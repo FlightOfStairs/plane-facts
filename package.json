@@ -1,0 +1,32 @@
+{
+  "name": "plane-facts",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/website",
+    "packages/infrastructure"
+  ],
+  "scripts": {
+    "lint": "oxlint",
+    "format": "prettier --write .",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "oxlint": "^1.79.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "prettier": "^3.9.6"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts,tsx,mjs,cjs,jsx}": [
+      "oxlint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html,css}": [
+      "prettier --write"
+    ]
+  }
+}

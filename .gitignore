@@ -1,0 +1,16 @@
+# dependencies
+node_modules
+
+# testing
+coverage
+
+# build output
+dist
+cdk.out
+
+# misc
+.DS_Store
+.env.local
+.env.*.local
+
+npm-debug.log*
