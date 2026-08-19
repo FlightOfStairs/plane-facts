@@ -127,8 +127,12 @@ parasite-dominated, consistent with a parabolic polar at cruise CL. Climb:
 
 1. **5-35's "REF. LINE – 2400 LBS." label is a misprint** — geometry places it
    at 2438 lb; all four takeoff/landing nomographs share the 2440 anchor.
-2. 5-9's bottom (500-ft) headwind guide implies a ~25-kt reference speed —
-   physically absurd, drafting error, excluded from its fit.
+2. 5-9's lowest headwind guide (anchored at 500 ft) is drawn parallel to the
+   one above it instead of shallower: it subtracts the same 210 ft from half
+   the starting distance — a 40% cut at 15 kt where the other seven guides cut
+   17–21%. That would require a ~25 kt barrier reference speed (real: 44–57
+   KIAS), so it is treated as a drawing error and excluded from the fit. The
+   model gives ×0.78 there, conservative against the drawn ×0.60.
 3. Unlabeled drawn curves everywhere: 7000 ft (5-9), 15–16,000 ft and negative
    altitudes (5-15, 5-17), 11–12,000 ft (5-31), a clipped 12,000 (5-19).
    Identified via ISA std-temp-line crossings — a free self-check on any chart

@@ -105,7 +105,7 @@ export function AboutModelsPage() {
         <Typography variant="body2" component="div">
           <ul>
             <li>Fig 5-35&apos;s &ldquo;REF. LINE — 2400 LBS.&rdquo; label is a misprint: the line&apos;s geometry sits at 2440 lb, the anchor all four takeoff/landing nomographs share.</li>
-            <li>Fig 5-9&apos;s bottom (500-ft) headwind guide implies an absurd ~25-kt reference speed — a drafting error, excluded from the fit.</li>
+            <li>Fig 5-9&apos;s wind panel draws eight guide lines, one per starting distance, each showing how much a headwind shortens the takeoff. The lowest — anchored at 500 ft — is drawn parallel to the line above it instead of shallower, so it subtracts the same 210 ft despite starting from half the distance: a 40% cut at 15 kt where its seven neighbours cut ~20%. Reproducing it would need a 50-ft barrier speed near 25 kt, against a real 44–57 KIAS, so it is treated as a drawing slip and excluded from the fit.</li>
             <li>Several charts draw unlabeled curves beyond their labels (7000 ft on 5-9; 15–16,000 ft on 5-15/5-17; 11–12,000 ft on 5-31) — identified via their standard-temperature-line crossings.</li>
             <li>Some printed worked examples are imperfect against their own charts (5-21 ~1 kt off its curves; 5-9 prints 1–2.5% above its guides; 5-31&apos;s fuel answer is a 0.5-gal rounding).</li>
           </ul>
