@@ -50,6 +50,17 @@ export const LIMITS = {
 } as const;
 
 /**
+ * What qualifying for the utility category actually buys. POH 2.15 Maneuver
+ * Limits and 2.17 Flight Load Factors (both p2-4/2-5), and the "UTILITY
+ * CATEGORY OPERATION ONLY" placard in 2.25.
+ *
+ * Spins are listed because this airframe prohibits them in *both* categories —
+ * the placard says so explicitly, and assuming utility unlocks them is the
+ * obvious wrong inference to draw from a permitted verdict.
+ */
+export const UTILITY_PRIVILEGES = ["Manoeuvres with bank angles over 60°: steep turns, lazy eights and chandelles — 111 KIAS entry speed for each.", "Positive limit load factor 4.4 G, against 3.8 G in the normal category.", "Spins stay prohibited in both categories, and no inverted manoeuvres are approved in either."] as const;
+
+/**
  * Forward C.G. limit at a weight — the "cutout". Straight-line variation
  * between the tabulated points, per POH 2.13's own note.
  *

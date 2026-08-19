@@ -7,7 +7,7 @@ import { useUrlState } from "../lib/urlState";
 import type { Unit } from "../model/units";
 import { toPounds } from "../model/units";
 import type { Category } from "../model/weightBalance";
-import { FUEL_ALLOWANCE_ARM_IN, FUEL_ALLOWANCE_LB, LIMITS, MAX_USABLE_FUEL_USGAL, PLACEHOLDER_BEW_ARM_IN, PLACEHOLDER_BEW_LB, STATIONS, weightAndBalance } from "../model/weightBalance";
+import { FUEL_ALLOWANCE_ARM_IN, FUEL_ALLOWANCE_LB, LIMITS, MAX_USABLE_FUEL_USGAL, PLACEHOLDER_BEW_ARM_IN, PLACEHOLDER_BEW_LB, STATIONS, UTILITY_PRIVILEGES, weightAndBalance } from "../model/weightBalance";
 
 export const chartEntry = {
   id: "fig-6-15",
@@ -236,6 +236,16 @@ export function WeightBalancePage() {
               {name} category — {result.withinLimits ? "permitted" : "not permitted"}
             </strong>
             <Box sx={{ mt: 0.25 }}>{result.withinLimits ? `C.G. ${result.takeoff.cgIn.toFixed(1)} in against limits ${result.takeoff.fwdLimitIn.toFixed(1)}–${result.takeoff.aftLimitIn.toFixed(1)} in at ${fmt(result.takeoff.weightLb, 1)} lb (max ${maxLb} lb)` : result.warnings.join("; ")}</Box>
+            {name === "Utility" && result.withinLimits && (
+              <>
+                <Box sx={{ mt: 1 }}>Permitted in utility but not in normal (POH 2.15, 2.17):</Box>
+                <Box component="ul" sx={{ m: 0, mt: 0.5, pl: 2.5 }}>
+                  {UTILITY_PRIVILEGES.map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </Box>
+              </>
+            )}
           </Alert>
         ))}
       </Grid>
