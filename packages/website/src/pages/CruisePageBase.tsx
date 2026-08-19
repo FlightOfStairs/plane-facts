@@ -1,9 +1,9 @@
-import { FormControlLabel, Stack, Switch, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { FormControlLabel, Switch, Typography } from "@mui/material";
 import type { ChartMeta, Polyline } from "../charts/types";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
-import type { CruiseInputs, CruiseResult, Mixture, PowerSetting } from "../model/cruisePerformance";
+import type { CruiseInputs, CruiseResult, Mixture } from "../model/cruisePerformance";
 import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cruisePerformance";
 
 /**
@@ -15,7 +15,7 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
   const [urlInputs, setInputs] = useUrlState<{
     pressureAltitudeFt: number;
     oatC: number;
-    powerPct: PowerSetting;
+    powerPct: number;
     wheelFairings: boolean;
   }>({
     pressureAltitudeFt: CHART_EXAMPLE.pressureAltitudeFt,
@@ -24,7 +24,7 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
     wheelFairings: CHART_EXAMPLE.wheelFairings,
   });
   // Guard the discrete setting against arbitrary URL values.
-  const powerPct: PowerSetting = urlInputs.powerPct === 55 || urlInputs.powerPct === 65 ? urlInputs.powerPct : 75;
+  const powerPct = Math.min(100, Math.max(55, urlInputs.powerPct));
   const inputs: CruiseInputs = { ...urlInputs, powerPct, mixture };
   const result = cruisePerformance(inputs);
   const { polylines, marker } = trace(inputs, result);
@@ -46,14 +46,21 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
         <>
           <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={16000} step={250} onChange={(v) => setInputs({ pressureAltitudeFt: v })} />
           <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={(v) => setInputs({ oatC: v })} />
-          <Stack direction="row" spacing={2} sx={{ alignItems: "center", mt: 1 }}>
-            <Typography variant="body2">Power</Typography>
-            <ToggleButtonGroup size="small" exclusive value={inputs.powerPct} onChange={(_, v: PowerSetting | null) => v !== null && setInputs({ powerPct: v })}>
-              <ToggleButton value={55}>55%</ToggleButton>
-              <ToggleButton value={65}>65%</ToggleButton>
-              <ToggleButton value={75}>75%</ToggleButton>
-            </ToggleButtonGroup>
-          </Stack>
+          <InputSlider
+            label="Cruise power"
+            unit="%"
+            value={inputs.powerPct}
+            min={0}
+            max={100}
+            step={1}
+            softMin={55}
+            marks={[
+              { value: 55, label: "55" },
+              { value: 65, label: "65" },
+              { value: 75, label: "75" },
+            ]}
+            onChange={(v) => setInputs({ powerPct: v })}
+          />
           <FormControlLabel sx={{ mt: 1 }} control={<Switch checked={inputs.wheelFairings} onChange={(_, v) => setInputs({ wheelFairings: v })} />} label={<Typography variant="body2">Wheel fairings installed</Typography>} />
         </>
       }

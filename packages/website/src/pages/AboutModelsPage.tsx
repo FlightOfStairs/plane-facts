@@ -88,6 +88,18 @@ export function AboutModelsPage() {
         </Typography>
       </Section>
 
+      <Section title="Cruise power between the printed settings">
+        <Typography variant="body2" component="div">
+          The POH draws curves at 55%, 65% and 75% only, but the power sliders are continuous. That is checked, not assumed: fitting a smooth law to the 55% and 75% curves <em>alone</em> reproduces the printed 65% curve to within 1.3 kt (≤1.25%) on cruise TAS and 1.0% on endurance — so interpolation informed by all three settings sits inside the charts&apos; own ~1 kt drafting tolerance. Values are exact at 55/65/75, and the sliders will not go below 55% because nothing is published there.
+          <ul>
+            <li>
+              <strong>Above 75%</strong> the cruise charts still have an anchor: the drawn FULL THROTTLE boundary. Reading its power label two independent ways agrees to 0.1–0.7 points, putting full throttle at ~92% at sea level, ~85% at 4,000 ft, and back down to 75% by ~8,800 ft — so the region between the 75% curve and that boundary is charted, not invented. TAS is capped there and the page says so.
+            </li>
+            <li>The range and endurance charts have no such anchor and no fuel-flow figures above 75%, so values there are flagged as extrapolated.</li>
+          </ul>
+        </Typography>
+      </Section>
+
       <Section title="Where the charts disagree with each other">
         <Typography variant="body2" component="div">
           Faithfully reproduced, not smoothed over:

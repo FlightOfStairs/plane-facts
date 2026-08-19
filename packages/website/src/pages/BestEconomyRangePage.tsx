@@ -3,7 +3,7 @@ import { fig527Meta, fig527Trace } from "../charts/fig527";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
-import type { PowerPct, ReservePolicy } from "../model/rangeEndurance";
+import type { ReservePolicy } from "../model/rangeEndurance";
 import { CHART_EXAMPLE_5_27, enduranceHr, impliedBlockTasKt, rangeNm } from "../model/rangeEndurance";
 
 export const chartEntry = {
@@ -13,7 +13,7 @@ export const chartEntry = {
 };
 
 export function BestEconomyRangePage() {
-  const [inputs, setInputs] = useUrlState<{ pressureAltFt: number; oatC: number; power: PowerPct; reserve: ReservePolicy }>({
+  const [inputs, setInputs] = useUrlState<{ pressureAltFt: number; oatC: number; power: number; reserve: ReservePolicy }>({
     pressureAltFt: CHART_EXAMPLE_5_27.pressureAltFt,
     oatC: CHART_EXAMPLE_5_27.oatC,
     power: CHART_EXAMPLE_5_27.power,
@@ -21,7 +21,7 @@ export function BestEconomyRangePage() {
   });
   const { pressureAltFt, oatC } = inputs;
   // Guard the discrete settings against arbitrary URL values.
-  const power: PowerPct = inputs.power === 55 || inputs.power === 65 ? inputs.power : 75;
+  const power = Math.min(100, Math.max(55, inputs.power));
   const reserve: ReservePolicy = inputs.reserve === "noReserve" ? "noReserve" : "reserve45";
 
   const common = { mixture: "bestEconomy" as const, power, pressureAltFt, oatC };
@@ -47,11 +47,21 @@ export function BestEconomyRangePage() {
           <Typography variant="body2" gutterBottom>
             Cruise power (best economy mixture)
           </Typography>
-          <ToggleButtonGroup exclusive size="small" value={power} onChange={(_, v: PowerPct | null) => v !== null && setInputs({ power: v })} sx={{ mb: 2 }}>
-            <ToggleButton value={55}>55%</ToggleButton>
-            <ToggleButton value={65}>65%</ToggleButton>
-            <ToggleButton value={75}>75%</ToggleButton>
-          </ToggleButtonGroup>
+          <InputSlider
+            label="Cruise power"
+            unit="%"
+            value={power}
+            min={0}
+            max={100}
+            step={1}
+            softMin={55}
+            marks={[
+              { value: 55, label: "55" },
+              { value: 65, label: "65" },
+              { value: 75, label: "75" },
+            ]}
+            onChange={(v) => setInputs({ power: v })}
+          />
           <Typography variant="body2" gutterBottom>
             Reserve policy
           </Typography>

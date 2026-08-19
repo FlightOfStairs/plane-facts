@@ -20,6 +20,7 @@
  */
 
 import { isaTempC } from "./atmosphere";
+import { MAX_PRINTED_POWER, interpolateByPower } from "./shared";
 
 export type Mixture = "bestPower" | "bestEconomy";
 export type PowerPct = 55 | 65 | 75;
@@ -106,7 +107,8 @@ const ENDURANCE_CURVES: Record<ReservePolicy, Record<PowerPct, EnduranceCurve>> 
 
 export interface RangeInputs {
   mixture: Mixture;
-  power: PowerPct;
+  /** Cruise power %, continuous 55–75 (interpolated between the printed settings) */
+  power: number;
   reserve: ReservePolicy;
   /** Pressure altitude, ft (chart: 0–12000; 75% curves end at 9000/10000) */
   pressureAltFt: number;
@@ -136,22 +138,26 @@ export interface RangeResult {
  */
 export function rangeNm(inp: RangeInputs): RangeResult {
   const chart = RANGE_CHARTS[inp.mixture];
-  const curve = chart.curves[inp.reserve][inp.power];
+  const curves = chart.curves[inp.reserve];
+  const readAt = (c: (typeof curves)[55]) => c.R0Nm + c.slopeNmPerFt * inp.pressureAltFt;
 
   const stdTempC = isaTempC(inp.pressureAltFt);
   const deltaIsaC = inp.oatC - stdTempC;
-  const baseRangeNm = curve.R0Nm + curve.slopeNmPerFt * inp.pressureAltFt;
+  const baseRangeNm = interpolateByPower(inp.power, readAt(curves[55]), readAt(curves[65]), readAt(curves[75]));
+  const altMaxFt = interpolateByPower(inp.power, curves[55].altMaxFt, curves[65].altMaxFt, curves[75].altMaxFt);
   const tempCorrNm = deltaIsaC > 0 ? chart.perDegAboveStd * deltaIsaC : chart.perDegBelowStd * deltaIsaC;
 
   const warnings: string[] = [];
+  if (inp.power > MAX_PRINTED_POWER) warnings.push(`the POH publishes no range data above ${MAX_PRINTED_POWER}% power — extrapolated`);
   if (inp.pressureAltFt < 0) warnings.push("pressure altitude below chart (0 ft)");
-  if (inp.pressureAltFt > curve.altMaxFt) warnings.push(`${inp.power}% ${RESERVE_LABEL[inp.reserve]} curve of Fig ${chart.figure} is drawn only to ${curve.altMaxFt} ft — extrapolating`);
+  if (inp.pressureAltFt > altMaxFt) warnings.push(`${Math.round(inp.power)}% ${RESERVE_LABEL[inp.reserve]} curves of Fig ${chart.figure} are drawn only to ${Math.round(altMaxFt)} ft — extrapolating`);
 
   return { rangeNm: baseRangeNm + tempCorrNm, baseRangeNm, tempCorrNm, stdTempC, deltaIsaC, warnings };
 }
 
 export interface EnduranceInputs {
-  power: PowerPct;
+  /** Cruise power %, continuous 55–75 (interpolated between the printed settings) */
+  power: number;
   reserve: ReservePolicy;
   /** Pressure altitude, ft (chart: 0–12000; 75% reserve curve ends at 9000) */
   pressureAltFt: number;
@@ -166,13 +172,16 @@ export interface EnduranceResult {
 
 /** Endurance from Fig 5-29 (best economy mixture, no temperature dependence). */
 export function enduranceHr(inp: EnduranceInputs): EnduranceResult {
-  const curve = ENDURANCE_CURVES[inp.reserve][inp.power];
+  const curves = ENDURANCE_CURVES[inp.reserve];
   const pa = inp.pressureAltFt;
-  const e = curve.E0Hr + curve.bHrPerFt * pa + curve.cHrPerFt2 * pa * pa;
+  const readAt = (c: (typeof curves)[55]) => c.E0Hr + c.bHrPerFt * pa + c.cHrPerFt2 * pa * pa;
+  const e = interpolateByPower(inp.power, readAt(curves[55]), readAt(curves[65]), readAt(curves[75]));
+  const altMaxFt = interpolateByPower(inp.power, curves[55].altMaxFt, curves[65].altMaxFt, curves[75].altMaxFt);
 
   const warnings: string[] = [];
+  if (inp.power > MAX_PRINTED_POWER) warnings.push(`the POH publishes no endurance data above ${MAX_PRINTED_POWER}% power — extrapolated`);
   if (pa < 0) warnings.push("pressure altitude below chart (0 ft)");
-  if (pa > curve.altMaxFt) warnings.push(`${inp.power}% ${RESERVE_LABEL[inp.reserve]} curve of Fig 5-29 is drawn only to ${curve.altMaxFt} ft — extrapolating`);
+  if (pa > altMaxFt) warnings.push(`${Math.round(inp.power)}% ${RESERVE_LABEL[inp.reserve]} curves of Fig 5-29 are drawn only to ${Math.round(altMaxFt)} ft — extrapolating`);
 
   return { enduranceHr: e, warnings };
 }

@@ -20,7 +20,7 @@
  */
 
 import { densityAltitudeFt, densityRatio } from "./atmosphere";
-import { warnRange } from "./shared";
+import { MAX_PRINTED_POWER, interpolateByPower, warnRange } from "./shared";
 
 export type Mixture = "bestPower" | "bestEconomy";
 export type PowerSetting = 55 | 65 | 75;
@@ -31,7 +31,8 @@ export interface CruiseInputs {
   /** Outside air temperature, °C (chart: −40…+40) */
   oatC: number;
   /** Nominal cruise power, % rated (chart curves: 55 / 65 / 75) */
-  powerPct: PowerSetting;
+  /** Cruise power %, continuous 55–75 (interpolated between the printed settings) */
+  powerPct: number;
   /** Mixture per POH leaning instructions: Fig 5-21 vs Fig 5-23 */
   mixture: Mixture;
   /** Wheel fairings installed? Chart note: subtract 7 kt TAS if not. */
@@ -145,7 +146,10 @@ export function cruisePerformance(inp: CruiseInputs): CruiseResult {
   const daFt = 2000 * u;
   const isaDa = densityAltitudeFt(densityRatio(pa, oatC));
 
-  const tasPower = polyval(p.q[powerPct], u);
+  const t55 = polyval(p.q[55], u);
+  const t65 = polyval(p.q[65], u);
+  const t75 = polyval(p.q[75], u);
+  const tasPower = interpolateByPower(powerPct, t55, t65, t75);
   const tasFT = polyval(p.qFT, u);
 
   // Cap by the full-throttle boundary. The u-guard keeps the FT cubic from
@@ -159,20 +163,20 @@ export function cruisePerformance(inp: CruiseInputs): CruiseResult {
   // Matches the fits' implied full-throttle power lapse to ~0.3 pt.
   let achievable: number | null = null;
   if (ftLimited) {
-    const t55 = polyval(p.q[55], u);
-    const t65 = polyval(p.q[65], u);
-    const t75 = polyval(p.q[75], u);
     achievable = tasFT >= t65 ? 65 + (10 * (tasFT - t65)) / (t75 - t65) : 55 + (10 * (tasFT - t55)) / (t65 - t55);
   }
 
   const warnings: string[] = [];
+  if (powerPct > MAX_PRINTED_POWER && !ftLimited) {
+    warnings.push(`the chart draws no curve above ${MAX_PRINTED_POWER}% — TAS above it is extrapolated toward the drawn full-throttle boundary`);
+  }
   warnRange(warnings, pa, 0, 16000, "pressure altitude", "ft");
   warnRange(warnings, oatC, -40, 40, "OAT", "°C");
   if (daFt < 0) warnings.push("density altitude below 0 ft — off the bottom of the chart");
   if (ftLimited) {
     if (u > p.uRange.FT[1]) warnings.push(`density altitude ${Math.round(daFt)} ft — beyond the drawn full-throttle boundary`);
-  } else if (u > p.uRange[powerPct][1]) {
-    warnings.push(`density altitude ${Math.round(daFt)} ft — beyond the top of the drawn ${powerPct}% curve`);
+  } else if (u > interpolateByPower(powerPct, p.uRange[55][1], p.uRange[65][1], p.uRange[75][1])) {
+    warnings.push(`density altitude ${Math.round(daFt)} ft — beyond the top of the drawn ${Math.round(powerPct)}% curve`);
   }
 
   return {
@@ -181,7 +185,7 @@ export function cruisePerformance(inp: CruiseInputs): CruiseResult {
     tasPowerCurveKt: tasPower,
     fullThrottleLimited: ftLimited,
     achievablePowerPct: achievable,
-    fuelGph: ftLimited && achievable !== null ? fuelAtPct(p, achievable) : p.fuelGph[powerPct],
+    fuelGph: fuelAtPct(p, ftLimited && achievable !== null ? achievable : powerPct),
     densityAltitudeFt: daFt,
     u,
     isaDensityAltitudeFt: isaDa,
