@@ -7,7 +7,7 @@ PA-28-161 Warrior II POH (Report VB-1180, Aug 13 1982; scan at
 `PA-28-161-POH.pdf`, Section 5 = PDF pages 90–108). Every chart (Figs 5-3 …
 5-37) has: a Python digitization driver, a fitted model validated against the
 chart's printed worked example (±3.4% worst, most ≤1%), a TypeScript model
-module with vitest coverage (371 tests), and a React page that outputs model
+module with vitest coverage (407 tests), and a React page that outputs model
 numbers and draws the model-derived trace over the original scan.
 
 ## Where things live
@@ -25,12 +25,13 @@ numbers and draws the model-derived trace over the original scan.
     regenerate rasters with
     `pdftoppm -png -r 300 -gray -f 90 -l 108 PA-28-161-POH.pdf tools/digitize/out/raw/page`.
   - `assets/fig-5-NN.json` + `export_asset.py` — web asset/calibration export.
-- Weight & balance (POH Section 6, PDF pages 109-125) is `model/weightBalance.ts`
-  - `model/units.ts` + `pages/WeightBalancePage.tsx`, overlaying Fig 6-15
-    (PDF p123). Limits come from POH 2.13/2.11, not from the drawing — see
-    `tools/digitize/out/fits/fig_6_15.json` for why (the figure's abscissa is
-    moment about an 88-inch reference, and its printed cutout is ~0.35 in more
-    permissive at max gross than the table).
+- Weight & balance (POH Section 6, PDF pages 109–125): `model/weightBalance.ts`,
+  `model/units.ts` and `pages/WeightBalancePage.tsx`, overlaying Fig 6-15
+  (PDF p123). Limits come from POH 2.13/2.11, **not** from the drawing — see
+  `tools/digitize/out/fits/fig_6_15.json` for why: the figure's abscissa is
+  moment about an 88-inch reference (so its C.G. scale stretches with weight),
+  and its printed forward cutout is ~0.35 in more permissive at max gross than
+  the tabulated limit.
 - `packages/website/src/model/` — TS models (shared `atmosphere.ts`,
   `airspeed.ts`, `shared.ts` for the wind-credit policy and envelope
   warnings; one module per chart; constants comment their source fit).
@@ -82,10 +83,10 @@ cd tools/digitize && uv run python charts/gate_5_11.py           # calibration g
 
 ## Possible next steps
 
-- Deploy (CDK stack in `packages/infrastructure` is ready; needs the org
-  account + NS delegation — see README).
 - Composite planning page (takeoff + climb + cruise + descent + landing for a
-  whole flight), density-altitude quick card, weight-and-balance (POH §6).
+  whole flight), density-altitude quick card.
+- The Loading Graph (Fig 6-13, PDF p122) as a second weight-and-balance view —
+  the moments are already computed arithmetically, so this is presentational.
 - Lowry bootstrap refinement: extract a clean drag polar from the 5-33 anchor
   (subtract windmilling-prop drag) and re-derive climb/cruise from physics to
   compare against the certification-policy charts.
