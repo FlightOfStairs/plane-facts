@@ -14,3 +14,7 @@ cdk.out
 .env.*.local
 
 npm-debug.log*
+
+# digitization intermediates
+tools/digitize/out/raw
+tools/digitize/out/qa
