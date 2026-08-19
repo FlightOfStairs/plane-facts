@@ -1,0 +1,12 @@
+{
+  "pdfPage": 95,
+  "title": "25° Flaps Takeoff Ground Roll (Fig 5-11)",
+  "crop": [300, 260, 2400, 1500],
+  "scale": 0.5,
+  "axes": {
+    "distanceFt": { "px0": 1363.14, "v0": 0, "pxPerUnit": -0.298819, "orient": "y" },
+    "oatC": { "px0": 439.73, "v0": -40, "pxPerUnit": 7.4897, "orient": "x" },
+    "weightLb": { "px0": 1189.5, "v0": 2300, "pxPerUnit": -0.747, "orient": "x" },
+    "windKt": { "px0": 1711.51, "v0": 0, "pxPerUnit": 15.046, "orient": "x" }
+  }
+}

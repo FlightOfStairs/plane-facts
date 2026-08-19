@@ -7,6 +7,12 @@ import { ResultsPanel } from "../components/ResultsPanel";
 import type { TakeoffInputs } from "../model/takeoffGroundRoll25";
 import { CHART_EXAMPLE, takeoffGroundRoll25 } from "../model/takeoffGroundRoll25";
 
+export const chartEntry = {
+  id: "fig-5-11",
+  label: "Takeoff ground roll — flaps 25° (Fig 5-11)",
+  Component: TakeoffGroundRoll25Page,
+};
+
 export function TakeoffGroundRoll25Page() {
   const [inputs, setInputs] = useState<TakeoffInputs>(CHART_EXAMPLE);
   const result = takeoffGroundRoll25(inputs);

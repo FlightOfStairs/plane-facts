@@ -1,8 +1,14 @@
 """Export web assets: deskewed/cropped/downsampled chart scan + calibration
 metadata JSON whose axes are expressed in the ASSET's pixel coordinates.
 
-Per-chart configs live in ASSETS below; Phase D adds one entry per chart.
-Run:  uv run python export_asset.py [fig-5-11 ...]
+Per-chart configs are JSON files in assets/<id>.json (one file per chart so
+parallel workers never conflict). Schema:
+  { "pdfPage": N, "title": "...", "crop": [x0,y0,x1,y1], "scale": 0.5,
+    "axes": { "<name>": {"px0":…, "v0":…, "pxPerUnit":…, "orient": "x"|"y"}}}
+Axis spec: value v0 sits at px0 in ORIGINAL page coordinates; pxPerUnit sign
+matters (y axes typically negative since values grow upward).
+
+Run:  uv run python export_asset.py [fig-5-11 ...]     (default: all configs)
 Writes packages/website/public/charts/<id>.png and
        packages/website/src/charts/<id>.meta.json
 """
@@ -16,29 +22,13 @@ import cv2
 from digitize import raster
 
 ROOT = Path(__file__).resolve().parents[2]
+ASSET_CFG = Path(__file__).resolve().parent / "assets"
 PUB = ROOT / "packages" / "website" / "public" / "charts"
 META = ROOT / "packages" / "website" / "src" / "charts"
 
-# Axis spec: value at px0 (original page coords) and px per unit (sign matters:
-# y axes typically negative pxPerUnit since values grow upward).
-ASSETS: dict[str, dict] = {
-    "fig-5-11": {
-        "pdfPage": 95,
-        "title": "25° Flaps Takeoff Ground Roll (Fig 5-11)",
-        "crop": [300, 260, 2400, 1500],  # x0, y0, x1, y1 in original px
-        "scale": 0.5,
-        "axes": {
-            "distanceFt": {"px0": 1363.14, "v0": 0, "pxPerUnit": -0.298819, "orient": "y"},
-            "oatC": {"px0": 439.73, "v0": -40, "pxPerUnit": 7.4897, "orient": "x"},
-            "weightLb": {"px0": 1189.5, "v0": 2300, "pxPerUnit": -0.747, "orient": "x"},
-            "windKt": {"px0": 1711.51, "v0": 0, "pxPerUnit": 15.046, "orient": "x"},
-        },
-    },
-}
-
 
 def export(asset_id: str) -> None:
-    cfg = ASSETS[asset_id]
+    cfg = json.loads((ASSET_CFG / f"{asset_id}.json").read_text())
     img, angle = raster.prepared_page(cfg["pdfPage"])
     x0, y0, x1, y1 = cfg["crop"]
     scale = cfg["scale"]
@@ -73,6 +63,6 @@ def export(asset_id: str) -> None:
 
 
 if __name__ == "__main__":
-    ids = sys.argv[1:] or list(ASSETS)
+    ids = sys.argv[1:] or sorted(p.stem for p in ASSET_CFG.glob("*.json"))
     for asset_id in ids:
         export(asset_id)

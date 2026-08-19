@@ -2,14 +2,12 @@ import { useState } from "react";
 import { AppBar, Container, CssBaseline, MenuItem, Select, Toolbar, Typography } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import { Disclaimer } from "./components/Disclaimer";
-import { TakeoffGroundRoll25Page } from "./pages/TakeoffGroundRoll25Page";
-
-const CHARTS = [{ id: "fig-5-11", label: "Takeoff ground roll — flaps 25° (Fig 5-11)", page: TakeoffGroundRoll25Page }];
+import { CHART_PAGES } from "./pages";
 
 function App() {
-  const [chartId, setChartId] = useState(CHARTS[0]!.id);
-  const chart = CHARTS.find((c) => c.id === chartId) ?? CHARTS[0]!;
-  const Page = chart.page;
+  const [chartId, setChartId] = useState(CHART_PAGES[0]!.id);
+  const chart = CHART_PAGES.find((c) => c.id === chartId) ?? CHART_PAGES[0]!;
+  const Page = chart.Component;
   return (
     <>
       <CssBaseline />
@@ -20,7 +18,7 @@ function App() {
             Plane Facts — PA-28-161 Performance
           </Typography>
           <Select size="small" value={chartId} onChange={(e) => setChartId(e.target.value)} sx={{ minWidth: 280, bgcolor: "background.paper" }}>
-            {CHARTS.map((c) => (
+            {CHART_PAGES.map((c) => (
               <MenuItem key={c.id} value={c.id}>
                 {c.label}
               </MenuItem>
