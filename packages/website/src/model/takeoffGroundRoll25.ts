@@ -8,6 +8,8 @@
  * brake release, flaps 25°.
  */
 
+import { densityAltitudeFt, densityRatio, tasFromCas } from "./atmosphere";
+
 export interface TakeoffInputs {
   /** Pressure altitude, ft (chart: 0–7000) */
   pressureAltitudeFt: number;
@@ -40,18 +42,6 @@ export interface TakeoffResult {
 
 export const MTOW_LB = 2440;
 
-/** ISA density ratio σ = δ/θ from pressure altitude and OAT. */
-export function densityRatio(pressureAltitudeFt: number, oatC: number): number {
-  const delta = Math.pow(1 - 6.87559e-6 * pressureAltitudeFt, 5.2559);
-  const theta = (oatC + 273.15) / 288.15;
-  return delta / theta;
-}
-
-/** Density altitude (ft) from σ. */
-export function densityAltitudeFt(sigma: number): number {
-  return 145442.16 * (1 - Math.pow(sigma, 1 / 4.2559));
-}
-
 /**
  * Panel 1: distance at 2440 lb, zero wind. Empirical plane fitted to the
  * eight altitude curves (rms 1.1%). Deliberately NOT a σ-power law — see
@@ -72,7 +62,7 @@ const WIND_EXPONENT = 1.55;
 const HEADWIND_CREDIT = 0.5; // certification policy: credit 50% of headwind
 const TAILWIND_FACTOR = 1.5; // …and 150% of tailwind
 
-export function takeoffGroundRoll(inp: TakeoffInputs): TakeoffResult {
+export function takeoffGroundRoll25(inp: TakeoffInputs): TakeoffResult {
   const { pressureAltitudeFt: pa, oatC, weightLb: w, windKt } = inp;
 
   const sigma = densityRatio(pa, oatC);
@@ -82,7 +72,7 @@ export function takeoffGroundRoll(inp: TakeoffInputs): TakeoffResult {
   const s1 = s0 * Math.pow(w / MTOW_LB, WEIGHT_EXPONENT);
 
   const vCas = liftoffKcas(w);
-  const vTas = vCas / Math.sqrt(sigma);
+  const vTas = tasFromCas(vCas, sigma);
 
   let windFactor = 1;
   if (windKt > 0) {
@@ -112,7 +102,7 @@ export function takeoffGroundRoll(inp: TakeoffInputs): TakeoffResult {
 }
 
 /**
- * Sanity check against the chart's own worked example:
+ * The chart's own worked example:
  * 1500 ft, 27 °C, 2175 lb, 15 kt headwind → POH prints 975 ft, 48 KIAS.
  * Model gives ≈950 ft (−2.6%), V_LOF 49.1 KCAS; intermediate values match
  * the chart's dashed trace (S0 ≈ 1495, after-weight ≈ 1220).
