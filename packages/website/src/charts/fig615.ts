@@ -10,7 +10,7 @@
  */
 
 import type { Category, StationPoint, WeightBalanceResult } from "../model/weightBalance";
-import { LIMITS } from "../model/weightBalance";
+import { LIMITS, forwardLimitIn } from "../model/weightBalance";
 import metaJson from "./fig-6-15.meta.json";
 import type { ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
@@ -35,6 +35,12 @@ export function weightPx(weightLb: number): number {
 
 const at = (cgIn: number, weightLb: number): [number, number] => [cgPx(cgIn, weightLb), weightPx(weightLb)];
 
+/**
+ * The envelope outlines are drawn thin: they exist to confirm the model lines
+ * up with the printed chart, so hairlines make misalignment obvious.
+ */
+const REFERENCE_WIDTH = 0.3;
+
 /** Lowest weight the chart draws — the envelope is clipped here, not limited. */
 const CHART_MIN_LB = 1200;
 
@@ -45,10 +51,30 @@ const CHART_MIN_LB = 1200;
  */
 export function envelopeOutline(category: Category): Polyline {
   const L = LIMITS[category];
+
+  // The forward cutout is a straight line in C.G. vs weight, but x encodes
+  // (cg − 88) × weight, so on this chart its locus is quadratic. Drawing it as
+  // a chord between the two tabulated points cuts about 0.3 in inside the true
+  // curve at mid-span, so sample it. The other edges really are straight here:
+  // constant C.G. is linear in weight, and the top edge is constant weight.
+  const cutout: [number, number][] = [];
+  const steps = 24;
+  for (let i = 0; i <= steps; i++) {
+    const w = L.fwdBreakLb + ((L.maxTakeoffLb - L.fwdBreakLb) * i) / steps;
+    cutout.push(at(forwardLimitIn(w, category), w));
+  }
+
+  // Utility shares its forward, aft and lower edges with normal, so drawing
+  // the whole outline twice just hides one under the other: show only the part
+  // that differs — its cutout and the 2020 lb cap.
+  if (category === "utility") {
+    return { points: [...cutout, at(L.aftIn, L.maxTakeoffLb)], color: "#0277BD", dashed: true, widthScale: REFERENCE_WIDTH };
+  }
+
   return {
-    points: [at(L.fwdAtBreakIn, CHART_MIN_LB), at(L.fwdAtBreakIn, L.fwdBreakLb), at(L.fwdAtMaxIn, L.maxTakeoffLb), at(L.aftIn, L.maxTakeoffLb), at(L.aftIn, CHART_MIN_LB), at(L.fwdAtBreakIn, CHART_MIN_LB)],
-    color: category === "normal" ? "#C62828" : "#0277BD",
-    dashed: category === "utility",
+    points: [at(L.fwdAtBreakIn, CHART_MIN_LB), at(L.fwdAtBreakIn, L.fwdBreakLb), ...cutout, at(L.aftIn, L.maxTakeoffLb), at(L.aftIn, CHART_MIN_LB), at(L.fwdAtBreakIn, CHART_MIN_LB)],
+    color: "#C62828",
+    widthScale: REFERENCE_WIDTH,
   };
 }
 
@@ -65,8 +91,8 @@ const BAD = "#C62828";
  * at the basic empty weight and add one segment per load, then mark the
  * take-off point and the zero-fuel point at the other end of the C.G. travel.
  */
-export function fig615Trace(result: WeightBalanceResult, category: Category): Fig615Trace {
-  const polylines: Polyline[] = [envelopeOutline(category)];
+export function fig615Trace(result: WeightBalanceResult): Fig615Trace {
+  const polylines: Polyline[] = [envelopeOutline("normal"), envelopeOutline("utility")];
 
   // Cumulative path: each vertex is the running weight and C.G.
   const segColors = [SECTION_COLORS.entry, SECTION_COLORS.weight, SECTION_COLORS.wind, "#00838F"];
@@ -79,7 +105,7 @@ export function fig615Trace(result: WeightBalanceResult, category: Category): Fi
     if (w <= 0) return;
     const here = at(m / w, w);
     if (prev && row.weightLb !== 0) {
-      polylines.push({ points: [prev, here], color: segColors[(i - 1) % segColors.length] });
+      polylines.push({ points: [prev, here], color: segColors[(i - 1) % segColors.length], widthScale: 0.55 });
     }
     prev = here;
   });

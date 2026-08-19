@@ -97,6 +97,30 @@ describe("out-of-limits detection", () => {
     expect(r.warnings.join(" ")).toMatch(/no rear-seat passengers/);
   });
 
+  test("the 88.0-88.3 band where Fig 6-15 and 2.13 disagree is called out", () => {
+    // Contrive a max-gross load whose C.G. lands inside the disputed band.
+    const r = weightAndBalance({
+      basicEmptyWeightLb: 1500,
+      basicEmptyArmIn: 85.9,
+      frontSeatsLb: 486,
+      rearSeatsLb: 173,
+      fuelLb: 288,
+      baggageLb: 0,
+      category: "normal",
+    });
+    const cg = r.takeoff.cgIn;
+    expect(cg).toBeGreaterThan(88.0);
+    expect(cg).toBeLessThan(88.3);
+    expect(r.takeoff.withinEnvelope).toBe(false); // 2.13 governs
+    expect(r.warnings.join(" ")).toMatch(/Fig 6-15 draws that limit at 88.0 in/);
+  });
+
+  test("well forward of both limits gets no chart-disagreement note", () => {
+    const r = weightAndBalance({ ...SAMPLE_PROBLEM, frontSeatsLb: 500, rearSeatsLb: 0, fuelLb: 288, baggageLb: 0 });
+    expect(r.warnings.join(" ")).toMatch(/forward of the/);
+    expect(r.warnings.join(" ")).not.toMatch(/Fig 6-15 draws/);
+  });
+
   test("zero-fuel point is checked too, not just take-off", () => {
     // heavy front seats with full fuel: legal loaded, forward once fuel burns off
     const r = weightAndBalance({ ...SAMPLE_PROBLEM, frontSeatsLb: 380, rearSeatsLb: 0, fuelLb: 288, baggageLb: 0 });

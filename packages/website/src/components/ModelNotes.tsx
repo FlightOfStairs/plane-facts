@@ -9,8 +9,8 @@ export function ModelNotes(props: {
   form: string | string[];
   /** Fit quality + worked-example validation, one or two sentences. */
   fit: string;
-  /** Interesting chart-specific findings, one bullet each. */
-  findings: string[];
+  /** Interesting chart-specific findings, one bullet each. Omit if none. */
+  findings?: string[];
 }) {
   const formLines = Array.isArray(props.form) ? props.form : [props.form];
   return (
@@ -38,14 +38,18 @@ export function ModelNotes(props: {
         <Typography variant="body2" sx={{ mb: 1 }}>
           {props.fit}
         </Typography>
-        <Typography variant="subtitle2">Notable findings</Typography>
-        <Box component="ul" sx={{ mt: 0.5, mb: 1, pl: 3 }}>
-          {props.findings.map((f) => (
-            <Typography key={f.slice(0, 40)} component="li" variant="body2">
-              {f}
-            </Typography>
-          ))}
-        </Box>
+        {props.findings && props.findings.length > 0 && (
+          <>
+            <Typography variant="subtitle2">Notable findings</Typography>
+            <Box component="ul" sx={{ mt: 0.5, mb: 1, pl: 3 }}>
+              {props.findings.map((f) => (
+                <Typography key={f.slice(0, 40)} component="li" variant="body2">
+                  {f}
+                </Typography>
+              ))}
+            </Box>
+          </>
+        )}
         <Typography variant="caption" color="text.secondary">
           Shared conventions — the 50%/150% wind-credit policy, atmosphere handling, and the digitization method — are covered under “About the models &amp; method” in the chart picker.
         </Typography>

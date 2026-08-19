@@ -64,6 +64,22 @@ export function forwardLimitIn(weightLb: number, category: Category): number {
   return L.fwdAtBreakIn + t * (L.fwdAtMaxIn - L.fwdAtBreakIn);
 }
 
+/**
+ * The forward limit as Fig 6-15 *draws* it. Its apex measures 87.93 in and is
+ * labelled 88, where 2.13 tabulates 88.3 — the POH disagrees with itself by
+ * 0.3 in at max gross. 2.13 governs (and is the more restrictive), but a load
+ * landing in the gap looks legal on the chart, so it is called out explicitly.
+ */
+export const CHART_FWD_AT_MAX_IN = 88.0;
+
+export function chartForwardLimitIn(weightLb: number, category: Category): number {
+  const L = LIMITS[category];
+  if (weightLb <= L.fwdBreakLb) return L.fwdAtBreakIn;
+  const atMax = category === "normal" ? CHART_FWD_AT_MAX_IN : L.fwdAtMaxIn;
+  const t = (weightLb - L.fwdBreakLb) / (L.maxTakeoffLb - L.fwdBreakLb);
+  return L.fwdAtBreakIn + t * (atMax - L.fwdAtBreakIn);
+}
+
 export function aftLimitIn(category: Category): number {
   return LIMITS[category].aftIn;
 }
@@ -184,7 +200,11 @@ export function weightAndBalance(inp: WeightBalanceInputs): WeightBalanceResult 
   ] as const) {
     if (p.overWeight) continue; // already reported as a weight exceedance
     if (p.cgIn < p.fwdLimitIn) {
-      warnings.push(`${label} C.G. ${p.cgIn.toFixed(1)} in is forward of the ${p.fwdLimitIn.toFixed(1)} in limit at ${Math.round(p.weightLb)} lb`);
+      // Inside the band where Fig 6-15 and 2.13 disagree, say so — otherwise
+      // the chart appears to contradict the verdict.
+      const drawn = chartForwardLimitIn(p.weightLb, category);
+      const chartWouldAllow = p.cgIn >= drawn;
+      warnings.push(`${label} C.G. ${p.cgIn.toFixed(1)} in is forward of the ${p.fwdLimitIn.toFixed(1)} in limit at ${Math.round(p.weightLb)} lb` + (chartWouldAllow ? ` — Fig 6-15 draws that limit at ${drawn.toFixed(1)} in, so the chart alone would show this inside the envelope; Section 2.13 governs` : ""));
     } else if (p.cgIn > p.aftLimitIn) {
       warnings.push(`${label} C.G. ${p.cgIn.toFixed(1)} in is aft of the ${p.aftLimitIn.toFixed(1)} in limit`);
     }

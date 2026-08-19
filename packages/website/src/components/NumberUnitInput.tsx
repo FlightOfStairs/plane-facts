@@ -16,9 +16,11 @@ export function NumberUnitInput(props: {
   units?: readonly Unit[];
   onChange: (value: string, unit: Unit) => void;
   required?: boolean;
+  /** Shown when empty; the caller treats empty as this value. */
+  placeholder?: string;
   helperText?: string;
 }) {
-  const { label, value, unit, units = [], onChange, required, helperText } = props;
+  const { label, value, unit, units = [], onChange, required, placeholder, helperText } = props;
   const missing = required && value.trim() === "";
   const parsed = Number(value);
   const invalid = value.trim() !== "" && (!Number.isFinite(parsed) || parsed < 0);
@@ -30,7 +32,7 @@ export function NumberUnitInput(props: {
 
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
-      <TextField size="small" label={label} value={value} onChange={(e) => onChange(e.target.value, unit)} error={missing || invalid} helperText={missing ? "required" : invalid ? "enter a number" : helperText} slotProps={{ htmlInput: { inputMode: "decimal", "aria-label": label } }} sx={{ flex: 1, minWidth: 0 }} />
+      <TextField size="small" label={label} value={value} onChange={(e) => onChange(e.target.value, unit)} error={missing || invalid} helperText={missing ? "required" : invalid ? "enter a number" : helperText} placeholder={placeholder} slotProps={{ htmlInput: { inputMode: "decimal", "aria-label": label } }} sx={{ flex: 1, minWidth: 0 }} />
       {units.length > 0 && (
         <Select size="small" value={unit} onChange={(e) => changeUnit(e.target.value)} sx={{ minWidth: 78 }} aria-label={`${label} units`}>
           {units.map((u) => (

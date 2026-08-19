@@ -29,6 +29,9 @@ export interface Polyline {
   dashed?: boolean;
   /** Stroke color; defaults to SECTION_COLORS.entry. */
   color?: string;
+  /** Multiplier on the standard stroke width — thinner for reference lines
+   *  whose alignment against the printed chart needs to be judged. */
+  widthScale?: number;
 }
 
 /**

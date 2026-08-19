@@ -61,10 +61,12 @@ export function ChartOverlay(props: {
       <svg viewBox={`0 0 ${meta.widthPx} ${meta.heightPx}`} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} aria-hidden>
         {polylines.map((line, i) => {
           const pts = line.points.map(([x, y]) => `${x},${y}`).join(" ");
+          const sw = stroke * (line.widthScale ?? 1);
+          const cw = casing * (line.widthScale ?? 1);
           return (
             <g key={i}>
-              <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={casing} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} />
-              <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? dash : undefined} opacity={0.95} />
+              <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={cw} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} />
+              <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? dash : undefined} opacity={0.95} />
             </g>
           );
         })}
