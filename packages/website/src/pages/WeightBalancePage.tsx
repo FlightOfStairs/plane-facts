@@ -150,54 +150,63 @@ export function WeightBalancePage() {
                   ))}
 
                   {normal && (
-                    <>
-                      <TableRow>
-                        <TableCell sx={{ px: 1 }}>
-                          <strong>Ramp</strong> — {fmt(normal.ramp.weightLb, 1)} lb
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {normal.ramp.cgIn.toFixed(1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {fmt(normal.ramp.momentInLb)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ px: 1 }}>Start, taxi &amp; run-up allowance</TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {STATIONS.fuel.toFixed(1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          −665
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ px: 1 }}>
-                          <strong>Take-off</strong> — {fmt(normal.takeoff.weightLb, 1)} lb
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          <strong>{normal.takeoff.cgIn.toFixed(1)}</strong>
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {fmt(normal.takeoff.momentInLb)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ px: 1 }}>Zero fuel — {fmt(normal.zeroFuel.weightLb, 1)} lb</TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {normal.zeroFuel.cgIn.toFixed(1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ px: 1 }}>
-                          {fmt(normal.zeroFuel.momentInLb)}
-                        </TableCell>
-                      </TableRow>
-                    </>
+                    <TableRow>
+                      <TableCell sx={{ px: 1 }}>Start, taxi &amp; run-up allowance</TableCell>
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        {STATIONS.fuel.toFixed(1)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        −665
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>
             </Box>
           </CardContent>
         </Card>
+
+        {normal && (
+          <Card sx={{ mt: 2 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Results
+              </Typography>
+              <Box sx={{ overflowX: "auto" }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ px: 1 }} />
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        Weight (lb)
+                      </TableCell>
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        Balance (in aft of datum)
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {[
+                      { label: "Ramp", p: normal.ramp },
+                      { label: "Take-off", p: normal.takeoff, lead: true },
+                      { label: "Zero fuel", p: normal.zeroFuel },
+                    ].map(({ label, p, lead }) => (
+                      <TableRow key={label}>
+                        <TableCell sx={{ px: 1 }}>{lead ? <strong>{label}</strong> : label}</TableCell>
+                        <TableCell align="right" sx={{ px: 1, color: p.overWeight ? "error.main" : undefined, fontWeight: lead || p.overWeight ? 600 : undefined }}>
+                          {fmt(p.weightLb, 1)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ px: 1, color: p.withinEnvelope ? undefined : "error.main", fontWeight: lead || !p.withinEnvelope ? 600 : undefined }}>
+                          {p.cgIn.toFixed(1)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
       </Grid>
 
       <Grid size={{ xs: 12, lg: 6 }}>
@@ -247,7 +256,7 @@ export function WeightBalancePage() {
             </Typography>
             <ChartOverlay meta={fig615Meta} polylines={trace?.polylines ?? []} markers={trace?.markers ?? []} />
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-              The hairlines are the Section 2.13 limits drawn over the POH&apos;s own figure — red for normal, blue dashed for the utility cap — as a check that the model lines up with the chart. They follow the printed cutout except at the very top, where 2.13 puts the forward limit at 88.3 in and the figure draws 88.0. The path steps through each load in turn; the dots are the take-off and zero-fuel points, red if outside.
+              The line joins the take-off and zero-fuel points — the two ends of the C.G. travel as fuel burns off. Either dot turns red if that point is outside limits.
             </Typography>
           </CardContent>
         </Card>
