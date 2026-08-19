@@ -26,19 +26,10 @@ npm test
 aws sso login --sso-session flightofstairs
 
 npm run build -w packages/website
-AWS_PROFILE=flightofstairs-plane-facts npm run deploy -w packages/infrastructure
+AWS_PROFILE=flightofstairs-planefacts npm run deploy -w packages/infrastructure
 ```
 
-### One-time setup
-
-1. Create the member account and SSO profile in the
-   [flightofstairs-infrastructure](https://github.com/FlightOfStairs/flightofstairs-infrastructure)
-   repo, and bootstrap CDK in it (`npx cdk bootstrap`).
-2. After the first deploy, take the `NameServers` stack output and add an NS
-   delegation record for `planefacts.flightofstairs.org` to the parent zone in
-   [flightofstairs.org](https://github.com/FlightOfStairs/flightofstairs.org).
-   Certificate validation (and therefore the first deploy) will not complete
-   until the delegation exists.
+Live at [planefacts.flightofstairs.org](https://planefacts.flightofstairs.org).
 
 ## Toolchain notes
 
