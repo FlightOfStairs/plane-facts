@@ -1,13 +1,21 @@
+import { useLayoutEffect } from "react";
 import { AppBar, Box, Container, CssBaseline, MenuItem, TextField, Toolbar, Typography } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import { Disclaimer } from "./components/Disclaimer";
 import { useUrlState } from "./lib/urlState";
-import { CHART_PAGES } from "./pages";
+import { CHART_PAGES, chartTitle } from "./pages";
 
 function App() {
   const [{ chart: chartId }, setUrl] = useUrlState({ chart: CHART_PAGES[0]!.id });
   const chart = CHART_PAGES.find((c) => c.id === chartId) ?? CHART_PAGES[0]!;
   const Page = chart.Component;
+
+  // Names the tab on first render as well as on every change, so a shared
+  // link opens already titled. Layout effect, so the static index.html title
+  // is never shown even for a frame.
+  useLayoutEffect(() => {
+    document.title = chartTitle(chart.label);
+  }, [chart.label]);
   return (
     <>
       <CssBaseline />

@@ -30,4 +30,12 @@ export interface ChartEntry {
   Component: ComponentType;
 }
 
+/**
+ * Document title for a chart. The figure number is already on the page and
+ * costs most of a browser tab's width, so it is dropped here.
+ */
+export function chartTitle(label: string): string {
+  return `${label.replace(/\s*\(Fig\s[\d-]+\)$/, "")} - PlaneFacts`;
+}
+
 export const CHART_PAGES: ChartEntry[] = [about, fig503, fig505, fig507, fig509, fig511, fig513, fig515, fig517, fig519, fig521, fig523, fig525, fig527, fig529, fig531, fig533, fig535, fig537, fig615];
