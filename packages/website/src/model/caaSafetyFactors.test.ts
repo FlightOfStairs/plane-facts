@@ -25,23 +25,28 @@ describe("CAA Safety Sense factors", () => {
     expect(bare("landing", "softOrSnow")).toBeCloseTo(1.25, 6);
   });
 
-  test("2% slope gives ×1.1 in the unfavourable direction only", () => {
-    const f = (op: "takeoff" | "landing", slopePct: number) => safetyFactors(op, { ...SAFETY_DEFAULTS, slopePct, generalFactor: false }).total;
-    expect(f("takeoff", 2)).toBeCloseTo(1.1, 6); // uphill departure
-    expect(f("takeoff", -2)).toBe(1); // downhill departure earns no credit
-    expect(f("landing", -2)).toBeCloseTo(1.1, 6); // downhill landing
-    expect(f("landing", 2)).toBe(1); // uphill landing earns no credit
-    expect(f("takeoff", 4)).toBeCloseTo(1.21, 6); // compounds per 2%
+  test("adverse 2% slope is a step of ×1.1, never interpolated", () => {
+    const f = (op: "takeoff" | "landing", adverseSlope: boolean) => safetyFactors(op, { ...SAFETY_DEFAULTS, adverseSlope, generalFactor: false }).total;
+    expect(f("takeoff", true)).toBeCloseTo(1.1, 6);
+    expect(f("landing", true)).toBeCloseTo(1.1, 6);
+    expect(f("takeoff", false)).toBe(1);
+    expect(f("landing", false)).toBe(1);
+  });
+
+  test("slope term names the direction that is adverse for the operation", () => {
+    const term = (op: "takeoff" | "landing") => safetyFactors(op, { ...SAFETY_DEFAULTS, adverseSlope: true, generalFactor: false }).terms[0]?.label;
+    expect(term("takeoff")).toBe("2% uphill slope");
+    expect(term("landing")).toBe("2% downhill slope");
   });
 
   test("multiple factors multiply together, per the leaflet note", () => {
-    const r = safetyFactors("takeoff", { surface: "grassDry", slopePct: 2, generalFactor: true });
+    const r = safetyFactors("takeoff", { surface: "grassDry", adverseSlope: true, generalFactor: true });
     expect(r.terms).toHaveLength(3);
     expect(r.total).toBeCloseTo(1.2 * 1.1 * 1.33, 6);
   });
 
   test("worst realistic landing case stays finite and ordered", () => {
-    const r = safetyFactors("landing", { surface: "grassWet", slopePct: -2, generalFactor: true });
+    const r = safetyFactors("landing", { surface: "grassWet", adverseSlope: true, generalFactor: true });
     expect(r.total).toBeCloseTo(1.35 * 1.1 * 1.43, 6);
     expect(r.terms.at(-1)?.label).toBe("General safety factor");
   });

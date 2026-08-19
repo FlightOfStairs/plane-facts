@@ -1,10 +1,9 @@
 import { Card, CardContent, FormControlLabel, Link, MenuItem, Select, Switch, Typography } from "@mui/material";
 import type { SafetyFactorsState } from "../lib/useSafetyFactors";
 
-import { GENERAL_FACTOR, SURFACES, SURFACE_ORDER } from "../model/caaSafetyFactors";
-import { InputSlider } from "./InputSlider";
+import { GENERAL_FACTOR, SLOPE_2_PERCENT_FACTOR, SURFACES, SURFACE_ORDER, slopeLabel } from "../model/caaSafetyFactors";
 
-const LEAFLET_URL = "https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-07/";
+const LEAFLET_URL = "https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-09/";
 
 /**
  * CAA Safety Sense factors for the conditions the POH charts don't cover:
@@ -22,7 +21,7 @@ export function SafetyFactorPanel(props: { safety: SafetyFactorsState }) {
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
           Weight, altitude, temperature and wind are already modelled by the POH chart, so only the factors it does not cover are applied here — see <Link href={LEAFLET_URL} target="_blank" rel="noreferrer">
-            CAA Safety Sense Leaflet 07
+            CAA Safety Sense Leaflet 09
           </Link>.
         </Typography>
 
@@ -41,7 +40,14 @@ export function SafetyFactorPanel(props: { safety: SafetyFactorsState }) {
           })}
         </Select>
 
-        <InputSlider label={`Runway slope (+up / −down, ${takeoff ? "departure" : "landing"} direction)`} unit="%" value={inputs.slopePct} min={-4} max={4} step={0.5} onChange={(v) => set({ slopePct: v })} />
+        <FormControlLabel
+          control={<Switch checked={inputs.adverseSlope} onChange={(e) => set({ adverseSlope: e.target.checked })} />}
+          label={
+            <Typography variant="body2">
+              {slopeLabel(op)} (×{SLOPE_2_PERCENT_FACTOR})
+            </Typography>
+          }
+        />
 
         <FormControlLabel control={<Switch checked={inputs.generalFactor} onChange={(e) => set({ generalFactor: e.target.checked })} />} label={<Typography variant="body2">General safety factor (×{GENERAL_FACTOR[op]})</Typography>} />
 

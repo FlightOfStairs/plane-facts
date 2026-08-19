@@ -77,11 +77,11 @@ export function AboutModelsPage() {
 
       <Section title="CAA safety factors (takeoff and landing pages)">
         <Typography variant="body2" component="div">
-          The POH charts are drawn for a <em>paved, level, dry runway</em>, and they already model weight, pressure altitude, temperature and wind properly — so the rule-of-thumb rows in the CAA leaflet&apos;s &ldquo;performance changes&rdquo; table are not applied here. What the charts say nothing about is applied instead, from <Link href="https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-07/" target="_blank" rel="noreferrer">
-            CAA Safety Sense Leaflet 07
+          The POH charts are drawn for a <em>paved, level, dry runway</em>, and they already model weight, pressure altitude, temperature and wind properly — so the rule-of-thumb rows in the CAA leaflet&apos;s &ldquo;performance changes&rdquo; table are not applied here. What the charts say nothing about is applied instead, from <Link href="https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-09/" target="_blank" rel="noreferrer">
+            CAA Safety Sense Leaflet 09
           </Link>:<ul>
             <li>Surface: dry grass ×1.2 takeoff / ×1.15 landing; wet grass ×1.3 / ×1.35; wet paved — / ×1.15; soft ground or snow ×1.25 / ×1.25.</li>
-            <li>Slope: ×1.1 per 2%, uphill for takeoff and downhill for landing; no credit is taken for a favourable slope.</li>
+            <li>Slope: ×1.1 for the leaflet&apos;s single tabulated 2% step — uphill for takeoff, downhill for landing. It is a toggle, not a slider: neither the leaflet nor the POH gives a rule for intermediate gradients, so nothing is interpolated. No credit is taken for a favourable slope.</li>
             <li>General safety factor ×1.33 takeoff / ×1.43 landing, applied after the others.</li>
           </ul>
           Factors multiply together. Both numbers are shown on each page: the factored distance is the one to plan with, and the raw POH chart figure sits beneath it. The CAA advises against operating when the factored distance exceeds what is available.

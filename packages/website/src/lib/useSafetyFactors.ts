@@ -21,14 +21,14 @@ function isRunwaySurface(value: string): value is RunwaySurface {
 export function useSafetyFactors(op: Operation): SafetyFactorsState {
   const [raw, setRaw] = useUrlState({
     surface: DEFAULT_SURFACE,
-    slopePct: SAFETY_DEFAULTS.slopePct,
+    adverseSlope: SAFETY_DEFAULTS.adverseSlope,
     generalFactor: SAFETY_DEFAULTS.generalFactor,
   });
 
   const inputs: SafetyFactorInputs = {
     // A hand-edited URL could carry any string; fall back to the default.
     surface: isRunwaySurface(raw.surface) ? raw.surface : SAFETY_DEFAULTS.surface,
-    slopePct: raw.slopePct,
+    adverseSlope: raw.adverseSlope,
     generalFactor: raw.generalFactor,
   };
 

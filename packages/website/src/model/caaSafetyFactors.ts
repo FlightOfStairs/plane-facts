@@ -8,8 +8,8 @@
  * are deliberately not applied here — only surface condition, runway slope,
  * and the general safety factor, which the charts say nothing about.
  *
- * Source: CAA Safety Sense Leaflet 07 (Aeroplane Performance).
- * https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-07/
+ * Source: CAA Safety Sense Leaflet 09 (Weight, Balance and Performance).
+ * https://www.caa.co.uk/data-and-publications/publications/documents/content/safety-sense-leaflet-09/
  */
 
 export type Operation = "takeoff" | "landing";
@@ -36,13 +36,17 @@ export const SURFACE_ORDER: RunwaySurface[] = ["pavedDry", "pavedWet", "grassDry
 /** General safety factor, applied after the others. */
 export const GENERAL_FACTOR: Record<Operation, number> = { takeoff: 1.33, landing: 1.43 };
 
-/** Leaflet gives ×1.1 per 2% of slope, in the unfavourable direction only. */
-export const SLOPE_FACTOR_PER_2_PERCENT = 1.1;
+/**
+ * The leaflet tabulates exactly one slope step — 2% uphill for takeoff,
+ * 2% downhill for landing — and neither it nor the POH offers a rule for
+ * intermediate gradients, so this is applied as a step, never interpolated.
+ */
+export const SLOPE_2_PERCENT_FACTOR = 1.1;
 
 export interface SafetyFactorInputs {
   surface: RunwaySurface;
-  /** Runway slope in %, positive = uphill in the direction of travel. */
-  slopePct: number;
+  /** Runway slopes ~2% the unfavourable way (uphill takeoff / downhill landing). */
+  adverseSlope: boolean;
   /** Apply the general ×1.33 / ×1.43 factor (CAA recommends it). */
   generalFactor: boolean;
 }
@@ -60,9 +64,14 @@ export interface SafetyFactorResult {
 
 export const SAFETY_DEFAULTS: SafetyFactorInputs = {
   surface: "pavedDry",
-  slopePct: 0,
+  adverseSlope: false,
   generalFactor: true,
 };
+
+/** Label for the slope step, which direction is adverse depends on the operation. */
+export function slopeLabel(op: Operation): string {
+  return `2% ${op === "takeoff" ? "uphill" : "downhill"} slope`;
+}
 
 export function safetyFactors(op: Operation, inp: SafetyFactorInputs): SafetyFactorResult {
   const terms: FactorTerm[] = [];
@@ -73,12 +82,8 @@ export function safetyFactors(op: Operation, inp: SafetyFactorInputs): SafetyFac
 
   // Uphill penalises takeoff, downhill penalises landing; the leaflet gives
   // no credit for a favourable slope.
-  const adverse = op === "takeoff" ? inp.slopePct : -inp.slopePct;
-  if (adverse > 0) {
-    terms.push({
-      label: `${adverse.toFixed(1)}% ${op === "takeoff" ? "uphill" : "downhill"} slope`,
-      factor: Math.pow(SLOPE_FACTOR_PER_2_PERCENT, adverse / 2),
-    });
+  if (inp.adverseSlope) {
+    terms.push({ label: slopeLabel(op), factor: SLOPE_2_PERCENT_FACTOR });
   }
 
   if (inp.generalFactor) {
