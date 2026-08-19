@@ -1,4 +1,4 @@
-import { Alert, Box, Card, CardContent, Grid, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Box, Card, CardContent, FormControlLabel, Grid, Switch, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { fig615Meta, fig615Trace } from "../charts/fig615";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { ModelNotes } from "../components/ModelNotes";
@@ -7,7 +7,7 @@ import { useUrlState } from "../lib/urlState";
 import type { Unit } from "../model/units";
 import { toPounds } from "../model/units";
 import type { Category } from "../model/weightBalance";
-import { LIMITS, MAX_USABLE_FUEL_USGAL, PLACEHOLDER_BEW_ARM_IN, PLACEHOLDER_BEW_LB, STATIONS, weightAndBalance } from "../model/weightBalance";
+import { FUEL_ALLOWANCE_ARM_IN, FUEL_ALLOWANCE_LB, LIMITS, MAX_USABLE_FUEL_USGAL, PLACEHOLDER_BEW_ARM_IN, PLACEHOLDER_BEW_LB, STATIONS, weightAndBalance } from "../model/weightBalance";
 
 export const chartEntry = {
   id: "fig-6-15",
@@ -40,6 +40,7 @@ export function WeightBalancePage() {
     fuelU: "usgal",
     bagW: "",
     bagU: "lb",
+    taxi: true,
   });
 
   const parse = (text: string, unit: Unit): number | null => {
@@ -94,6 +95,7 @@ export function WeightBalancePage() {
       fuelLb: byKey("fuel"),
       baggageLb: byKey("bag"),
       category,
+      includeTaxiAllowance: s.taxi,
     });
 
   const normal = complete ? forCategory("normal") : null;
@@ -102,12 +104,15 @@ export function WeightBalancePage() {
 
   const fuelLb = rows.find((r) => r.key === "fuel")?.lb ?? null;
   const fuelGal = fuelLb === null ? null : fuelLb / toPounds(1, "usgal");
-  const permittedNames = [
-    { name: "normal", r: normal },
-    { name: "utility", r: utility },
-  ]
-    .filter((c) => c.r?.withinLimits)
-    .map((c) => c.name);
+  const categories =
+    normal && utility
+      ? ([
+          { name: "Normal", result: normal, maxLb: LIMITS.normal.maxTakeoffLb, severityWhenDenied: "error" },
+          // Failing utility alone is only a caution; failing it when normal is
+          // out too leaves the loading unflyable, so both go red.
+          { name: "Utility", result: utility, maxLb: LIMITS.utility.maxTakeoffLb, severityWhenDenied: normal.withinLimits ? "warning" : "error" },
+        ] as const)
+      : [];
 
   return (
     <Grid container spacing={2}>
@@ -140,8 +145,16 @@ export function WeightBalancePage() {
                       <TableCell sx={{ py: 1.2, px: 1 }}>
                         <NumberUnitInput label={f.label} value={f.text} unit={f.unit} units={f.units} required={f.key !== "bew"} placeholder={f.placeholder} onChange={(value, unit) => set({ [`${f.key}W`]: value, [`${f.key}U`]: unit })} helperText={f.lb !== null && f.unit !== "lb" ? `${fmt(f.lb, 1)} lb` : undefined} />
                       </TableCell>
-                      <TableCell align="right" sx={{ px: 1, minWidth: f.key === "bew" ? 104 : undefined }}>
-                        {f.key === "bew" ? <NumberUnitInput label="Arm" value={s.bewArm} unit="lb" placeholder={String(PLACEHOLDER_BEW_ARM_IN)} onChange={(value) => set({ bewArm: value })} /> : f.armIn.toFixed(1)}
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        {f.key === "bew" ? (
+                          // Only four characters ever go in here, so cap it —
+                          // left free it stretches the whole Arm column.
+                          <Box sx={{ width: 84, ml: "auto" }}>
+                            <NumberUnitInput label="Arm" value={s.bewArm} unit="lb" placeholder={String(PLACEHOLDER_BEW_ARM_IN)} onChange={(value) => set({ bewArm: value })} />
+                          </Box>
+                        ) : (
+                          f.armIn.toFixed(1)
+                        )}
                       </TableCell>
                       <TableCell align="right" sx={{ px: 1 }}>
                         {f.lb === null ? "—" : fmt(f.lb * f.armIn)}
@@ -149,22 +162,28 @@ export function WeightBalancePage() {
                     </TableRow>
                   ))}
 
-                  {normal && (
-                    <TableRow>
-                      <TableCell sx={{ px: 1 }}>Start, taxi &amp; run-up allowance</TableCell>
-                      <TableCell align="right" sx={{ px: 1 }}>
-                        {STATIONS.fuel.toFixed(1)}
-                      </TableCell>
-                      <TableCell align="right" sx={{ px: 1 }}>
-                        −665
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  <TableRow>
+                    <TableCell sx={{ px: 1 }}>
+                      <FormControlLabel control={<Switch size="small" checked={s.taxi} onChange={(e) => set({ taxi: e.target.checked })} />} label={`Start, taxi & run-up allowance (−${Math.abs(FUEL_ALLOWANCE_LB)} lb at ${FUEL_ALLOWANCE_ARM_IN.toFixed(1)} in)`} slotProps={{ typography: { variant: "body2" } }} />
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                      {s.taxi ? FUEL_ALLOWANCE_ARM_IN.toFixed(1) : "—"}
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                      {s.taxi ? fmt(FUEL_ALLOWANCE_LB * FUEL_ALLOWANCE_ARM_IN) : "—"}
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </Box>
           </CardContent>
         </Card>
+
+        {usingPlaceholderBew && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Basic empty weight is the POH sample figure ({PLACEHOLDER_BEW_LB} lb at {PLACEHOLDER_BEW_ARM_IN} in), not your aircraft. Enter the actual figures from its Weight and Balance Record before relying on any of this.
+          </Alert>
+        )}
 
         {normal && (
           <Card sx={{ mt: 2 }}>
@@ -207,6 +226,18 @@ export function WeightBalancePage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Reported per category, because failing utility is unremarkable — it
+            forbids baggage and rear seats, so most real loads exceed it. Only
+            normal is an error when it fails. */}
+        {categories.map(({ name, result, maxLb, severityWhenDenied }) => (
+          <Alert key={name} severity={result.withinLimits ? "success" : severityWhenDenied} sx={{ mt: 2 }}>
+            <strong>
+              {name} category — {result.withinLimits ? "permitted" : "not permitted"}
+            </strong>
+            <Box sx={{ mt: 0.25 }}>{result.withinLimits ? `C.G. ${result.takeoff.cgIn.toFixed(1)} in against limits ${result.takeoff.fwdLimitIn.toFixed(1)}–${result.takeoff.aftLimitIn.toFixed(1)} in at ${fmt(result.takeoff.weightLb, 1)} lb (max ${maxLb} lb)` : result.warnings.join("; ")}</Box>
+          </Alert>
+        ))}
       </Grid>
 
       <Grid size={{ xs: 12, lg: 6 }}>
@@ -216,33 +247,6 @@ export function WeightBalancePage() {
           </Alert>
         )}
 
-        {normal && utility && (
-          <Alert severity={permittedNames.length > 0 ? "success" : "error"} sx={{ mb: 2 }}>
-            <strong>{permittedNames.length === 0 ? "This loading is not permitted in either category." : `Permitted in the ${permittedNames.join(" and ")} categor${permittedNames.length > 1 ? "ies" : "y"}.`}</strong>
-            <Box component="table" sx={{ mt: 1, borderSpacing: 0, "& td": { pr: 1.5, py: 0.25, verticalAlign: "top" } }}>
-              <tbody>
-                {[
-                  { name: "Normal", r: normal, max: LIMITS.normal.maxTakeoffLb },
-                  { name: "Utility", r: utility, max: LIMITS.utility.maxTakeoffLb },
-                ].map(({ name, r, max }) => (
-                  <tr key={name}>
-                    <td>
-                      <strong>{name}</strong>
-                    </td>
-                    <td>{r.withinLimits ? "permitted" : "not permitted"}</td>
-                    <td>{r.withinLimits ? `C.G. ${r.takeoff.cgIn.toFixed(1)} in against limits ${r.takeoff.fwdLimitIn.toFixed(1)}–${r.takeoff.aftLimitIn.toFixed(1)} in at ${fmt(r.takeoff.weightLb, 1)} lb (max ${max} lb)` : r.warnings.join("; ")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Box>
-          </Alert>
-        )}
-
-        {usingPlaceholderBew && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Basic empty weight is the POH sample figure ({PLACEHOLDER_BEW_LB} lb at {PLACEHOLDER_BEW_ARM_IN} in), not your aircraft. Enter the actual figures from its Weight and Balance Record before relying on any of this.
-          </Alert>
-        )}
         {fuelGal !== null && fuelGal > MAX_USABLE_FUEL_USGAL + 0.5 && (
           <Alert severity="warning" sx={{ mb: 2 }}>
             {fuelGal.toFixed(1)} US gal exceeds the {MAX_USABLE_FUEL_USGAL} gal usable capacity.
@@ -261,7 +265,7 @@ export function WeightBalancePage() {
           </CardContent>
         </Card>
 
-        <ModelNotes form={["moment = weight x arm       (arms: front 80.5, rear 118.1, fuel 95.0, baggage 142.8 in)", "C.G.   = total moment / total weight", "take-off = ramp - 7 lb at 95.0 in      (start, taxi and run-up)", "fwd limit = 83.0 in to 1950 lb, then straight-line to 88.3 in at 2440 lb (normal)", "                                    or to 83.8 in at 2020 lb (utility);  aft limit 93.0 in"]} fit="Arithmetic from quoted figures, so it reproduces the POH exactly rather than to a fitted tolerance: the printed sample problem (Fig 6-9) returns ramp 2447 lb at 90.6 in and take-off 2440 lb at 90.6 in, matching every printed moment. Limits are from POH 2.13 and 2.11; fuel uses SG 0.72 (6.009 lb/US gal), within 0.15% of the loading graph's 6 lb per gallon." />
+        <ModelNotes form={["moment = weight x arm       (arms: front 80.5, rear 118.1, fuel 95.0, baggage 142.8 in)", "C.G.   = total moment / total weight", "take-off = ramp - 7 lb at 95.0 in      (start, taxi and run-up; optional — off leaves take-off = ramp)", "fwd limit = 83.0 in to 1950 lb, then straight-line to 88.3 in at 2440 lb (normal)", "                                    or to 83.8 in at 2020 lb (utility);  aft limit 93.0 in"]} fit="Arithmetic from quoted figures, so it reproduces the POH exactly rather than to a fitted tolerance: the printed sample problem (Fig 6-9) returns ramp 2447 lb at 90.6 in and take-off 2440 lb at 90.6 in, matching every printed moment. Limits are from POH 2.13 and 2.11; fuel uses SG 0.72 (6.009 lb/US gal), within 0.15% of the loading graph's 6 lb per gallon." />
       </Grid>
     </Grid>
   );

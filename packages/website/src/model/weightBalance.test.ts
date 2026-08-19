@@ -21,6 +21,15 @@ describe("POH Fig 6-9 sample loading problem (page 6-11)", () => {
     expect(r.takeoff.cgIn).toBeCloseTo(90.6, 1);
   });
 
+  test("declining the taxi allowance leaves take-off at the ramp figures", () => {
+    const noAllowance = weightAndBalance({ ...SAMPLE_PROBLEM, includeTaxiAllowance: false });
+    expect(noAllowance.takeoff.weightLb).toBeCloseTo(2447, 0);
+    expect(noAllowance.takeoff.momentInLb).toBeCloseTo(221739, 0);
+    // 2447 lb is legal on the ramp but 7 lb over the take-off limit.
+    expect(noAllowance.takeoff.overWeight).toBe(true);
+    expect(noAllowance.ramp.overWeight).toBe(false);
+  });
+
   test("the sample loading is inside the envelope with no warnings", () => {
     expect(r.takeoff.withinEnvelope).toBe(true);
     expect(r.withinLimits).toBe(true);

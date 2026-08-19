@@ -2,6 +2,13 @@ import { useCallback, useState } from "react";
 
 type Primitive = string | number | boolean;
 
+/**
+ * A `true` default infers as the literal type `true`, which would then reject
+ * `false` from a toggle. Widen booleans back to `boolean`; strings and numbers
+ * already widen on their own.
+ */
+type Widen<T> = { [K in keyof T]: T[K] extends boolean ? boolean : T[K] };
+
 function parseParam(raw: string, fallback: Primitive): Primitive {
   if (typeof fallback === "number") {
     const n = Number(raw);
@@ -20,23 +27,23 @@ function parseParam(raw: string, fallback: Primitive): Primitive {
  * are removed from the URL to keep it clean. Keys not in `defaults` are left
  * untouched, so different pages can persist independent state side by side.
  */
-export function useUrlState<T extends Record<string, Primitive>>(defaults: T): [T, (patch: Partial<T>) => void] {
+export function useUrlState<T extends Record<string, Primitive>>(defaults: T): [Widen<T>, (patch: Partial<Widen<T>>) => void] {
   // First-render defaults, stable for the component lifetime.
   const [initialDefaults] = useState(defaults);
 
-  const [state, setState] = useState<T>(() => {
+  const [state, setState] = useState<Widen<T>>(() => {
     const params = new URLSearchParams(window.location.search);
-    const out = { ...initialDefaults };
-    for (const key of Object.keys(out) as (keyof T)[]) {
-      const raw = params.get(String(key));
-      // oxlint-disable-next-line no-unsafe-type-assertion -- parseParam returns the same primitive kind as the default it is given
-      if (raw !== null) out[key] = parseParam(raw, out[key]!) as T[keyof T];
+    const out: Record<string, Primitive> = { ...initialDefaults };
+    for (const key of Object.keys(out)) {
+      const raw = params.get(key);
+      if (raw !== null) out[key] = parseParam(raw, out[key]!);
     }
-    return out;
+    // oxlint-disable-next-line no-unsafe-type-assertion -- keys and value kinds come straight from `defaults`; parseParam preserves them
+    return out as Widen<T>;
   });
 
   const update = useCallback(
-    (patch: Partial<T>) => {
+    (patch: Partial<Widen<T>>) => {
       setState((prev) => {
         const next = { ...prev, ...patch };
         const params = new URLSearchParams(window.location.search);

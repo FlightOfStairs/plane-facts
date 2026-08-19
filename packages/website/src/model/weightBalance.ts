@@ -114,6 +114,12 @@ export interface WeightBalanceInputs {
   fuelLb: number;
   baggageLb: number;
   category: Category;
+  /**
+   * Apply the start/taxi/run-up allowance between ramp and take-off. Defaults
+   * to true, as the POH's own loading form does; omitting it simply makes
+   * take-off equal ramp, which is the conservative reading.
+   */
+  includeTaxiAllowance?: boolean;
 }
 
 export interface WeightBalanceResult {
@@ -181,8 +187,9 @@ export function weightAndBalance(inp: WeightBalanceInputs): WeightBalanceResult 
 
   const rampWeight = rows.reduce((s, r) => s + r.weightLb, 0);
   const rampMoment = rows.reduce((s, r) => s + r.momentInLb, 0);
+  const allowanceLb = inp.includeTaxiAllowance === false ? 0 : FUEL_ALLOWANCE_LB;
   const ramp = point(rampWeight, rampMoment, category, L.maxRampLb);
-  const takeoff = point(rampWeight + FUEL_ALLOWANCE_LB, rampMoment + FUEL_ALLOWANCE_LB * FUEL_ALLOWANCE_ARM_IN, category);
+  const takeoff = point(rampWeight + allowanceLb, rampMoment + allowanceLb * FUEL_ALLOWANCE_ARM_IN, category);
   const zeroFuel = point(rampWeight - inp.fuelLb, rampMoment - inp.fuelLb * STATIONS.fuel, category);
 
   const warnings: string[] = [];

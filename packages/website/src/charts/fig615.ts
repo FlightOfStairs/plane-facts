@@ -61,7 +61,9 @@ export function fig615Trace(result: WeightBalanceResult): Fig615Trace {
   const zeroFuel = mark(result.zeroFuel, "zero fuel");
 
   return {
-    polylines: [{ points: [takeoff.at, zeroFuel.at], color: SECTION_COLORS.wind }],
+    // Dashed grey: the travel between the two points is a connector, not a
+    // modelled locus, so it stays subordinate to the coloured end markers.
+    polylines: [{ points: [takeoff.at, zeroFuel.at], color: "#616161", dashed: true }],
     markers: [zeroFuel, takeoff],
   };
 }
