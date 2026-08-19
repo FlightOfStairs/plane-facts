@@ -40,8 +40,14 @@ function useRenderedWidth() {
  * measure 2–4 viewBox px, so the overlay is deliberately heavier — and it
  * thickens as the chart shrinks, holding a usable width on small screens.
  */
-export function ChartOverlay(props: { meta: ChartMeta; polylines: Polyline[]; marker?: [number, number] }) {
-  const { meta, polylines, marker } = props;
+export function ChartOverlay(props: {
+  meta: ChartMeta;
+  polylines: Polyline[];
+  marker?: [number, number];
+  /** Several labelled points, each able to carry its own colour. */
+  markers?: { at: [number, number]; color: string; label?: string }[];
+}) {
+  const { meta, polylines, marker, markers } = props;
   const [boxRef, renderedWidth] = useRenderedWidth();
 
   const scale = renderedWidth > 0 ? renderedWidth / meta.widthPx : 1;
@@ -68,6 +74,17 @@ export function ChartOverlay(props: { meta: ChartMeta; polylines: Polyline[]; ma
             <circle cx={marker[0]} cy={marker[1]} r={stroke * 1.6} fill={SECTION_COLORS.result} />
           </>
         )}
+        {markers?.map((mk) => (
+          <g key={`${mk.label ?? ""}${mk.at[0]},${mk.at[1]}`}>
+            <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 2.2} fill="#ffffff" opacity={0.85} />
+            <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 1.5} fill={mk.color} />
+            {mk.label && (
+              <text x={mk.at[0] + stroke * 2.8} y={mk.at[1] - stroke * 1.4} fontSize={stroke * 3.4} fill={mk.color} stroke="#ffffff" strokeWidth={stroke * 0.7} paintOrder="stroke" fontWeight={600}>
+                {mk.label}
+              </text>
+            )}
+          </g>
+        ))}
       </svg>
     </Box>
   );

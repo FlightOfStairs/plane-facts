@@ -47,6 +47,17 @@ def export(asset_id: str) -> None:
             "pxPerUnit": ax["pxPerUnit"] * scale,
             "orient": ax["orient"],
         }
+    # Some charts (Fig 6-15) encode x as moment about a reference C.G. rather
+    # than a plain linear axis; carry those constants through the same
+    # crop/scale so the page can use them directly.
+    moment = cfg.get("momentAxis")
+    if moment:
+        moment = {
+            "aPx": (moment["aPx"] - x0) * scale,
+            "kPxPerInLb": moment["kPxPerInLb"] * scale,
+            "cgRefIn": moment["cgRefIn"],
+        }
+
     meta = {
         "id": asset_id,
         "title": cfg["title"],
@@ -56,6 +67,7 @@ def export(asset_id: str) -> None:
         "heightPx": out.shape[0],
         "deskewDeg": round(angle, 3),
         "axes": axes,
+        **({"momentAxis": moment} if moment else {}),
     }
     (META / f"{asset_id}.meta.json").write_text(json.dumps(meta, indent=2) + "\n")
     print(f"{asset_id}: {out.shape[1]}x{out.shape[0]} px, "

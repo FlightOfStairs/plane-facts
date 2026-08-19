@@ -1,0 +1,20 @@
+{
+  "pdfPage": 123,
+  "title": "C.G. Range and Weight (Fig 6-15)",
+  "crop": [150, 430, 1500, 2030],
+  "scale": 0.5,
+  "axes": {
+    "weightLb": {
+      "px0": 1866.2,
+      "v0": 1200,
+      "pxPerUnit": -1.071,
+      "orient": "y"
+    }
+  },
+  "momentAxis": {
+    "_comment": "x = aPx + kPxPerInLb*weightLb*(cgIn - cgRefIn)",
+    "aPx": 766.72,
+    "kPxPerInLb": 0.046098,
+    "cgRefIn": 88.0
+  }
+}

@@ -22,6 +22,7 @@ import { chartEntry as fig531 } from "./DescentFuelTimeDistancePage";
 import { chartEntry as fig533 } from "./GlidePerformancePage";
 import { chartEntry as fig535 } from "./LandingDistance50Page";
 import { chartEntry as fig537 } from "./LandingGroundRollPage";
+import { chartEntry as fig615 } from "./WeightBalancePage";
 
 export interface ChartEntry {
   id: string;
@@ -29,4 +30,4 @@ export interface ChartEntry {
   Component: ComponentType;
 }
 
-export const CHART_PAGES: ChartEntry[] = [about, fig503, fig505, fig507, fig509, fig511, fig513, fig515, fig517, fig519, fig521, fig523, fig525, fig527, fig529, fig531, fig533, fig535, fig537];
+export const CHART_PAGES: ChartEntry[] = [about, fig503, fig505, fig507, fig509, fig511, fig513, fig515, fig517, fig519, fig521, fig523, fig525, fig527, fig529, fig531, fig533, fig535, fig537, fig615];

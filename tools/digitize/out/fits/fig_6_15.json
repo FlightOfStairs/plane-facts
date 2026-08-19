@@ -1,0 +1,66 @@
+{
+  "figure": "6-15",
+  "pdfPage": 123,
+  "title": "C.G. Range and Weight",
+  "deskewDeg": -0.05,
+  "transform": {
+    "form": "x = A + k*W*(cg - 88);   y = yAt1200 - pxPerLb*(W - 1200)",
+    "why": "The abscissa is not C.G. despite the caption: ray spacing grows with weight and the family pivots about C.G. 88, so x encodes moment about an 88-inch reference.",
+    "A": 766.72,
+    "k": 0.046098,
+    "cgRefIn": 88.0,
+    "yAt1200": 1866.2,
+    "pxPerLb": 1.071,
+    "validation": {
+      "fwdEdgeReadsCg": 82.96,
+      "fwdEdgeRmsPx": 0.68,
+      "statedFwd": 83.0,
+      "aftEdgeReadsCg": 92.93,
+      "aftEdgeRmsPx": 0.65,
+      "statedAft": 93.0,
+      "topEdgeRaysReadCg": [88.92, 89.91, 90.91, 91.95, 92.93],
+      "topEdgeRaysPrinted": [89, 90, 91, 92, 93],
+      "note": "Weight axis: last major tick is 2400 at y=581; the envelope top edge sits ~39 lb above it at 2440."
+    }
+  },
+  "limitsAuthoritative": {
+    "source": "POH 2.13 Center of Gravity Limits (p2-4) and 2.11 Weight Limits (p2-3a)",
+    "note": "'Straight line variation between points given' - linear in C.G. vs weight. These govern.",
+    "normal": {
+      "maxTakeoffLb": 2440,
+      "maxRampLb": 2447,
+      "maxBaggageLb": 200,
+      "fwd": [
+        [1950, 83.0],
+        [2440, 88.3]
+      ],
+      "aftIn": 93.0
+    },
+    "utility": {
+      "maxTakeoffLb": 2020,
+      "maxRampLb": 2027,
+      "maxBaggageLb": 0,
+      "fwd": [
+        [1950, 83.0],
+        [2020, 83.8]
+      ],
+      "aftIn": 93.0,
+      "restrictions": "no baggage, no aft passengers"
+    }
+  },
+  "printedCutout": {
+    "extraction": "93 thick-stroke points, W 1955-2435, seeded search window; rms of the best fit 0.03-0.07 in",
+    "shape": "Nearly straight in C.G.-vs-weight but with a real bow: a straight line in C.G. fits to rms 0.041 in (max 0.162), a straight line in the chart's own pixel space fits worse (0.066 in), and a quadratic best of all (0.031 in). So the drawn cutout is not straight on the chart - confirmed against a physical ruler on screen.",
+    "quadraticFitCgOfW": "cg = -1.583e-6*W^2 + 0.017433*W + 54.932",
+    "measured": {
+      "1960": 83.06,
+      "2100": 84.55,
+      "2200": 85.65,
+      "2320": 86.89,
+      "2440": 87.93
+    },
+    "startsAtLb": 1950,
+    "notCoincidentWithUtilityCeiling": "the cutout begins at 1950 lb; the utility ceiling is a separate 2020 lb cap",
+    "vsTable": "The drawing reaches C.G. 87.93 at max gross where 2.13 tabulates 88.3, i.e. the illustration is ~0.35 in MORE permissive at the top. The model therefore uses the 2.13 table, which is both the legal limit and the conservative one."
+  }
+}

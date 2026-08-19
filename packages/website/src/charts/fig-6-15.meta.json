@@ -1,0 +1,22 @@
+{
+  "id": "fig-6-15",
+  "title": "C.G. Range and Weight (Fig 6-15)",
+  "pdfPage": 123,
+  "image": "/charts/fig-6-15.png",
+  "widthPx": 675,
+  "heightPx": 800,
+  "deskewDeg": -0.05,
+  "axes": {
+    "weightLb": {
+      "px0": 718.1,
+      "v0": 1200,
+      "pxPerUnit": -0.5355,
+      "orient": "y"
+    }
+  },
+  "momentAxis": {
+    "aPx": 308.36,
+    "kPxPerInLb": 0.023049,
+    "cgRefIn": 88.0
+  }
+}
