@@ -20,6 +20,7 @@
  */
 
 import { densityAltitudeFt, densityRatio } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export type Mixture = "bestPower" | "bestEconomy";
 export type PowerSetting = 55 | 65 | 75;
@@ -61,7 +62,6 @@ export interface CruiseResult {
 }
 
 interface FigureParams {
-  figure: "5-21" | "5-23";
   /** u = c0 + c1·PA + c2·OAT + c3·PA·OAT + c4·PA² + c5·OAT² */
   uCoeffs: readonly [number, number, number, number, number, number];
   /** TAS(u) per nominal %power, quadratic, highest degree first */
@@ -76,7 +76,6 @@ interface FigureParams {
 
 /** Fitted constants from tools/digitize/out/fits/fig_5_21.json */
 const FIG_5_21: FigureParams = {
-  figure: "5-21",
   uCoeffs: [-0.9507783909699528, 0.0006314575541150251, 0.06466373882369007, -6.104509968054439e-7, -8.253277179683813e-10, -0.0001397604374975914],
   q: {
     55: [-0.0013556416119979624, 1.9340153469688388, 95.44952559967443],
@@ -95,7 +94,6 @@ const FIG_5_21: FigureParams = {
 
 /** Fitted constants from tools/digitize/out/fits/fig_5_23.json */
 const FIG_5_23: FigureParams = {
-  figure: "5-23",
   uCoeffs: [-0.9032707650595712, 0.0006177928156102027, 0.06378223582321918, -5.859859198787578e-7, -7.47280207646028e-11, -0.00015669553705125662],
   q: {
     55: [0.0029826219818078733, 2.0287049309070744, 91.97724863072169],
@@ -135,10 +133,8 @@ export function latticeU(mixture: Mixture, pressureAltitudeFt: number, oatC: num
 
 /** Fuel flow (GPH) at a %power, linear through the printed 55/65/75 table. */
 function fuelAtPct(p: FigureParams, pct: number): number {
-  const f55 = p.fuelGph[55];
-  const f65 = p.fuelGph[65];
-  const f75 = p.fuelGph[75];
-  return pct >= 65 ? f65 + ((pct - 65) / 10) * (f75 - f65) : f55 + ((pct - 55) / 10) * (f65 - f55);
+  const [lo, hi] = pct >= 65 ? ([65, 75] as const) : ([55, 65] as const);
+  return p.fuelGph[lo] + ((pct - lo) / 10) * (p.fuelGph[hi] - p.fuelGph[lo]);
 }
 
 export function cruisePerformance(inp: CruiseInputs): CruiseResult {
@@ -170,8 +166,8 @@ export function cruisePerformance(inp: CruiseInputs): CruiseResult {
   }
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 16000) warnings.push("pressure altitude outside chart (0–16000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
+  warnRange(warnings, pa, 0, 16000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
   if (daFt < 0) warnings.push("density altitude below 0 ft — off the bottom of the chart");
   if (ftLimited) {
     if (u > p.uRange.FT[1]) warnings.push(`density altitude ${Math.round(daFt)} ft — beyond the drawn full-throttle boundary`);

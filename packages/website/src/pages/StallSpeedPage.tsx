@@ -1,10 +1,7 @@
-import { Card, CardContent, Grid, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { fig505Meta, fig505Trace } from "../charts/fig505";
-import { ChartOverlay } from "../components/ChartOverlay";
+import { ChartPageLayout } from "../components/ChartPageLayout";
 import { InputSlider } from "../components/InputSlider";
-import { ModelNotes } from "../components/ModelNotes";
-import { ResultsPanel } from "../components/ResultsPanel";
-import { TraceCaption } from "../components/TraceCaption";
 import { useUrlState } from "../lib/urlState";
 import type { StallFlaps, StallInputs } from "../model/stallSpeed";
 import { CHART_EXAMPLE, stallSpeed } from "../model/stallSpeed";
@@ -23,51 +20,36 @@ export function StallSpeedPage() {
   const set = (k: "weightLb" | "bankDeg") => (v: number) => setInputs({ [k]: v });
 
   return (
-    <Grid container spacing={2}>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Conditions
-            </Typography>
-            <ToggleButtonGroup exclusive size="small" fullWidth value={inputs.flaps} onChange={(_, v: StallFlaps | null) => v !== null && setInputs({ flaps: v })} sx={{ mb: 2 }}>
-              <ToggleButton value={0}>Flaps 0°</ToggleButton>
-              <ToggleButton value={40}>Flaps 40°</ToggleButton>
-            </ToggleButtonGroup>
-            <InputSlider label="Gross weight" unit="lb" value={inputs.weightLb} min={1600} max={2440} step={10} onChange={set("weightLb")} />
-            <InputSlider label="Angle of bank" unit="°" value={inputs.bankDeg} min={0} max={60} step={1} onChange={set("bankDeg")} />
-          </CardContent>
-        </Card>
-        <Card sx={{ mt: 2 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Results
-            </Typography>
-            <ResultsPanel
-              rows={[
-                { label: "Wings-level stall", value: `${result.wingsLevelIasKt.toFixed(1)} KIAS / ${result.wingsLevelCasKt.toFixed(1)} KCAS` },
-                { label: "Load factor n", value: `${result.loadFactor.toFixed(2)} g` },
-                { label: "Bank multiplier", value: `× ${result.bankFactorApplied.toFixed(3)}` },
-                { label: "Stall speed", value: `${result.stallIasKt.toFixed(1)} KIAS`, emphasize: true },
-                { label: "Stall speed", value: `${result.stallCasKt.toFixed(1)} KCAS`, emphasize: true },
-              ]}
-              warnings={result.warnings}
-            />
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid size={{ xs: 12, md: 8 }}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              {fig505Meta.title}
-            </Typography>
-            <ChartOverlay meta={fig505Meta} polylines={polylines} marker={marker} />
-            <TraceCaption sections={["entry", "wind", "result"]} labels={["weight entry", "bank fan", "result"]} />
-          </CardContent>
-        </Card>
-        <ModelNotes form={["Vs₀ = c₂·w² + c₁·w + c₀,  w = W/2440     (per flap; CAS and IAS curves fitted separately)", "Vs(φ) = Vs₀ / cos(φ)^0.499", "n = 1/cos φ,  V ∝ √n                      (exact load-factor physics)"]} fit="Curves fitted at 0.08–0.21 kt rms each (0.47% overall). The chart's printed example (2170 lb, 20° bank, flaps 40 → 44 KIAS) reproduces at 43.5 KIAS (−1.1%) — the printed answer is itself 0.5–1 kt generous against the chart's own drawn curves." findings={["The right-panel bank fan is one universal curve family V = V₀/cos(φ)^0.499 — the fitted exponent is indistinguishable from the physical 0.5, applied multiplicatively to any entry speed.", "The weight curves are drawn shallower than √W near gross weight, steepening to ~√W below ~2000 lb — a drafting choice, not load-factor physics.", "Anchors read from this chart: Vs0 flaps-0 = 50.4 KIAS / 56.1 KCAS; flaps-40 = 44.1 KIAS / 50.1 KCAS. The landing charts' 45-KIAS touchdown and 65-KIAS approach (1.3×Vs0 CAS) anchor to these exactly at 2440 lb.", "Fig 5-11's lift-off speed (52 KCAS) is only 1.036× the flaps-40 stall CAS — a thin margin over stall at rotation.", "The paired solid (IAS) and dash-dot (CAS) families imply a near-constant CAS ≈ IAS + 6.6 kt at stall AoA — used to extend the Fig 5-3 calibration below its drawn 43-KIAS floor."]} />
-      </Grid>
-    </Grid>
+    <ChartPageLayout
+      meta={fig505Meta}
+      polylines={polylines}
+      marker={marker}
+      sections={["entry", "wind", "result"]}
+      sectionLabels={["weight entry", "bank fan", "result"]}
+      conditionsNote="The chart draws only the 0° and 40° flap families; results are given in both KIAS and KCAS."
+      conditions={
+        <>
+          <ToggleButtonGroup exclusive size="small" fullWidth value={inputs.flaps} onChange={(_, v: StallFlaps | null) => v !== null && setInputs({ flaps: v })} sx={{ mb: 2 }}>
+            <ToggleButton value={0}>Flaps 0°</ToggleButton>
+            <ToggleButton value={40}>Flaps 40°</ToggleButton>
+          </ToggleButtonGroup>
+          <InputSlider label="Gross weight" unit="lb" value={inputs.weightLb} min={1600} max={2440} step={10} onChange={set("weightLb")} />
+          <InputSlider label="Angle of bank" unit="°" value={inputs.bankDeg} min={0} max={60} step={1} onChange={set("bankDeg")} />
+        </>
+      }
+      results={[
+        { label: "Wings-level stall", value: `${result.wingsLevelIasKt.toFixed(1)} KIAS / ${result.wingsLevelCasKt.toFixed(1)} KCAS` },
+        { label: "Load factor n", value: `${result.loadFactor.toFixed(2)} g` },
+        { label: "Bank multiplier", value: `× ${result.bankFactorApplied.toFixed(3)}` },
+        { label: "Stall speed", value: `${result.stallIasKt.toFixed(1)} KIAS`, emphasize: true },
+        { label: "Stall speed", value: `${result.stallCasKt.toFixed(1)} KCAS`, emphasize: true },
+      ]}
+      warnings={result.warnings}
+      notes={{
+        form: ["Vs₀ = c₂·w² + c₁·w + c₀,  w = W/2440     (per flap; CAS and IAS curves fitted separately)", "Vs(φ) = Vs₀ / cos(φ)^0.499", "n = 1/cos φ,  V ∝ √n                      (exact load-factor physics)"],
+        fit: "Curves fitted at 0.08–0.21 kt rms each (0.47% overall). The chart's printed example (2170 lb, 20° bank, flaps 40 → 44 KIAS) reproduces at 43.5 KIAS (−1.1%) — the printed answer is itself 0.5–1 kt generous against the chart's own drawn curves.",
+        findings: ["The right-panel bank fan is one universal curve family V = V₀/cos(φ)^0.499 — the fitted exponent is indistinguishable from the physical 0.5, applied multiplicatively to any entry speed.", "The weight curves are drawn shallower than √W near gross weight, steepening to ~√W below ~2000 lb — a drafting choice, not load-factor physics.", "Anchors read from this chart: Vs0 flaps-0 = 50.4 KIAS / 56.1 KCAS; flaps-40 = 44.1 KIAS / 50.1 KCAS. The landing charts' 45-KIAS touchdown and 65-KIAS approach (1.3×Vs0 CAS) anchor to these exactly at 2440 lb.", "The paired solid (IAS) and dash-dot (CAS) families imply a near-constant CAS ≈ IAS + 6.6 kt at stall AoA — used to extend the Fig 5-3 calibration below its drawn 43-KIAS floor."],
+      }}
+    />
   );
 }

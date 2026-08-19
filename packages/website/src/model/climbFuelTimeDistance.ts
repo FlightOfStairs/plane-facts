@@ -13,6 +13,7 @@
 
 import { DIST_POLY, FUEL_POLY, G_SURFACE, TIME_POLY, VALUE_PX_PER_UNIT, VALUE_X0_PX, Y_RANGE_PX } from "../charts/fixtures/fig519Fit";
 import { densityAltitudeFt, densityRatio, isaTempC } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export interface ClimbToInputs {
   /** Departure airport pressure altitude, ft (chart: 0–11,000) */
@@ -86,9 +87,11 @@ export function climbLeg(paFt: number, oatC: number): ClimbLeg {
 }
 
 function envelopeWarnings(prefix: string, paFt: number, oatC: number, yPx: number, out: string[]): void {
-  if (paFt < 0 || paFt > 11000) out.push(`${prefix} pressure altitude outside chart (0–11,000 ft)`);
-  if (oatC < -40 || oatC > 40) out.push(`${prefix} OAT outside chart (−40…+40 °C)`);
-  else if (yPx < Y_RANGE_PX[0]) out.push(`${prefix} conditions beyond the drawn curve family (this altitude is only charted at colder OAT)`);
+  const oatOffChart = oatC < -40 || oatC > 40;
+  warnRange(out, paFt, 0, 11000, `${prefix} pressure altitude`, "ft");
+  warnRange(out, oatC, -40, 40, `${prefix} OAT`, "°C");
+  // Only meaningful with the OAT on the chart — off-chart OAT already warned above.
+  if (!oatOffChart && yPx < Y_RANGE_PX[0]) out.push(`${prefix} conditions beyond the drawn curve family (this altitude is only charted at colder OAT)`);
 }
 
 export function climbFuelTimeDistance(inp: ClimbToInputs): ClimbToResult {

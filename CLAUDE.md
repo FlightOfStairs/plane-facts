@@ -26,9 +26,19 @@ numbers and draws the model-derived trace over the original scan.
     `pdftoppm -png -r 300 -gray -f 90 -l 108 PA-28-161-POH.pdf tools/digitize/out/raw/page`.
   - `assets/fig-5-NN.json` + `export_asset.py` — web asset/calibration export.
 - `packages/website/src/model/` — TS models (shared `atmosphere.ts`,
-  `airspeed.ts`; one module per chart; constants comment their source fit).
-- `packages/website/src/charts/` — asset calibration metas + trace builders.
-- `packages/website/src/pages/` — one page per chart; registry in `index.ts`.
+  `airspeed.ts`, `shared.ts` for the wind-credit policy and envelope
+  warnings; one module per chart; constants comment their source fit).
+  `caaSafetyFactors.ts` layers CAA Safety Sense factors (surface, slope,
+  general factor) on the takeoff/landing distances — the POH already covers
+  weight/altitude/temperature/wind, so those leaflet rows are not applied.
+- `packages/website/src/charts/` — asset calibration metas + trace builders;
+  `SECTION_COLORS` in `types.ts` colors each nomogram section of a trace.
+- `packages/website/src/pages/` — one page per chart, all built on
+  `components/ChartPageLayout.tsx`; registry in `index.ts`. `AboutModelsPage`
+  holds the cross-chart documentation, so per-chart `ModelNotes` carry only
+  what is unique to that chart.
+- Page state (chart selection + all inputs) is URL-persisted via
+  `lib/urlState.ts`, so a refresh or a shared link restores the scenario.
 - `tools/screenshot.mjs` — serves the built `dist` and screenshots every
   registered page to `tools/digitize/out/qa/ui-*.png` (playwright).
 

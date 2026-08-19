@@ -10,6 +10,7 @@
  */
 
 import { densityAltitudeFt, densityRatio, tasFromCas } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export interface TakeoffRoll0Inputs {
   /** Pressure altitude, ft (chart: 0–6000) */
@@ -50,7 +51,9 @@ const S0_A = 865.0; // ft
 const S0_B = 0.2113; // ft per ft PA
 const S0_C = 17.76; // ft per °C (c/b = 84 ft PA per °C — same sub-DA anisotropy as Fig 5-11)
 const WEIGHT_EXPONENT = 2.344; // vs 1.85 on the 25° flap chart — real POH content
-// Smooth (Veff, m) wind form; robust factors f(5/10/15 kt HW) = 0.923/0.848/0.775, f(5 kt TW) = 1.259
+// Smooth (Veff, m) wind form; robust factors f(5/10/15 kt HW) = 0.923/0.848/0.775, f(5 kt TW) = 1.259.
+// Not expressible through the shared windCreditFactor: under the 50%/150% credit the two sides imply
+// different reference speeds (93/2 = 46.5 kt headwind vs 28·1.5 = 42 kt tailwind), unique to this chart.
 const HEADWIND_VEFF_KT = 93.0;
 const HEADWIND_EXPONENT = 1.45;
 const TAILWIND_VEFF_KT = 28.0;
@@ -90,9 +93,9 @@ export function takeoffGroundRoll0(inp: TakeoffRoll0Inputs): TakeoffRoll0Result 
   }
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 6000) warnings.push("pressure altitude outside chart (0–6000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (w < 1700 || w > MTOW_LB) warnings.push("weight outside chart (1700–2440 lb)");
+  warnRange(warnings, pa, 0, 6000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, w, 1700, MTOW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
 

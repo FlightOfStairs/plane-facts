@@ -9,6 +9,7 @@
  */
 
 import { densityAltitudeFt, densityRatio, tasFromCas } from "./atmosphere";
+import { warnRange, windCreditFactor } from "./shared";
 
 export interface TakeoffInputs {
   /** Pressure altitude, ft (chart: 0–7000) */
@@ -59,8 +60,6 @@ export function liftoffKcas(weightLb: number): number {
 
 const WEIGHT_EXPONENT = 1.85;
 const WIND_EXPONENT = 1.55;
-const HEADWIND_CREDIT = 0.5; // certification policy: credit 50% of headwind
-const TAILWIND_FACTOR = 1.5; // …and 150% of tailwind
 
 export function takeoffGroundRoll25(inp: TakeoffInputs): TakeoffResult {
   const { pressureAltitudeFt: pa, oatC, weightLb: w, windKt } = inp;
@@ -74,17 +73,12 @@ export function takeoffGroundRoll25(inp: TakeoffInputs): TakeoffResult {
   const vCas = liftoffKcas(w);
   const vTas = tasFromCas(vCas, sigma);
 
-  let windFactor = 1;
-  if (windKt > 0) {
-    windFactor = Math.pow(1 - (HEADWIND_CREDIT * windKt) / vTas, WIND_EXPONENT);
-  } else if (windKt < 0) {
-    windFactor = Math.pow(1 + (TAILWIND_FACTOR * -windKt) / vTas, WIND_EXPONENT);
-  }
+  const windFactor = windCreditFactor(windKt, vTas, WIND_EXPONENT);
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 7000) warnings.push("pressure altitude outside chart (0–7000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (w < 1700 || w > MTOW_LB) warnings.push("weight outside chart (1700–2440 lb)");
+  warnRange(warnings, pa, 0, 7000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, w, 1700, MTOW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
   if (da > 7500) warnings.push(`density altitude ${Math.round(da)} ft — beyond drawn curves`);

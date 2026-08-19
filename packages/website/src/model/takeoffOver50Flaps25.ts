@@ -10,6 +10,7 @@
  */
 
 import { densityAltitudeFt, densityRatio, tasFromCas } from "./atmosphere";
+import { warnRange, windCreditFactor } from "./shared";
 
 export interface TakeoffOver50Flaps25Inputs {
   /** Pressure altitude, ft (chart: 0–7000) */
@@ -59,7 +60,7 @@ const S0_D = 0.001865; // PA·OAT cross term
 const S0_E = 1.2935e-5; // PA²
 const S0_F = 0.0445; // OAT²
 const WEIGHT_EXPONENT = 2.02;
-// Certification wind policy (50% headwind / 150% tailwind credit) vs 52 KIAS
+// Wind panel reference speed (see windCreditFactor for the shared policy)
 const V_REF_KIAS = 52.0;
 const M_HW = 1.49;
 const M_TW = 1.42; // weakly constrained (2 usable tailwind guides)
@@ -115,17 +116,12 @@ export function takeoffOver50Flaps25(inp: TakeoffOver50Flaps25Inputs): TakeoffOv
   const vLof = liftoffOver50Flaps25Kias(w);
   const v50 = barrierFlaps25Kias(w);
 
-  let windFactor = 1;
-  if (windKt > 0) {
-    windFactor = Math.pow(1 - (0.5 * windKt) / V_REF_KIAS, M_HW);
-  } else if (windKt < 0) {
-    windFactor = Math.pow(1 + (1.5 * -windKt) / V_REF_KIAS, M_TW);
-  }
+  const windFactor = windCreditFactor(windKt, V_REF_KIAS, M_HW, M_TW);
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 7000) warnings.push("pressure altitude outside chart (0–7000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (w < 1700 || w > MTOW_LB) warnings.push("weight outside chart (1700–2440 lb)");
+  warnRange(warnings, pa, 0, 7000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, w, 1700, MTOW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
   const final = s1 * windFactor;

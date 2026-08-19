@@ -15,6 +15,8 @@
  * read at cruise PA minus the range read at terrain PA.
  */
 
+import { warnRange } from "./shared";
+
 // Fitted line: glide_range_nm(h) = (h_ft − B) / M
 // From tools/digitize/out/fits/fig_5_33.json
 const M_FT_PER_NM = 530.47;
@@ -56,8 +58,8 @@ export function glidePerformance(inp: GlideInputs): GlideResult {
   const rangeTerrainNm = glideRangeNm(inp.terrainPressureAltitudeFt);
 
   const warnings: string[] = [];
-  if (inp.cruisePressureAltitudeFt < 0 || inp.cruisePressureAltitudeFt > 12000) warnings.push("cruise pressure altitude outside chart (0–12,000 ft)");
-  if (inp.terrainPressureAltitudeFt < 0 || inp.terrainPressureAltitudeFt > 12000) warnings.push("terrain pressure altitude outside chart (0–12,000 ft)");
+  warnRange(warnings, inp.cruisePressureAltitudeFt, 0, 12000, "cruise pressure altitude", "ft");
+  warnRange(warnings, inp.terrainPressureAltitudeFt, 0, 12000, "terrain pressure altitude", "ft");
   if (inp.terrainPressureAltitudeFt >= inp.cruisePressureAltitudeFt) warnings.push("terrain is at or above cruise altitude — no glide range to compute");
 
   return {

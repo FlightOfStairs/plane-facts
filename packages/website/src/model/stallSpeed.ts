@@ -12,6 +12,8 @@
  * V ∝ √n) applied multiplicatively to any entry speed.
  */
 
+import { warnRange } from "./shared";
+
 export type StallFlaps = 0 | 40;
 
 export interface StallInputs {
@@ -69,9 +71,11 @@ function evalQuad(q: Quad, w: number): number {
   return q.c2 * w * w + q.c1 * w + q.c0;
 }
 
+const cosBank = (bankDeg: number): number => Math.cos((bankDeg * Math.PI) / 180);
+
 /** Right-panel fan multiplier: V(φ)/V₀ = cos(φ)^−0.499. */
 export function bankFactor(bankDeg: number): number {
-  return Math.pow(Math.cos((bankDeg * Math.PI) / 180), -BANK_EXPONENT);
+  return Math.pow(cosBank(bankDeg), -BANK_EXPONENT);
 }
 
 export function stallSpeed(inp: StallInputs): StallResult {
@@ -84,15 +88,15 @@ export function stallSpeed(inp: StallInputs): StallResult {
   const f = bankFactor(bankDeg);
 
   const warnings: string[] = [];
-  if (weightLb < MIN_WEIGHT_LB || weightLb > MAX_WEIGHT_LB) warnings.push("weight outside chart (1600–2440 lb)");
-  if (bankDeg < 0 || bankDeg > MAX_BANK_DEG) warnings.push("bank angle outside chart (0–60°)");
+  warnRange(warnings, weightLb, MIN_WEIGHT_LB, MAX_WEIGHT_LB, "weight", "lb");
+  warnRange(warnings, bankDeg, 0, MAX_BANK_DEG, "bank angle", "degrees");
 
   return {
     stallCasKt: wingsLevelCas * f,
     stallIasKt: wingsLevelIas * f,
     wingsLevelCasKt: wingsLevelCas,
     wingsLevelIasKt: wingsLevelIas,
-    loadFactor: 1 / Math.cos((bankDeg * Math.PI) / 180),
+    loadFactor: 1 / cosBank(bankDeg),
     bankFactorApplied: f,
     warnings,
   };

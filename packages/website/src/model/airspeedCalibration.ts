@@ -34,7 +34,7 @@ export const IAS_ENVELOPE: Record<FlapSetting, [number, number]> = {
 };
 
 /** Vfe — the flaps-40 line ends here and merges into the flaps-up line. */
-export const FLAPS40_VFE_KIAS = 103.2;
+export const FLAPS40_VFE_KIAS = IAS_ENVELOPE.deg40[1];
 
 export function airspeedCalibration(inp: AirspeedCalInputs): AirspeedCalResult {
   const { speedKt, direction, flaps } = inp;

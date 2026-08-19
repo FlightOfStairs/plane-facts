@@ -17,6 +17,7 @@
 
 import { cubic, DIST_POLY, FUEL_POLY, HE_SURFACE, TIME_POLY } from "../charts/fixtures/fig531Coeffs";
 import { isaTempC } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export interface DescentInputs {
   /** Cruise pressure altitude, ft (chart: 0–12,000) */
@@ -85,10 +86,10 @@ export function descentFuelTimeDistance(inp: DescentInputs): DescentResult {
   const destination = readingsAt(inp.destPressureAltitudeFt, inp.destOatC);
 
   const warnings: string[] = [];
-  if (inp.cruisePressureAltitudeFt < 0 || inp.cruisePressureAltitudeFt > 12000) warnings.push("cruise pressure altitude outside chart (0–12,000 ft)");
-  if (inp.destPressureAltitudeFt < 0 || inp.destPressureAltitudeFt > 12000) warnings.push("destination pressure altitude outside chart (0–12,000 ft)");
-  if (inp.cruiseOatC < -40 || inp.cruiseOatC > 40) warnings.push("cruise OAT outside chart (−40…+40 °C)");
-  if (inp.destOatC < -40 || inp.destOatC > 40) warnings.push("destination OAT outside chart (−40…+40 °C)");
+  warnRange(warnings, inp.cruisePressureAltitudeFt, 0, 12000, "cruise pressure altitude", "ft");
+  warnRange(warnings, inp.destPressureAltitudeFt, 0, 12000, "destination pressure altitude", "ft");
+  warnRange(warnings, inp.cruiseOatC, -40, 40, "cruise OAT", "°C");
+  warnRange(warnings, inp.destOatC, -40, 40, "destination OAT", "°C");
   if (destination.effectiveAltitudeFt >= cruise.effectiveAltitudeFt) warnings.push("destination is not below cruise on the chart's effective-altitude scale — no descent to compute");
   if (inp.cruisePressureAltitudeFt > 10000) warnings.push("11,000/12,000 ft curves are unlabeled in the POH — lower confidence");
 

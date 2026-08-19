@@ -10,6 +10,7 @@
  */
 
 import { densityAltitudeFt, densityRatio, tasFromCas } from "./atmosphere";
+import { warnRange, windCreditFactor } from "./shared";
 
 export interface TakeoffOver50Flaps0Inputs {
   /** Pressure altitude, ft (chart: 0–7000) */
@@ -62,8 +63,8 @@ const KW_A = 2.042;
 const KW_B = -3.183;
 const KW_C = -0.417;
 const KW_D = -4.568;
-// Panel 3: certification wind policy (50% headwind / 150% tailwind credit) vs
-// 57 KIAS, with distance-dependent exponents.
+// Panel 3: wind panel vs 57 KIAS (shared credit policy — see windCreditFactor),
+// but with exponents that vary with the distance being corrected.
 const V_REF_KT = 57.0;
 // oxlint-disable-next-line approx-constant -- fitted exponent, coincidentally ≈ log2(e)
 const M_HW0 = 1.442;
@@ -111,19 +112,13 @@ export function takeoffOver50Flaps0(inp: TakeoffOver50Flaps0Inputs): TakeoffOver
   const vLof = liftoffOver50Flaps0Kias(w);
   const v50 = barrierFlaps0Kias(w);
 
-  let windFactor = 1;
-  if (windKt > 0) {
-    const m = M_HW0 + M_HW1 * Math.log(s1 / D_REF_FT);
-    windFactor = Math.pow(1 - (0.5 * windKt) / V_REF_KT, m);
-  } else if (windKt < 0) {
-    const m = M_TW0 + M_TW1 * Math.log(s1 / D_REF_FT);
-    windFactor = Math.pow(1 + (1.5 * -windKt) / V_REF_KT, m);
-  }
+  const lnS = Math.log(s1 / D_REF_FT);
+  const windFactor = windCreditFactor(windKt, V_REF_KT, M_HW0 + M_HW1 * lnS, M_TW0 + M_TW1 * lnS);
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 7000) warnings.push("pressure altitude outside chart (0–7000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (w < 1700 || w > MTOW_LB) warnings.push("weight outside chart (1700–2440 lb)");
+  warnRange(warnings, pa, 0, 7000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, w, 1700, MTOW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
   const final = s1 * windFactor;

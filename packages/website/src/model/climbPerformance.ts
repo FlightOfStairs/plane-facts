@@ -9,6 +9,7 @@
  */
 
 import { densityAltitudeFt, densityRatio, isaTempC } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export interface ClimbPerformanceInputs {
   /** Pressure altitude, ft (chart: 0–16000; high altitudes drawn only at cold OAT) */
@@ -68,8 +69,8 @@ export function climbPerformance(inp: ClimbPerformanceInputs): ClimbPerformanceR
   const roc = rocChart + fairing;
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 16000) warnings.push("pressure altitude outside chart (0–16,000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
+  warnRange(warnings, pa, 0, 16000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
   if (roc < 25) warnings.push("below the drawn ROC line (< 25 fpm) — effectively at the ceiling");
   else if (roc < 100) warnings.push("rate of climb below 100 fpm — marginal climb performance");
 

@@ -33,7 +33,6 @@ export const RESERVE_LABEL: Record<ReservePolicy, string> = {
 interface RangeCurve {
   R0Nm: number;
   slopeNmPerFt: number;
-  altMinFt: number;
   altMaxFt: number;
 }
 
@@ -54,14 +53,14 @@ const RANGE_CHARTS: Record<Mixture, RangeChart> = {
     perDegBelowStd: 1.0,
     curves: {
       reserve45: {
-        75: { R0Nm: 474.2, slopeNmPerFt: 0.005568, altMinFt: 500, altMaxFt: 9000 },
-        65: { R0Nm: 499.9, slopeNmPerFt: 0.004126, altMinFt: 500, altMaxFt: 12000 },
-        55: { R0Nm: 513.8, slopeNmPerFt: 0.003902, altMinFt: 500, altMaxFt: 12000 },
+        75: { R0Nm: 474.2, slopeNmPerFt: 0.005568, altMaxFt: 9000 },
+        65: { R0Nm: 499.9, slopeNmPerFt: 0.004126, altMaxFt: 12000 },
+        55: { R0Nm: 513.8, slopeNmPerFt: 0.003902, altMaxFt: 12000 },
       },
       noReserve: {
-        75: { R0Nm: 524.3, slopeNmPerFt: 0.00708, altMinFt: 500, altMaxFt: 9000 },
-        65: { R0Nm: 559.2, slopeNmPerFt: 0.004334, altMinFt: 500, altMaxFt: 13000 },
-        55: { R0Nm: 579.1, slopeNmPerFt: 0.00392, altMinFt: 500, altMaxFt: 13000 },
+        75: { R0Nm: 524.3, slopeNmPerFt: 0.00708, altMaxFt: 9000 },
+        65: { R0Nm: 559.2, slopeNmPerFt: 0.004334, altMaxFt: 13000 },
+        55: { R0Nm: 579.1, slopeNmPerFt: 0.00392, altMaxFt: 13000 },
       },
     },
   },
@@ -71,14 +70,14 @@ const RANGE_CHARTS: Record<Mixture, RangeChart> = {
     perDegBelowStd: 1.1,
     curves: {
       reserve45: {
-        75: { R0Nm: 538.9, slopeNmPerFt: 0.005725, altMinFt: 500, altMaxFt: 10000 },
-        65: { R0Nm: 570.1, slopeNmPerFt: 0.004931, altMinFt: 500, altMaxFt: 12000 },
-        55: { R0Nm: 584.1, slopeNmPerFt: 0.004664, altMinFt: 500, altMaxFt: 12000 },
+        75: { R0Nm: 538.9, slopeNmPerFt: 0.005725, altMaxFt: 10000 },
+        65: { R0Nm: 570.1, slopeNmPerFt: 0.004931, altMaxFt: 12000 },
+        55: { R0Nm: 584.1, slopeNmPerFt: 0.004664, altMaxFt: 12000 },
       },
       noReserve: {
-        75: { R0Nm: 601.5, slopeNmPerFt: 0.006594, altMinFt: 500, altMaxFt: 10000 },
-        65: { R0Nm: 638.7, slopeNmPerFt: 0.005556, altMinFt: 500, altMaxFt: 13000 },
-        55: { R0Nm: 653.8, slopeNmPerFt: 0.005106, altMinFt: 500, altMaxFt: 13000 },
+        75: { R0Nm: 601.5, slopeNmPerFt: 0.006594, altMaxFt: 10000 },
+        65: { R0Nm: 638.7, slopeNmPerFt: 0.005556, altMaxFt: 13000 },
+        55: { R0Nm: 653.8, slopeNmPerFt: 0.005106, altMaxFt: 13000 },
       },
     },
   },
@@ -88,26 +87,22 @@ interface EnduranceCurve {
   E0Hr: number;
   bHrPerFt: number;
   cHrPerFt2: number;
-  altMinFt: number;
   altMaxFt: number;
 }
 
 /** Fitted parameters, fig_5_29.json (quadratic in PA, rms ≈ 0). */
 const ENDURANCE_CURVES: Record<ReservePolicy, Record<PowerPct, EnduranceCurve>> = {
   reserve45: {
-    75: { E0Hr: 4.927, bHrPerFt: -2.3296e-5, cHrPerFt2: 5.355e-10, altMinFt: 500, altMaxFt: 9000 },
-    65: { E0Hr: 5.551, bHrPerFt: -2.856e-5, cHrPerFt2: 9.616e-10, altMinFt: 500, altMaxFt: 11500 },
-    55: { E0Hr: 6.4, bHrPerFt: -3.4462e-5, cHrPerFt2: 1.0725e-9, altMinFt: 500, altMaxFt: 11500 },
+    75: { E0Hr: 4.927, bHrPerFt: -2.3296e-5, cHrPerFt2: 5.355e-10, altMaxFt: 9000 },
+    65: { E0Hr: 5.551, bHrPerFt: -2.856e-5, cHrPerFt2: 9.616e-10, altMaxFt: 11500 },
+    55: { E0Hr: 6.4, bHrPerFt: -3.4462e-5, cHrPerFt2: 1.0725e-9, altMaxFt: 11500 },
   },
   noReserve: {
-    75: { E0Hr: 5.485, bHrPerFt: -9.182e-6, cHrPerFt2: -2.25e-11, altMinFt: 500, altMaxFt: 11500 },
-    65: { E0Hr: 6.247, bHrPerFt: -2.616e-6, cHrPerFt2: -6.934e-10, altMinFt: 500, altMaxFt: 11500 },
-    55: { E0Hr: 7.109, bHrPerFt: -3.2592e-5, cHrPerFt2: -6.01e-11, altMinFt: 500, altMaxFt: 11500 },
+    75: { E0Hr: 5.485, bHrPerFt: -9.182e-6, cHrPerFt2: -2.25e-11, altMaxFt: 11500 },
+    65: { E0Hr: 6.247, bHrPerFt: -2.616e-6, cHrPerFt2: -6.934e-10, altMaxFt: 11500 },
+    55: { E0Hr: 7.109, bHrPerFt: -3.2592e-5, cHrPerFt2: -6.01e-11, altMaxFt: 11500 },
   },
 };
-
-export const USABLE_FUEL_GAL = 48;
-export const MID_CRUISE_WEIGHT_LB = 2300;
 
 export interface RangeInputs {
   mixture: Mixture;

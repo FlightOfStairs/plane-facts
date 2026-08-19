@@ -39,13 +39,16 @@ export function ModelNotes(props: {
           {props.fit}
         </Typography>
         <Typography variant="subtitle2">Notable findings</Typography>
-        <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 3 }}>
+        <Box component="ul" sx={{ mt: 0.5, mb: 1, pl: 3 }}>
           {props.findings.map((f) => (
             <Typography key={f.slice(0, 40)} component="li" variant="body2">
               {f}
             </Typography>
           ))}
         </Box>
+        <Typography variant="caption" color="text.secondary">
+          Shared conventions — the 50%/150% wind-credit policy, atmosphere handling, and the digitization method — are covered under “About the models &amp; method” in the chart picker.
+        </Typography>
       </CardContent>
     </Card>
   );

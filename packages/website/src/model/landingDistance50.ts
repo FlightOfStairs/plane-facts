@@ -11,6 +11,7 @@
 
 import { densityAltitudeFt, densityRatio } from "./atmosphere";
 import { approachKias, touchdownKias } from "./landingSpeeds";
+import { warnRange, windCreditFactor } from "./shared";
 
 export interface LandingDistance50Inputs {
   /** Pressure altitude, ft (chart: 0–7000) */
@@ -57,8 +58,6 @@ const WEIGHT_EXPONENT = 0.96; // landing k≈1: KE ∝ W·Vs² ∝ W², braking 
 const WIND_EXPONENT_HW = 1.47;
 const WIND_EXPONENT_TW = 1.7;
 const V_REF_KT = 45; // touchdown KIAS at 2440 lb; chart treats IAS ≈ TAS at SL
-const HEADWIND_CREDIT = 0.5; // certification policy: credit 50% of headwind
-const TAILWIND_FACTOR = 1.5; // …and 150% of tailwind
 
 /**
  * Panel 1: distance at 2440 lb, zero wind. Quadratic surface in (PA, OAT)
@@ -80,17 +79,12 @@ export function landingDistance50(inp: LandingDistance50Inputs): LandingDistance
   const s0 = baseDistance50Ft(pa, oatC);
   const s1 = s0 * Math.pow(w / MLW_LB, WEIGHT_EXPONENT);
 
-  let windFactor = 1;
-  if (windKt > 0) {
-    windFactor = Math.pow(1 - (HEADWIND_CREDIT * windKt) / V_REF_KT, WIND_EXPONENT_HW);
-  } else if (windKt < 0) {
-    windFactor = Math.pow(1 + (TAILWIND_FACTOR * -windKt) / V_REF_KT, WIND_EXPONENT_TW);
-  }
+  const windFactor = windCreditFactor(windKt, V_REF_KT, WIND_EXPONENT_HW, WIND_EXPONENT_TW);
 
   const warnings: string[] = [];
-  if (pa < 0 || pa > 7000) warnings.push("pressure altitude outside chart (0–7000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (w < 1700 || w > MLW_LB) warnings.push("weight outside chart (1700–2440 lb)");
+  warnRange(warnings, pa, 0, 7000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, w, 1700, MLW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
 

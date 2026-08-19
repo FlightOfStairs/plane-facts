@@ -15,6 +15,7 @@
  */
 
 import { densityAltitudeFt, densityRatio } from "./atmosphere";
+import { warnRange } from "./shared";
 
 export interface EnginePerformanceInputs {
   /** Pressure altitude, ft (chart: −2000…16000) */
@@ -78,7 +79,12 @@ export const FUEL_FLOW_GPH: Record<"bestPower" | "bestEconomy", Record<55 | 65 |
 export const FULL_THROTTLE_CEILING_DA_FT: Record<55 | 65 | 75, number> = { 55: 15977, 65: 13535, 75: 8008 };
 
 export const RPM_REDLINE = 2700;
-const PCT_ANCHORS: readonly (55 | 65 | 75)[] = [55, 65, 75];
+
+/** Nearest printed table column to a requested %power (ties round down). */
+function snapPct(pctPower: number): 55 | 65 | 75 {
+  if (pctPower <= 60) return 55;
+  return pctPower <= 70 ? 65 : 75;
+}
 
 /** Piecewise-linear interpolation through the three %power anchors. */
 function interpPct(table: Record<55 | 65 | 75, number>, pct: number): number {
@@ -101,15 +107,15 @@ export function enginePerformance(inp: EnginePerformanceInputs): EnginePerforman
   const aP = aOfP(pctPower);
   const rpm = aP + RPM_PER_FT * da;
 
-  const snapped = PCT_ANCHORS.reduce((best, p) => (Math.abs(p - pctPower) < Math.abs(best - pctPower) ? p : best), PCT_ANCHORS[0]!);
+  const snapped = snapPct(pctPower);
 
   const ceiling = interpPct(FULL_THROTTLE_CEILING_DA_FT, pctPower);
   const limited = da > ceiling;
 
   const warnings: string[] = [];
-  if (pa < -2000 || pa > 16000) warnings.push("pressure altitude outside chart (−2000…16000 ft)");
-  if (oatC < -40 || oatC > 40) warnings.push("OAT outside chart (−40…+40 °C)");
-  if (pctPower < 55 || pctPower > 75) warnings.push("percent power outside chart lines (55–75%)");
+  warnRange(warnings, pa, -2000, 16000, "pressure altitude", "ft");
+  warnRange(warnings, oatC, -40, 40, "OAT", "°C");
+  warnRange(warnings, pctPower, 55, 75, "percent power", "% rated");
   if (da < 0) warnings.push(`density altitude ${Math.round(da)} ft — below the chart's sea-level bottom border`);
   if (da > 16000) warnings.push(`density altitude ${Math.round(da)} ft — above the chart top (16,000 ft)`);
   if (limited) warnings.push(`${Math.round(pctPower)}% power is not available at full throttle above ~${Math.round(ceiling / 10) * 10} ft density altitude (the printed curve ends there)`);

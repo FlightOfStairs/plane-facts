@@ -3,6 +3,7 @@
  * `chartEntry = { id, label, Component }`.
  */
 import type { ComponentType } from "react";
+import { chartEntry as about } from "./AboutModelsPage";
 import { chartEntry as fig503 } from "./AirspeedCalibrationPage";
 import { chartEntry as fig505 } from "./StallSpeedPage";
 import { chartEntry as fig507 } from "./TakeoffGroundRoll0Page";
@@ -28,4 +29,4 @@ export interface ChartEntry {
   Component: ComponentType;
 }
 
-export const CHART_PAGES: ChartEntry[] = [fig503, fig505, fig507, fig509, fig511, fig513, fig515, fig517, fig519, fig521, fig523, fig525, fig527, fig529, fig531, fig533, fig535, fig537];
+export const CHART_PAGES: ChartEntry[] = [about, fig503, fig505, fig507, fig509, fig511, fig513, fig515, fig517, fig519, fig521, fig523, fig525, fig527, fig529, fig531, fig533, fig535, fig537];
