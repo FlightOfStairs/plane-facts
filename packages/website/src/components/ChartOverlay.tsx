@@ -8,7 +8,9 @@ import { SECTION_COLORS } from "../charts/types";
  * mathematical model, never from reading the overlay.
  *
  * Each polyline is drawn with a white casing under a bold colored stroke so
- * the trace stays legible over the dense scanned grid.
+ * the trace stays legible over the dense scanned grid. Stroke widths are in
+ * asset-pixel units; the printed chart strokes measure 2-4 px there, so the
+ * overlay is deliberately several times heavier.
  */
 export function ChartOverlay(props: { meta: ChartMeta; polylines: Polyline[]; marker?: [number, number] }) {
   const { meta, polylines, marker } = props;
@@ -20,15 +22,15 @@ export function ChartOverlay(props: { meta: ChartMeta; polylines: Polyline[]; ma
           const pts = line.points.map(([x, y]) => `${x},${y}`).join(" ");
           return (
             <g key={i}>
-              <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" opacity={0.65} />
-              <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? "9 6" : undefined} opacity={0.95} />
+              <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} />
+              <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? "13 9" : undefined} opacity={0.95} />
             </g>
           );
         })}
         {marker && (
           <>
-            <circle cx={marker[0]} cy={marker[1]} r={8} fill="#ffffff" opacity={0.75} />
-            <circle cx={marker[0]} cy={marker[1]} r={6} fill={SECTION_COLORS.result} />
+            <circle cx={marker[0]} cy={marker[1]} r={11} fill="#ffffff" opacity={0.8} />
+            <circle cx={marker[0]} cy={marker[1]} r={8} fill={SECTION_COLORS.result} />
           </>
         )}
       </svg>
