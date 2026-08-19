@@ -1,0 +1,23 @@
+{
+  "id": "fig-5-33",
+  "title": "Glide Performance (Fig 5-33)",
+  "pdfPage": 106,
+  "image": "/charts/fig-5-33.png",
+  "widthPx": 630,
+  "heightPx": 860,
+  "deskewDeg": 0.1,
+  "axes": {
+    "glideRangeNm": {
+      "px0": 86.2449,
+      "v0": 0,
+      "pxPerUnit": 14.856965,
+      "orient": "x"
+    },
+    "pressureAltFt": {
+      "px0": 341.0,
+      "v0": 12000,
+      "pxPerUnit": -0.03745565,
+      "orient": "y"
+    }
+  }
+}

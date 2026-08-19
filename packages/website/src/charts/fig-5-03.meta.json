@@ -1,0 +1,23 @@
+{
+  "id": "fig-5-03",
+  "title": "Airspeed System Calibration (Fig 5-3)",
+  "pdfPage": 91,
+  "image": "/charts/fig-5-03.png",
+  "widthPx": 650,
+  "heightPx": 860,
+  "deskewDeg": 0.05,
+  "axes": {
+    "iasKt": {
+      "px0": 87.59299999999999,
+      "v0": 40,
+      "pxPerUnit": 3.739186,
+      "orient": "x"
+    },
+    "casKt": {
+      "px0": 49.53200000000001,
+      "v0": 240,
+      "pxPerUnit": -3.750525,
+      "orient": "y"
+    }
+  }
+}

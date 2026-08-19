@@ -1,23 +1,23 @@
-/** Fig 5-11 chart page wiring: metadata + model-derived overlay trace. */
+/** Fig 5-7 chart page wiring: metadata + model-derived overlay trace. */
 
-import type { TakeoffInputs, TakeoffResult } from "../model/takeoffGroundRoll25";
-import { MTOW_LB, takeoffGroundRoll25 } from "../model/takeoffGroundRoll25";
-import metaJson from "./fig-5-11.meta.json";
+import type { TakeoffRoll0Inputs, TakeoffRoll0Result } from "../model/takeoffGroundRoll0";
+import { MTOW_LB, takeoffGroundRoll0 } from "../model/takeoffGroundRoll0";
+import metaJson from "./fig-5-07.meta.json";
 import type { ChartMeta, Polyline } from "./types";
 import { axisPx } from "./types";
 
-export const fig511Meta: ChartMeta = metaJson;
+export const fig507Meta: ChartMeta = metaJson;
 
 /**
  * Build the POH-style worked-example trace from the model: up from the OAT
- * axis to the pressure-altitude curve, across to the weight reference line,
- * along a model-derived guide curve to the weight, across to the wind
+ * axis to the pressure-altitude curve, across to the 2440-lb reference
+ * line, along a model-derived weight guide, across to the no-wind
  * reference line, along the wind guide, then out to the distance axis.
  * Every y-coordinate is the model's output passed through the calibration —
  * demonstration only.
  */
-export function fig511Trace(inputs: TakeoffInputs, result: TakeoffResult): { polylines: Polyline[]; marker: [number, number] } {
-  const m = fig511Meta;
+export function fig507Trace(inputs: TakeoffRoll0Inputs, result: TakeoffRoll0Result): { polylines: Polyline[]; marker: [number, number] } {
+  const m = fig507Meta;
   const dist = m.axes.distanceFt!;
   const oat = m.axes.oatC!;
   const weight = m.axes.weightLb!;
@@ -29,8 +29,6 @@ export function fig511Trace(inputs: TakeoffInputs, result: TakeoffResult): { pol
   const yS1 = axisPx(dist, result.s1Ft);
   const xW = axisPx(weight, inputs.weightLb);
   const xWindRef = axisPx(wind, 0);
-  // Tailwind guides are drawn in the 0–5 kt band right of the ref line, so
-  // the trace uses |wind| for x regardless of sign.
   const xWind = axisPx(wind, Math.abs(inputs.windKt));
   const yFinal = axisPx(dist, result.groundRollFt);
   const xRight = axisPx(wind, 15) + 14;
@@ -38,14 +36,14 @@ export function fig511Trace(inputs: TakeoffInputs, result: TakeoffResult): { pol
   const weightGuide: [number, number][] = [];
   for (let i = 0; i <= 20; i++) {
     const w = MTOW_LB + ((inputs.weightLb - MTOW_LB) * i) / 20;
-    const s = takeoffGroundRoll25({ ...inputs, weightLb: w, windKt: 0 }).s1Ft;
+    const s = takeoffGroundRoll0({ ...inputs, weightLb: w, windKt: 0 }).s1Ft;
     weightGuide.push([axisPx(weight, w), axisPx(dist, s)]);
   }
 
   const windGuide: [number, number][] = [];
   for (let i = 0; i <= 20; i++) {
     const v = (inputs.windKt * i) / 20;
-    const s = takeoffGroundRoll25({ ...inputs, windKt: v }).groundRollFt;
+    const s = takeoffGroundRoll0({ ...inputs, windKt: v }).groundRollFt;
     windGuide.push([axisPx(wind, Math.abs(v)), axisPx(dist, s)]);
   }
 

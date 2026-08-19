@@ -1,0 +1,11 @@
+{
+  "pdfPage": 99,
+  "title": "Fuel, Time and Distance to Climb (Fig 5-19)",
+  "crop": [360, 210, 2310, 1580],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 417.32565789473693, "v0": -40, "pxPerUnit": 7.443092105263157, "orient": "x" },
+    "value": { "px0": 1537.8583333333333, "v0": 10, "pxPerUnit": 7.517619047619064, "orient": "x" },
+    "yPx": { "px0": 0, "v0": 0, "pxPerUnit": 1, "orient": "y" }
+  }
+}

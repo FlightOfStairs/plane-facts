@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-23",
+  "title": "Best Economy Cruise Performance (Fig 5-23)",
+  "pdfPage": 101,
+  "image": "/charts/fig-5-23.png",
+  "widthPx": 890,
+  "heightPx": 690,
+  "deskewDeg": -0.1,
+  "axes": {
+    "oatC": {
+      "px0": 44.1806020761079,
+      "v0": -40,
+      "pxPerUnit": 3.4907316999197566,
+      "orient": "x"
+    },
+    "tasKt": {
+      "px0": 533.6483303682373,
+      "v0": 90,
+      "pxPerUnit": 7.03779412198507,
+      "orient": "x"
+    },
+    "daFt": {
+      "px0": 624.4108169616782,
+      "v0": 0,
+      "pxPerUnit": -0.034911489977489184,
+      "orient": "y"
+    }
+  }
+}

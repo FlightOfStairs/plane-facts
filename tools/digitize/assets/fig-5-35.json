@@ -1,0 +1,12 @@
+{
+  "pdfPage": 107,
+  "title": "Landing Distance over 50 ft Barrier (Fig 5-35)",
+  "crop": [400, 260, 2360, 1500],
+  "scale": 0.5,
+  "axes": {
+    "distanceFt": { "px0": 801.6404, "v0": 1400, "pxPerUnit": -0.7438294, "orient": "y" },
+    "oatC": { "px0": 573.2629, "v0": -40, "pxPerUnit": 7.4854537, "orient": "x" },
+    "weightLb": { "px0": 1245.7811, "v0": 2400, "pxPerUnit": -0.7479856, "orient": "x" },
+    "windKt": { "px0": 1844.6012, "v0": 0, "pxPerUnit": 15.0212485, "orient": "x" }
+  }
+}

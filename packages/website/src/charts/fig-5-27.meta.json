@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-27",
+  "title": "Best Economy Mixture Range (Fig 5-27)",
+  "pdfPage": 103,
+  "image": "/charts/fig-5-27.png",
+  "widthPx": 910,
+  "heightPx": 740,
+  "deskewDeg": -0.3,
+  "axes": {
+    "pressureAltFt": {
+      "px0": 202.45,
+      "v0": 12000,
+      "pxPerUnit": -0.037375,
+      "orient": "y"
+    },
+    "rangeNmReserve45": {
+      "px0": 860.6500000000001,
+      "v0": 850,
+      "pxPerUnit": 1.5122,
+      "orient": "x"
+    },
+    "rangeNmNoReserve": {
+      "px0": 860.6500000000001,
+      "v0": 750,
+      "pxPerUnit": 1.5122,
+      "orient": "x"
+    }
+  }
+}

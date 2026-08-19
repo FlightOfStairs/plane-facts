@@ -1,0 +1,12 @@
+{
+  "pdfPage": 108,
+  "title": "Landing Ground Roll Distance (Fig 5-37)",
+  "crop": [420, 190, 2300, 1490],
+  "scale": 0.5,
+  "axes": {
+    "distanceFt": { "px0": 571.6243, "v0": 800, "pxPerUnit": -1.4899358, "orient": "y" },
+    "oatC": { "px0": 663.8083, "v0": -40, "pxPerUnit": 7.5525167, "orient": "x" },
+    "weightLb": { "px0": 1343.7285, "v0": 2400, "pxPerUnit": -0.7518406, "orient": "x" },
+    "windKt": { "px0": 1946.1414, "v0": 0, "pxPerUnit": 15.2004571, "orient": "x" }
+  }
+}

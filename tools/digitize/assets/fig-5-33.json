@@ -1,0 +1,10 @@
+{
+  "pdfPage": 106,
+  "title": "Glide Performance (Fig 5-33)",
+  "crop": [200, 380, 1460, 2100],
+  "scale": 0.5,
+  "axes": {
+    "glideRangeNm": { "px0": 372.4898, "v0": 0, "pxPerUnit": 29.71393, "orient": "x" },
+    "pressureAltFt": { "px0": 1062.0, "v0": 12000, "pxPerUnit": -0.0749113, "orient": "y" }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-17",
+  "title": "Climb Performance (Fig 5-17)",
+  "pdfPage": 98,
+  "image": "/charts/fig-5-17.png",
+  "widthPx": 868,
+  "heightPx": 667,
+  "deskewDeg": 0.15,
+  "axes": {
+    "oatC": {
+      "px0": 29.093287525281085,
+      "v0": -40,
+      "pxPerUnit": 3.7230310780818057,
+      "orient": "x"
+    },
+    "rocFpm": {
+      "px0": 401.8384051118936,
+      "v0": 0,
+      "pxPerUnit": 0.37422369811670386,
+      "orient": "x"
+    },
+    "yPx": {
+      "px0": -123.0,
+      "v0": 0,
+      "pxPerUnit": 0.5,
+      "orient": "y"
+    }
+  }
+}

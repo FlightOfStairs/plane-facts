@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-21",
+  "title": "Best Power Cruise Performance (Fig 5-21)",
+  "pdfPage": 100,
+  "image": "/charts/fig-5-21.png",
+  "widthPx": 935,
+  "heightPx": 715,
+  "deskewDeg": -0.05,
+  "axes": {
+    "oatC": {
+      "px0": 35.345460696465864,
+      "v0": -40,
+      "pxPerUnit": 3.723314798778472,
+      "orient": "x"
+    },
+    "tasKt": {
+      "px0": 557.2647951676543,
+      "v0": 90,
+      "pxPerUnit": 7.508481092575512,
+      "orient": "x"
+    },
+    "daFt": {
+      "px0": 649.1593490804973,
+      "v0": 0,
+      "pxPerUnit": -0.03729658071862287,
+      "orient": "y"
+    }
+  }
+}

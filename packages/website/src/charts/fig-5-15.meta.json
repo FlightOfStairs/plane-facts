@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-15",
+  "title": "Engine Performance (Fig 5-15)",
+  "pdfPage": 97,
+  "image": "/charts/fig-5-15.png",
+  "widthPx": 910,
+  "heightPx": 725,
+  "deskewDeg": -0.15,
+  "axes": {
+    "oatC": {
+      "px0": 193.64999999999998,
+      "v0": 0,
+      "pxPerUnit": 3.7301,
+      "orient": "x"
+    },
+    "rpm": {
+      "px0": 417.6,
+      "v0": 2100,
+      "pxPerUnit": 0.75303,
+      "orient": "x"
+    },
+    "uMajor": {
+      "px0": 653.45,
+      "v0": 0,
+      "pxPerUnit": -74.912,
+      "orient": "y"
+    }
+  }
+}

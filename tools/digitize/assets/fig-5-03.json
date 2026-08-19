@@ -1,0 +1,10 @@
+{
+  "pdfPage": 91,
+  "title": "Airspeed System Calibration (Fig 5-3)",
+  "crop": [140, 380, 1440, 2100],
+  "scale": 0.5,
+  "axes": {
+    "iasKt": { "px0": 315.186, "v0": 40, "pxPerUnit": 7.478372, "orient": "x" },
+    "casKt": { "px0": 479.064, "v0": 240, "pxPerUnit": -7.50105, "orient": "y" }
+  }
+}

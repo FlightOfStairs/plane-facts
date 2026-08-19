@@ -1,0 +1,11 @@
+{
+  "pdfPage": 101,
+  "title": "Best Economy Cruise Performance (Fig 5-23)",
+  "crop": [480, 120, 2260, 1500],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 568.3612041522158, "v0": -40, "pxPerUnit": 6.981463399839513, "orient": "x" },
+    "tasKt": { "px0": 1547.2966607364747, "v0": 90, "pxPerUnit": 14.07558824397014, "orient": "x" },
+    "daFt": { "px0": 1368.8216339233563, "v0": 0, "pxPerUnit": -0.06982297995497837, "orient": "y" }
+  }
+}

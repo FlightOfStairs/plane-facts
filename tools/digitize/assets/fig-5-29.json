@@ -1,0 +1,11 @@
+{
+  "pdfPage": 104,
+  "title": "Endurance (Fig 5-29)",
+  "crop": [460, 170, 2300, 1490],
+  "scale": 0.5,
+  "axes": {
+    "pressureAltFt": { "px0": 406.0, "v0": 12000, "pxPerUnit": -0.07467, "orient": "y" },
+    "enduranceHrReserve45": { "px0": 793.8, "v0": 4.0, "pxPerUnit": 75.188, "orient": "x" },
+    "enduranceHrNoReserve": { "px0": 1395.3, "v0": 4.0, "pxPerUnit": 75.188, "orient": "x" }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "pdfPage": 98,
+  "title": "Climb Performance (Fig 5-17)",
+  "crop": [430, 246, 2165, 1580],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 488.18657505056217, "v0": -40, "pxPerUnit": 7.446062156163611, "orient": "x" },
+    "rocFpm": { "px0": 1233.6768102237872, "v0": 0, "pxPerUnit": 0.7484473962334077, "orient": "x" },
+    "yPx": { "px0": 0, "v0": 0, "pxPerUnit": 1, "orient": "y" }
+  }
+}

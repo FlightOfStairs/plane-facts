@@ -1,0 +1,11 @@
+{
+  "pdfPage": 105,
+  "title": "Fuel, Time and Distance to Descend (Fig 5-31)",
+  "crop": [440, 200, 2240, 1510],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 538.5695, "v0": -40, "pxPerUnit": 7.4714, "orient": "x" },
+    "value": { "px0": 1284.2822, "v0": 0, "pxPerUnit": 14.91402, "orient": "x" },
+    "isaAltFt": { "px0": 1347.9068, "v0": 0, "pxPerUnit": -0.0747959, "orient": "y" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "pdfPage": 94,
+  "title": "0° Flaps Takeoff Performance — Distance Over 50 ft Barrier (Fig 5-9)",
+  "crop": [420, 160, 2350, 1440],
+  "scale": 0.5,
+  "axes": {
+    "distanceFt": { "px0": 1316.7, "v0": 0, "pxPerUnit": -0.15, "orient": "y" },
+    "oatC": { "px0": 759.2, "v0": 0, "pxPerUnit": 7.5541, "orient": "x" },
+    "weightLb": { "px0": 1106.0, "v0": 2440, "pxPerUnit": -0.74856, "orient": "x" },
+    "windKt": { "px0": 1735.2, "v0": 0, "pxPerUnit": 15.1064, "orient": "x" }
+  }
+}

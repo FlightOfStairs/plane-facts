@@ -1,0 +1,11 @@
+{
+  "pdfPage": 102,
+  "title": "Best Power Mixture Range (Fig 5-25)",
+  "crop": [400, 160, 2360, 1620],
+  "scale": 0.5,
+  "axes": {
+    "pressureAltFt": { "px0": 573.0, "v0": 12000, "pxPerUnit": -0.0745, "orient": "y" },
+    "rangeNmReserve45": { "px0": 607.0, "v0": 250, "pxPerUnit": 3.0009, "orient": "x" },
+    "rangeNmNoReserve": { "px0": 607.0, "v0": 100, "pxPerUnit": 3.0009, "orient": "x" }
+  }
+}

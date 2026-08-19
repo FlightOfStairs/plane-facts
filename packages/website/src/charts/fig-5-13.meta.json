@@ -1,0 +1,35 @@
+{
+  "id": "fig-5-13",
+  "title": "25\u00b0 Flaps Takeoff Performance \u2014 Distance Over 50 ft Barrier (Fig 5-13)",
+  "pdfPage": 96,
+  "image": "/charts/fig-5-13.png",
+  "widthPx": 985,
+  "heightPx": 615,
+  "deskewDeg": -0.05,
+  "axes": {
+    "distanceFt": {
+      "px0": 270.5387232210371,
+      "v0": 4000,
+      "pxPerUnit": -0.07461423879056082,
+      "orient": "y"
+    },
+    "oatC": {
+      "px0": 130.61301069345336,
+      "v0": -40,
+      "pxPerUnit": 3.7738770604395593,
+      "orient": "x"
+    },
+    "weightLb": {
+      "px0": 455.1601686996423,
+      "v0": 2440,
+      "pxPerUnit": -0.3754999751166459,
+      "orient": "x"
+    },
+    "windKt": {
+      "px0": 770.8666793950576,
+      "v0": 0,
+      "pxPerUnit": 7.590131996391892,
+      "orient": "x"
+    }
+  }
+}

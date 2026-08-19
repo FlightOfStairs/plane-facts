@@ -1,0 +1,35 @@
+{
+  "id": "fig-5-37",
+  "title": "Landing Ground Roll Distance (Fig 5-37)",
+  "pdfPage": 108,
+  "image": "/charts/fig-5-37.png",
+  "widthPx": 940,
+  "heightPx": 650,
+  "deskewDeg": -0.15,
+  "axes": {
+    "distanceFt": {
+      "px0": 190.81214999999997,
+      "v0": 800,
+      "pxPerUnit": -0.7449679,
+      "orient": "y"
+    },
+    "oatC": {
+      "px0": 121.90415000000002,
+      "v0": -40,
+      "pxPerUnit": 3.77625835,
+      "orient": "x"
+    },
+    "weightLb": {
+      "px0": 461.86424999999997,
+      "v0": 2400,
+      "pxPerUnit": -0.3759203,
+      "orient": "x"
+    },
+    "windKt": {
+      "px0": 763.0707,
+      "v0": 0,
+      "pxPerUnit": 7.60022855,
+      "orient": "x"
+    }
+  }
+}

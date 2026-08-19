@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-31",
+  "title": "Fuel, Time and Distance to Descend (Fig 5-31)",
+  "pdfPage": 105,
+  "image": "/charts/fig-5-31.png",
+  "widthPx": 900,
+  "heightPx": 655,
+  "deskewDeg": 0.05,
+  "axes": {
+    "oatC": {
+      "px0": 49.284749999999974,
+      "v0": -40,
+      "pxPerUnit": 3.7357,
+      "orient": "x"
+    },
+    "value": {
+      "px0": 422.14110000000005,
+      "v0": 0,
+      "pxPerUnit": 7.45701,
+      "orient": "x"
+    },
+    "isaAltFt": {
+      "px0": 573.9534,
+      "v0": 0,
+      "pxPerUnit": -0.03739795,
+      "orient": "y"
+    }
+  }
+}

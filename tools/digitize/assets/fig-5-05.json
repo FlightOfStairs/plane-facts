@@ -1,0 +1,11 @@
+{
+  "pdfPage": 92,
+  "title": "Stall Speed (Fig 5-5)",
+  "crop": [520, 200, 2280, 1500],
+  "scale": 0.5,
+  "axes": {
+    "speedKt": { "px0": 1336.794, "v0": 20, "pxPerUnit": -14.921244, "orient": "y" },
+    "weightLb": { "px0": 871.356, "v0": 2400, "pxPerUnit": -0.751901, "orient": "x" },
+    "bankDeg": { "px0": 2075.351, "v0": 60, "pxPerUnit": 7.568285, "orient": "x" }
+  }
+}

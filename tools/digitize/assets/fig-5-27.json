@@ -1,0 +1,11 @@
+{
+  "pdfPage": 103,
+  "title": "Best Economy Mixture Range (Fig 5-27)",
+  "crop": [500, 140, 2320, 1620],
+  "scale": 0.5,
+  "axes": {
+    "pressureAltFt": { "px0": 544.9, "v0": 12000, "pxPerUnit": -0.07475, "orient": "y" },
+    "rangeNmReserve45": { "px0": 2221.3, "v0": 850, "pxPerUnit": 3.0244, "orient": "x" },
+    "rangeNmNoReserve": { "px0": 2221.3, "v0": 750, "pxPerUnit": 3.0244, "orient": "x" }
+  }
+}

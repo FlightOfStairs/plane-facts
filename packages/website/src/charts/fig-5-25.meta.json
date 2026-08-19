@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-25",
+  "title": "Best Power Mixture Range (Fig 5-25)",
+  "pdfPage": 102,
+  "image": "/charts/fig-5-25.png",
+  "widthPx": 980,
+  "heightPx": 730,
+  "deskewDeg": -0.15,
+  "axes": {
+    "pressureAltFt": {
+      "px0": 206.5,
+      "v0": 12000,
+      "pxPerUnit": -0.03725,
+      "orient": "y"
+    },
+    "rangeNmReserve45": {
+      "px0": 103.5,
+      "v0": 250,
+      "pxPerUnit": 1.50045,
+      "orient": "x"
+    },
+    "rangeNmNoReserve": {
+      "px0": 103.5,
+      "v0": 100,
+      "pxPerUnit": 1.50045,
+      "orient": "x"
+    }
+  }
+}

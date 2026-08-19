@@ -1,0 +1,11 @@
+{
+  "pdfPage": 97,
+  "title": "Engine Performance (Fig 5-15)",
+  "crop": [440, 170, 2260, 1620],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 827.3, "v0": 0, "pxPerUnit": 7.4602, "orient": "x" },
+    "rpm": { "px0": 1275.2, "v0": 2100, "pxPerUnit": 1.50606, "orient": "x" },
+    "uMajor": { "px0": 1476.9, "v0": 0, "pxPerUnit": -149.824, "orient": "y" }
+  }
+}

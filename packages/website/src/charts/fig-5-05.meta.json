@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-05",
+  "title": "Stall Speed (Fig 5-5)",
+  "pdfPage": 92,
+  "image": "/charts/fig-5-05.png",
+  "widthPx": 880,
+  "heightPx": 650,
+  "deskewDeg": 0.0,
+  "axes": {
+    "speedKt": {
+      "px0": 568.397,
+      "v0": 20,
+      "pxPerUnit": -7.460622,
+      "orient": "y"
+    },
+    "weightLb": {
+      "px0": 175.678,
+      "v0": 2400,
+      "pxPerUnit": -0.3759505,
+      "orient": "x"
+    },
+    "bankDeg": {
+      "px0": 777.6755,
+      "v0": 60,
+      "pxPerUnit": 3.7841425,
+      "orient": "x"
+    }
+  }
+}

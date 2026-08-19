@@ -1,0 +1,11 @@
+{
+  "pdfPage": 100,
+  "title": "Best Power Cruise Performance (Fig 5-21)",
+  "crop": [430, 150, 2300, 1580],
+  "scale": 0.5,
+  "axes": {
+    "oatC": { "px0": 500.6909213929317, "v0": -40, "pxPerUnit": 7.446629597556944, "orient": "x" },
+    "tasKt": { "px0": 1544.5295903353085, "v0": 90, "pxPerUnit": 15.016962185151025, "orient": "x" },
+    "daFt": { "px0": 1448.3186981609947, "v0": 0, "pxPerUnit": -0.07459316143724574, "orient": "y" }
+  }
+}

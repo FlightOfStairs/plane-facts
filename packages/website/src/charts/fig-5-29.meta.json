@@ -1,0 +1,29 @@
+{
+  "id": "fig-5-29",
+  "title": "Endurance (Fig 5-29)",
+  "pdfPage": 104,
+  "image": "/charts/fig-5-29.png",
+  "widthPx": 920,
+  "heightPx": 660,
+  "deskewDeg": -0.1,
+  "axes": {
+    "pressureAltFt": {
+      "px0": 118.0,
+      "v0": 12000,
+      "pxPerUnit": -0.037335,
+      "orient": "y"
+    },
+    "enduranceHrReserve45": {
+      "px0": 166.89999999999998,
+      "v0": 4.0,
+      "pxPerUnit": 37.594,
+      "orient": "x"
+    },
+    "enduranceHrNoReserve": {
+      "px0": 467.65,
+      "v0": 4.0,
+      "pxPerUnit": 37.594,
+      "orient": "x"
+    }
+  }
+}
