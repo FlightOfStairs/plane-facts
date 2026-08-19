@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig519Meta, fig519Trace } from "../charts/fig519";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { ClimbToInputs } from "../model/climbFuelTimeDistance";
 import { CHART_EXAMPLE, climbFuelTimeDistance } from "../model/climbFuelTimeDistance";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function ClimbFuelTimeDistancePage() {
-  const [inputs, setInputs] = useState<ClimbToInputs>(CHART_EXAMPLE);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof ClimbToInputs]: number }>(CHART_EXAMPLE);
   const result = climbFuelTimeDistance(inputs);
   const { polylines, marker } = fig519Trace(inputs, result);
 
-  const set = (k: keyof ClimbToInputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof ClimbToInputs) => (v: number) => setInputs({ [k]: v });
 
   const legValue = (leg: { timeMin: number; distNm: number; fuelGal: number }) => `${leg.timeMin.toFixed(1)} min / ${leg.distNm.toFixed(1)} nm / ${leg.fuelGal.toFixed(1)} gal`;
 
@@ -67,14 +69,10 @@ export function ClimbFuelTimeDistancePage() {
               {fig519Meta.title}
             </Typography>
             <ChartOverlay meta={fig519Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-              Chart quirks: the cumulative curves carry a ~1 min / ~1 nm sea-level allowance that cancels in the chart's subtract-two-lookups usage, so only the differences are meaningful; the 12,000-ft curve is clipped by the title box and unusable (the model stops at 11,000 ft); the implied climb fuel flow is a constant ≈12 GPH.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind"]} labels={["entry / distance", "fuel", "time"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["y = Σ gᵢⱼ·(PA/1000)ⁱ·(OAT/10)ʲ            (deg-4 nomograph-height surface)", "value = (P꜀ᵤᵣᵥₑ(y) − x₀)/k                 for each of time / distance / fuel", "answer = value(cruise) − value(departure)   (the chart's subtract-two-lookups rule)"]} fit="Surface and value-curve polynomials fitted at 1.25% rms; the chart's printed worked example (1500 ft/27 °C departure, 5000 ft/16 °C cruise → 9 min, 12 nm, 2 gal) reproduces at 8.5 min / 11.7 nm / 1.9 gal (−2…−6%)." findings={["The cumulative curves carry a ~+1 min / ~+1 nm sea-level allowance that cancels in the chart's subtract-two-lookups usage — only the differences between lookups are meaningful, not the absolute readings.", "Cross-checked against integrating dh/ROC from the Fig 5-17 climb model, the differences agree to +2.7% on time and +3.3% on distance.", "The implied climb fuel flow is a constant ≈12 GPH — well above the 75% best-power cruise flow of 10 GPH, as expected at full throttle.", "The 12,000-ft curve is clipped by the chart's title box and unusable — the model (and these sliders) stop at 11,000 ft.", "The subtraction rule silently assumes departure and cruise share a similar ISA deviation; the model warns when they differ by more than 10 °C."]} />
       </Grid>
     </Grid>
   );

@@ -3,7 +3,7 @@
 import type { ClimbPerformanceInputs, ClimbPerformanceResult } from "../model/climbPerformance";
 import metaJson from "./fig-5-17.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig517Meta: ChartMeta = metaJson;
 
@@ -97,6 +97,7 @@ export function fig517Trace(inputs: ClimbPerformanceInputs, result: ClimbPerform
           [xOat, yEntry],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -104,6 +105,7 @@ export function fig517Trace(inputs: ClimbPerformanceInputs, result: ClimbPerform
           [xRoc, yEntry],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
       {
         points: [
@@ -111,6 +113,7 @@ export function fig517Trace(inputs: ClimbPerformanceInputs, result: ClimbPerform
           [xRoc, yBottom],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xRoc, yBottom],

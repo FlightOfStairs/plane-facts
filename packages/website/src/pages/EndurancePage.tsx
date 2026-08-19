@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { fig529Meta, fig529Trace } from "../charts/fig529";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import { isaTempC } from "../model/atmosphere";
 import type { PowerPct, ReservePolicy } from "../model/rangeEndurance";
 import { CHART_EXAMPLE_5_29, enduranceHr, impliedBlockTasKt, rangeNm } from "../model/rangeEndurance";
@@ -21,9 +23,15 @@ function formatHours(hr: number): string {
 }
 
 export function EndurancePage() {
-  const [pressureAltFt, setPressureAltFt] = useState(CHART_EXAMPLE_5_29.pressureAltFt);
-  const [power, setPower] = useState<PowerPct>(CHART_EXAMPLE_5_29.power);
-  const [reserve, setReserve] = useState<ReservePolicy>(CHART_EXAMPLE_5_29.reserve);
+  const [inputs, setInputs] = useUrlState<{ pressureAltFt: number; power: PowerPct; reserve: ReservePolicy }>({
+    pressureAltFt: CHART_EXAMPLE_5_29.pressureAltFt,
+    power: CHART_EXAMPLE_5_29.power,
+    reserve: CHART_EXAMPLE_5_29.reserve,
+  });
+  const { pressureAltFt } = inputs;
+  // Guard the discrete settings against arbitrary URL values.
+  const power: PowerPct = inputs.power === 55 || inputs.power === 65 ? inputs.power : 75;
+  const reserve: ReservePolicy = inputs.reserve === "noReserve" ? "noReserve" : "reserve45";
 
   const reserveRes = enduranceHr({ power, reserve: "reserve45", pressureAltFt });
   const noReserveRes = enduranceHr({ power, reserve: "noReserve", pressureAltFt });
@@ -41,11 +49,11 @@ export function EndurancePage() {
             <Typography variant="h6" gutterBottom>
               Conditions
             </Typography>
-            <InputSlider label="Cruise pressure altitude" unit="ft" value={pressureAltFt} min={0} max={12000} step={100} onChange={setPressureAltFt} />
+            <InputSlider label="Cruise pressure altitude" unit="ft" value={pressureAltFt} min={0} max={12000} step={100} onChange={(v) => setInputs({ pressureAltFt: v })} />
             <Typography variant="body2" gutterBottom>
               Cruise power (best economy mixture)
             </Typography>
-            <ToggleButtonGroup exclusive size="small" value={power} onChange={(_, v: PowerPct | null) => v !== null && setPower(v)} sx={{ mb: 2 }}>
+            <ToggleButtonGroup exclusive size="small" value={power} onChange={(_, v: PowerPct | null) => v !== null && setInputs({ power: v })} sx={{ mb: 2 }}>
               <ToggleButton value={55}>55%</ToggleButton>
               <ToggleButton value={65}>65%</ToggleButton>
               <ToggleButton value={75}>75%</ToggleButton>
@@ -53,7 +61,7 @@ export function EndurancePage() {
             <Typography variant="body2" gutterBottom>
               Reserve policy
             </Typography>
-            <ToggleButtonGroup exclusive size="small" value={reserve} onChange={(_, v: ReservePolicy | null) => v !== null && setReserve(v)}>
+            <ToggleButtonGroup exclusive size="small" value={reserve} onChange={(_, v: ReservePolicy | null) => v !== null && setInputs({ reserve: v })}>
               <ToggleButton value="reserve45">45 min @ 55%</ToggleButton>
               <ToggleButton value="noReserve">No reserve</ToggleButton>
             </ToggleButtonGroup>
@@ -86,14 +94,10 @@ export function EndurancePage() {
               {fig529Meta.title}
             </Typography>
             <ChartOverlay meta={fig529Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary" component="p">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
-              Chart quirks: the hours axis carries two offset 1-hr scales on one continuous lattice — the no-reserve family (drawn dashed in the original) reads 8 hr lower than the reserve scale at the same grid position. Endurance is nearly altitude-independent; the 75% reserve curve ends near 9,000 ft.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind", "result"]} labels={["altitude entry", "45-min-reserve read", "no-reserve read", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["endurance = E₀ + b·PA + c·PA²        (per {reserve policy} × {55/65/75%} curve)", "no temperature term — the chart prints no OAT axis"]} fit="Per-curve quadratics fit the digitized curves at ≈0% rms. The chart's printed example (5000 ft, 75% → 4.85 / 5.45 hr with/without reserve) reproduces at 4.82 / 5.44 hr (−0.5%)." findings={["The hours axis carries two offset 1-hr scales on one continuous lattice — the no-reserve family (drawn dashed in the original) reads 8 hr lower than the reserve scale at the same grid position.", "Endurance is nearly altitude-independent: the curves bow slightly and peak near mid altitude, unlike range, which grows steadily with altitude.", "The chart-implied fuel flows run ~3% above the cruise charts' printed tables — the climb and descent allowances are baked into the curves.", "The 45-min reserve costs 0.56–0.78 hr depending on power — not a fixed 0.75 hr, because the reserve burns at 55% while the trip burns at the selected power; the deltas are only ~5% self-consistent with the range charts.", "The 75% reserve curve ends near 9,000 ft, the same full-throttle limit seen on the engine, cruise and range charts."]} />
       </Grid>
     </Grid>
   );

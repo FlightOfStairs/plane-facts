@@ -4,7 +4,7 @@ import type { TakeoffInputs, TakeoffResult } from "../model/takeoffGroundRoll25"
 import { MTOW_LB, takeoffGroundRoll25 } from "../model/takeoffGroundRoll25";
 import metaJson from "./fig-5-11.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig511Meta: ChartMeta = metaJson;
 
@@ -57,6 +57,7 @@ export function fig511Trace(inputs: TakeoffInputs, result: TakeoffResult): { pol
           [xOat, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -64,22 +65,25 @@ export function fig511Trace(inputs: TakeoffInputs, result: TakeoffResult): { pol
           [xWRef, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
-      { points: weightGuide },
+      { points: weightGuide, color: SECTION_COLORS.weight },
       {
         points: [
           [xW, yS1],
           [xWindRef, yS1],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
-      { points: windGuide },
+      { points: windGuide, color: SECTION_COLORS.wind },
       {
         points: [
           [xWind, yFinal],
           [xRight, yFinal],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xWind, yFinal],

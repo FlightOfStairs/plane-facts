@@ -4,7 +4,7 @@ import type { ClimbLeg, ClimbToInputs, ClimbToResult } from "../model/climbFuelT
 import metaJson from "./fig-5-19.meta.json";
 import { Y_RANGE_PX } from "./fixtures/fig519Fit";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig519Meta: ChartMeta = metaJson;
 
@@ -42,6 +42,7 @@ export function fig519Trace(inputs: ClimbToInputs, result: ClimbToResult): { pol
           [xOat, y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -49,14 +50,23 @@ export function fig519Trace(inputs: ClimbToInputs, result: ClimbToResult): { pol
           [Math.max(xFuel, xTime, xDist), y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       // drops from each value-curve intersection to the bottom axis
-      ...[xFuel, xTime, xDist].map((x): Polyline => ({
+      // (per-curve colors: fuel=weight, time=wind, distance=entry)
+      ...(
+        [
+          [xFuel, SECTION_COLORS.weight],
+          [xTime, SECTION_COLORS.wind],
+          [xDist, SECTION_COLORS.entry],
+        ] as const
+      ).map(([x, color]): Polyline => ({
         points: [
           [x, y],
           [x, yBottom],
         ],
         dashed: true,
+        color,
       })),
     ];
     return { lines, xDist };

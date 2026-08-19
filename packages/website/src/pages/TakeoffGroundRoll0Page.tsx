@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig507Meta, fig507Trace } from "../charts/fig507";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { TakeoffRoll0Inputs } from "../model/takeoffGroundRoll0";
 import { CHART_EXAMPLE_5_07, takeoffGroundRoll0 } from "../model/takeoffGroundRoll0";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function TakeoffGroundRoll0Page() {
-  const [inputs, setInputs] = useState<TakeoffRoll0Inputs>(CHART_EXAMPLE_5_07);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof TakeoffRoll0Inputs]: number }>(CHART_EXAMPLE_5_07);
   const result = takeoffGroundRoll0(inputs);
   const { polylines, marker } = fig507Trace(inputs, result);
 
-  const set = (k: keyof TakeoffRoll0Inputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof TakeoffRoll0Inputs) => (v: number) => setInputs({ [k]: v });
 
   return (
     <Grid container spacing={2}>
@@ -59,14 +61,10 @@ export function TakeoffGroundRoll0Page() {
               {fig507Meta.title}
             </Typography>
             <ChartOverlay meta={fig507Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
-              Chart quirks: this 0°-flap chart uses a weight exponent of ≈2.34 (the 25°-flap Fig 5-11 uses 1.85), so the two ground-roll charts nominally cross near 2000 lb — a drafting artifact, not physics. The printed lift-off strip runs 1–1.5 kt below the √W law at light weight, and its 52 KIAS at 2440 lb is identical to the 25°-flap figure — a publication artifact.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["S₀ = 865 + 0.211·PA + 17.8·OAT            (ft; at 2440 lb, calm)", "S  = S₀ · (W/2440)^2.34 · f_wind", "f_wind = (1 − Vw/93)^1.45 headwind · (1 + Vw/28)^1.4 tailwind", "V_LOF = 52·√(W/2440) KIAS"]} fit="Panel-1 plane fitted to the altitude curves at 1.6% rms (weight panel 1.0%); the assembled chain reproduces the chart's printed worked example (1500 ft, 27 °C, 2316 lb, 15 kt HW → 1150 ft, 50 KIAS) at −0.9% (≈1139 ft, 50.7 KIAS), with intermediates matching the printed dashed trace (S₀ ≈ 1665, after-weight ≈ 1477)." findings={["Panel 1 is a plane in (PA, OAT) weighing temperature at ~84 ft-PA/°C — well below the ~96 a density-altitude model would force. Same carburetted full-rich power-lapse anisotropy (P ∝ δ/√θ) as Fig 5-11: a takeoff-family trait, not a POH-wide convention.", "Weight exponent 2.34 vs 1.85 on the 25°-flap Fig 5-11 — the two ground-roll charts nominally cross near 2000 lb, so the 0-flap distance penalty shrinks with weight. Drafting artifact, not physics.", "V_LOF at 2440 lb is 52 KIAS — identical to the 25°-flap chart, which is aerodynamically suspect (publication artifact). The printed strip labels also run 1–1.5 kt below the √W law at light weight.", "Wind panel encodes the AFM policy of ~−2%/kt headwind credit (f(15 kt HW) = 0.775) against a tailwind penalty ≈3× the headwind benefit (f(5 kt TW) = 1.26)."]} />
       </Grid>
     </Grid>
   );

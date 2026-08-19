@@ -3,7 +3,7 @@
 import type { DescentInputs, DescentReading, DescentResult } from "../model/descentFuelTimeDistance";
 import metaJson from "./fig-5-31.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig531Meta: ChartMeta = metaJson;
 
@@ -38,6 +38,7 @@ export function fig531Trace(inputs: DescentInputs, result: DescentResult): { pol
           [xIn, y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       // transfer: straight across to the farthest (distance) curve
       {
@@ -46,14 +47,17 @@ export function fig531Trace(inputs: DescentInputs, result: DescentResult): { pol
           [xDist, y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       // read-offs: drop to the shared value axis at each curve crossing
+      // (per-curve colors: fuel=weight, time=wind, distance=entry)
       {
         points: [
           [xFuel, y],
           [xFuel, yBottom],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
       {
         points: [
@@ -61,6 +65,7 @@ export function fig531Trace(inputs: DescentInputs, result: DescentResult): { pol
           [xTime, yBottom],
         ],
         dashed: true,
+        color: SECTION_COLORS.wind,
       },
       {
         points: [
@@ -68,6 +73,7 @@ export function fig531Trace(inputs: DescentInputs, result: DescentResult): { pol
           [xDist, yBottom],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
     ];
   };

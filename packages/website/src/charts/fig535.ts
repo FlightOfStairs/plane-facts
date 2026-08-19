@@ -4,7 +4,7 @@ import type { LandingDistance50Inputs, LandingDistance50Result } from "../model/
 import { MLW_LB, landingDistance50 } from "../model/landingDistance50";
 import metaJson from "./fig-5-35.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig535Meta: ChartMeta = metaJson;
 
@@ -57,6 +57,7 @@ export function fig535Trace(inputs: LandingDistance50Inputs, result: LandingDist
           [xOat, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -64,22 +65,25 @@ export function fig535Trace(inputs: LandingDistance50Inputs, result: LandingDist
           [xWRef, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
-      { points: weightGuide },
+      { points: weightGuide, color: SECTION_COLORS.weight },
       {
         points: [
           [xW, yS1],
           [xWindRef, yS1],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
-      { points: windGuide },
+      { points: windGuide, color: SECTION_COLORS.wind },
       {
         points: [
           [xWind, yFinal],
           [xRight, yFinal],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xWind, yFinal],

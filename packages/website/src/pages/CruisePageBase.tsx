@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, FormControlLabel, Grid, Stack, Switch, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import type { ChartMeta, Polyline } from "../charts/types";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { CruiseInputs, CruiseResult, Mixture, PowerSetting } from "../model/cruisePerformance";
 import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cruisePerformance";
 
@@ -11,9 +13,22 @@ import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cru
  * Shared page for the two cruise-performance nomographs (Figs 5-21/5-23).
  * The figures differ only in mixture; the model is common.
  */
-export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace: (inputs: CruiseInputs, result: CruiseResult) => { polylines: Polyline[]; marker: [number, number] }; quirkNote: string }) {
-  const { mixture, meta, trace, quirkNote } = props;
-  const [inputs, setInputs] = useState<CruiseInputs>({ ...CHART_EXAMPLE, mixture });
+export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace: (inputs: CruiseInputs, result: CruiseResult) => { polylines: Polyline[]; marker: [number, number] }; notes: { form: string[]; fit: string; findings: string[] } }) {
+  const { mixture, meta, trace, notes } = props;
+  const [urlInputs, setInputs] = useUrlState<{
+    pressureAltitudeFt: number;
+    oatC: number;
+    powerPct: PowerSetting;
+    wheelFairings: boolean;
+  }>({
+    pressureAltitudeFt: CHART_EXAMPLE.pressureAltitudeFt,
+    oatC: CHART_EXAMPLE.oatC,
+    powerPct: CHART_EXAMPLE.powerPct,
+    wheelFairings: CHART_EXAMPLE.wheelFairings,
+  });
+  // Guard the discrete setting against arbitrary URL values.
+  const powerPct: PowerSetting = urlInputs.powerPct === 55 || urlInputs.powerPct === 65 ? urlInputs.powerPct : 75;
+  const inputs: CruiseInputs = { ...urlInputs, powerPct, mixture };
   const result = cruisePerformance(inputs);
   const { polylines, marker } = trace(inputs, result);
 
@@ -50,17 +65,17 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
             <Typography variant="h6" gutterBottom>
               Conditions
             </Typography>
-            <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={16000} step={250} onChange={(v) => setInputs((prev) => ({ ...prev, pressureAltitudeFt: v }))} />
-            <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={(v) => setInputs((prev) => ({ ...prev, oatC: v }))} />
+            <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={16000} step={250} onChange={(v) => setInputs({ pressureAltitudeFt: v })} />
+            <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={(v) => setInputs({ oatC: v })} />
             <Stack direction="row" spacing={2} sx={{ alignItems: "center", mt: 1 }}>
               <Typography variant="body2">Power</Typography>
-              <ToggleButtonGroup size="small" exclusive value={inputs.powerPct} onChange={(_, v: PowerSetting | null) => v !== null && setInputs((prev) => ({ ...prev, powerPct: v }))}>
+              <ToggleButtonGroup size="small" exclusive value={inputs.powerPct} onChange={(_, v: PowerSetting | null) => v !== null && setInputs({ powerPct: v })}>
                 <ToggleButton value={55}>55%</ToggleButton>
                 <ToggleButton value={65}>65%</ToggleButton>
                 <ToggleButton value={75}>75%</ToggleButton>
               </ToggleButtonGroup>
             </Stack>
-            <FormControlLabel sx={{ mt: 1 }} control={<Switch checked={inputs.wheelFairings} onChange={(_, v) => setInputs((prev) => ({ ...prev, wheelFairings: v }))} />} label={<Typography variant="body2">Wheel fairings installed</Typography>} />
+            <FormControlLabel sx={{ mt: 1 }} control={<Switch checked={inputs.wheelFairings} onChange={(_, v) => setInputs({ wheelFairings: v })} />} label={<Typography variant="body2">Wheel fairings installed</Typography>} />
             <Typography variant="caption" color="text.secondary" component="p">
               Mid-cruise weight {CRUISE_WEIGHT_LB} lb, {mixture === "bestPower" ? "best power" : "best economy"} mixture per Section 4.
             </Typography>
@@ -82,14 +97,10 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
               {meta.title}
             </Typography>
             <ChartOverlay meta={meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary" component="p">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p">
-              {quirkNote}
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "result"]} labels={["OAT entry", "DA transfer", "TAS read-out"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={notes.form} fit={notes.fit} findings={notes.findings} />
       </Grid>
     </Grid>
   );

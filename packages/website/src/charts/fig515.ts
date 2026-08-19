@@ -3,7 +3,7 @@
 import type { EnginePerformanceInputs, EnginePerformanceResult } from "../model/enginePerformance";
 import metaJson from "./fig-5-15.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig515Meta: ChartMeta = metaJson;
 
@@ -38,6 +38,7 @@ export function fig515Trace(inputs: EnginePerformanceInputs, result: EnginePerfo
           [xOat, yU],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       // constant-DA transfer across to the %power line
       {
@@ -46,6 +47,7 @@ export function fig515Trace(inputs: EnginePerformanceInputs, result: EnginePerfo
           [xRpm, yU],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
       // down to the RPM axis
       {
@@ -54,6 +56,7 @@ export function fig515Trace(inputs: EnginePerformanceInputs, result: EnginePerfo
           [xRpm, yBase],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xRpm, yU],

@@ -27,4 +27,21 @@ export function axisPx(axis: AxisMeta, value: number): number {
 export interface Polyline {
   points: [number, number][];
   dashed?: boolean;
+  /** Stroke color; defaults to SECTION_COLORS.entry. */
+  color?: string;
 }
+
+/**
+ * Standard trace colors, one per nomogram section, in reading order.
+ * Palette validated (CVD separation + contrast) over the white scan surface.
+ */
+export const SECTION_COLORS = {
+  /** First panel: altitude/temperature (or the chart's single entry) */
+  entry: "#1565C0",
+  /** Weight-correction panel */
+  weight: "#E65100",
+  /** Wind-correction panel */
+  wind: "#8E24AA",
+  /** Final read-out segment and result marker */
+  result: "#2E7D32",
+} as const;

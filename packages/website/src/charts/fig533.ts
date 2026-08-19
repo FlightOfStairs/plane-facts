@@ -3,7 +3,7 @@
 import type { GlideInputs, GlideResult } from "../model/glidePerformance";
 import metaJson from "./fig-5-33.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig533Meta: ChartMeta = metaJson;
 
@@ -21,7 +21,7 @@ export function fig533Trace(inputs: GlideInputs, result: GlideResult): { polylin
   const xLeft = axisPx(range, 0);
   const yBottom = axisPx(alt, 0);
 
-  const leg = (altitudeFt: number, rangeNm: number): Polyline[] => {
+  const leg = (altitudeFt: number, rangeNm: number, color: string): Polyline[] => {
     const y = axisPx(alt, altitudeFt);
     const x = axisPx(range, rangeNm);
     return [
@@ -31,6 +31,7 @@ export function fig533Trace(inputs: GlideInputs, result: GlideResult): { polylin
           [x, y],
         ],
         dashed: true,
+        color,
       },
       {
         points: [
@@ -38,12 +39,13 @@ export function fig533Trace(inputs: GlideInputs, result: GlideResult): { polylin
           [x, yBottom],
         ],
         dashed: true,
+        color,
       },
     ];
   };
 
   return {
-    polylines: [...leg(inputs.cruisePressureAltitudeFt, result.rangeCruiseNm), ...leg(inputs.terrainPressureAltitudeFt, result.rangeTerrainNm)],
+    polylines: [...leg(inputs.cruisePressureAltitudeFt, result.rangeCruiseNm, SECTION_COLORS.entry), ...leg(inputs.terrainPressureAltitudeFt, result.rangeTerrainNm, SECTION_COLORS.weight)],
     marker: [axisPx(range, result.rangeCruiseNm), axisPx(alt, inputs.cruisePressureAltitudeFt)],
   };
 }

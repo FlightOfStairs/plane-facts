@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig531Meta, fig531Trace } from "../charts/fig531";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { DescentInputs } from "../model/descentFuelTimeDistance";
 import { CHART_EXAMPLE, FUEL_TOLERANCE_GAL, descentFuelTimeDistance } from "../model/descentFuelTimeDistance";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function DescentFuelTimeDistancePage() {
-  const [inputs, setInputs] = useState<DescentInputs>(CHART_EXAMPLE);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof DescentInputs]: number }>(CHART_EXAMPLE);
   const result = descentFuelTimeDistance(inputs);
   const { polylines, marker } = fig531Trace(inputs, result);
 
-  const set = (k: keyof DescentInputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof DescentInputs) => (v: number) => setInputs({ [k]: v });
 
   return (
     <Grid container spacing={2}>
@@ -65,14 +67,10 @@ export function DescentFuelTimeDistancePage() {
               {fig531Meta.title}
             </Typography>
             <ChartOverlay meta={fig531Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary" component="p">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p">
-              Chart quirks: this chart&apos;s temperature sign is inverted vs density physics — warmer than ISA means <em>less</em> time, fuel and distance to descend. The near-vertical fuel curve on the 0.5-gal grid limits fuel answers to roughly ±0.2 gal (the POH&apos;s own example prints 0.5 gal for a drawn ≈0.6). Altitude curves above 10,000 ft are unlabeled in the original.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind", "result"]} labels={["entry / distance read", "fuel read", "time read", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["h_e = PA + a₁·ΔT + a₂·ΔT·PA/1000 + b₁·ΔT² + b₂·ΔT²·PA/1000 + c₃·ΔT³", "ΔT = OAT − (15 − 1.9812·PA/1000)", "time, dist, fuel = cubic(h_e)                  (cumulative curves)", "answer = reading(cruise PA, OAT) − reading(dest PA, OAT)"]} fit="Overall fit 1.37% rms (effective-altitude surface 164 ft rms; per-curve 0.18 min / 0.16 nm / 0.08 gal). The chart's printed example (cruise 5000 ft / 16 °C, destination 2500 ft / 24 °C → 3.0 min, 5.5 nm, 0.5 gal) reproduces at 2.91 min (−3.1%), 5.56 nm (+1.0%) and 0.33 gal — the printed 0.5 is a rounded read of a drawn ≈0.62 gal." findings={["The temperature sign is inverted vs density physics: warmer than ISA means less time, fuel and distance to descend (≈−8 ft/°C at sea level to ≈−60 ft/°C at 10,000 ft) — certification-policy smoothing, faithfully reproduced.", "The implied rate of descent grows strongly with altitude — ~500 fpm near sea level to 1400+ fpm above 10,000 ft — at the fixed 2500 RPM / 126 KIAS schedule.", "The near-vertical fuel curve on the 0.5-gal grid limits fuel answers to roughly ±0.2 gal; the POH's own example prints 0.5 gal for a drawn ≈0.6.", "This is a difference nomograph: the drawn curves carry small drafting offsets, so only cruise-minus-destination differences are meaningful — never absolute readings.", "Altitude curves above 10,000 ft are unlabeled in the original (identified via the STD TEMP diagonal's crossings), and a hidden 6000-ft curve lies under the example's dashed transfer line."]} />
       </Grid>
     </Grid>
   );

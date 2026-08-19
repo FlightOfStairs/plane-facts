@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig537Meta, fig537Trace } from "../charts/fig537";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { LandingGroundRollInputs } from "../model/landingGroundRoll";
 import { CHART_EXAMPLE_5_37, landingGroundRoll } from "../model/landingGroundRoll";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function LandingGroundRollPage() {
-  const [inputs, setInputs] = useState<LandingGroundRollInputs>(CHART_EXAMPLE_5_37);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof LandingGroundRollInputs]: number }>(CHART_EXAMPLE_5_37);
   const result = landingGroundRoll(inputs);
   const { polylines, marker } = fig537Trace(inputs, result);
 
-  const set = (k: keyof LandingGroundRollInputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof LandingGroundRollInputs) => (v: number) => setInputs({ [k]: v });
 
   return (
     <Grid container spacing={2}>
@@ -60,14 +62,10 @@ export function LandingGroundRollPage() {
               {fig537Meta.title}
             </Typography>
             <ChartOverlay meta={fig537Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
-              This chart&apos;s &ldquo;REF. LINE 2440 LBS.&rdquo; is printed correctly (its sibling Fig 5-35 mislabels the same line &ldquo;2400 LBS.&rdquo;). Wind acts on the ground roll from a lower reference speed, so the tailwind penalty — roughly 3× the headwind credit — bites hardest here.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["S₀ = 594 + 0.0198·PA + 2.02·OAT + 9e−5·PA·OAT + 5.7e−7·PA² + 0.0015·OAT²", "S  = S₀ · (W/2440)^0.96 · f_wind", "f_wind = (1 − 0.5·Vw/45)^1.90 headwind · (1 + 1.5·Vw/45)^2.08 tailwind"]} fit="Panel-1 quadratic surface fitted to the five altitude curves at 0.25% rms; the chain reproduces the chart's printed worked example (2500 ft, 24 °C, 2179 lb, calm → 625 ft) at +0.9% (≈630 ft), with intermediates matching the printed dashed trace (S₀ ≈ 698, after-weight ≈ 625)." findings={["This chart's “REF. LINE 2440 LBS.” is printed correctly — its sibling Fig 5-35 mislabels the same shared reference line “2400 LBS.” (geometry: ≈2438 lb).", "Panel 1 is nearly a pure σ^−0.95 power law: power-off ground roll scales ~1/σ (touchdown TAS²), with none of the takeoff charts' engine-lapse temperature anisotropy.", "Weight exponent 0.96 ≈ 1 is textbook landing physics (KE ∝ W·Vs² ∝ W², braking force ∝ W ⇒ S ∝ W).", "Wind exponents 1.90/2.08 are the largest of all six wind panels, but it is the same physics seen from a lower 45-kt reference speed — rescaled to the 65-KIAS approach speed they match Fig 5-35's 1.47/1.70.", "Same 50%/150% certification wind credit as everywhere; here the ground roll changes ≈ −2%/kt of headwind but +6–8%/kt of tailwind — the tailwind penalty (~3× the headwind benefit) bites hardest on this chart."]} />
       </Grid>
     </Grid>
   );

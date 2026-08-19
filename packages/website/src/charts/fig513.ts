@@ -4,7 +4,7 @@ import type { TakeoffOver50Flaps25Inputs, TakeoffOver50Flaps25Result } from "../
 import { MTOW_LB, takeoffOver50Flaps25 } from "../model/takeoffOver50Flaps25";
 import metaJson from "./fig-5-13.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig513Meta: ChartMeta = metaJson;
 
@@ -55,6 +55,7 @@ export function fig513Trace(inputs: TakeoffOver50Flaps25Inputs, result: TakeoffO
           [xOat, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -62,22 +63,25 @@ export function fig513Trace(inputs: TakeoffOver50Flaps25Inputs, result: TakeoffO
           [xWRef, yS0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
-      { points: weightGuide },
+      { points: weightGuide, color: SECTION_COLORS.weight },
       {
         points: [
           [xW, yS1],
           [xWindRef, yS1],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
-      { points: windGuide },
+      { points: windGuide, color: SECTION_COLORS.wind },
       {
         points: [
           [xWind, yFinal],
           [xRight, yFinal],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xWind, yFinal],

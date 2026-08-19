@@ -4,7 +4,7 @@ import type { StallInputs, StallResult } from "../model/stallSpeed";
 import { bankFactor } from "../model/stallSpeed";
 import metaJson from "./fig-5-05.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig505Meta: ChartMeta = metaJson;
 
@@ -44,6 +44,7 @@ export function fig505Trace(inputs: StallInputs, result: StallResult): { polylin
           [xW, yV0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -51,14 +52,16 @@ export function fig505Trace(inputs: StallInputs, result: StallResult): { polylin
           [xBank0, yV0],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
-      { points: fanGuide },
+      { points: fanGuide, color: SECTION_COLORS.wind },
       {
         points: [
           [xBank, yFinal],
           [xRight, yFinal],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xBank, yFinal],

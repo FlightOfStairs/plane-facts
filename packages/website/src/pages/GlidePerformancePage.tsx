@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig533Meta, fig533Trace } from "../charts/fig533";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { GlideInputs } from "../model/glidePerformance";
 import { BEST_GLIDE_KIAS, CHART_EXAMPLE, glidePerformance } from "../model/glidePerformance";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function GlidePerformancePage() {
-  const [inputs, setInputs] = useState<GlideInputs>(CHART_EXAMPLE);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof GlideInputs]: number }>(CHART_EXAMPLE);
   const result = glidePerformance(inputs);
   const { polylines, marker } = fig533Trace(inputs, result);
 
-  const set = (k: keyof GlideInputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof GlideInputs) => (v: number) => setInputs({ [k]: v });
 
   return (
     <Grid container spacing={2}>
@@ -59,14 +61,10 @@ export function GlidePerformancePage() {
               {fig533Meta.title}
             </Typography>
             <ChartOverlay meta={fig533Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary" component="p">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p">
-              The chart is a single straight line: L/D ≈ 11.45 at {BEST_GLIDE_KIAS} KIAS with the prop windmilling (≈1.9 nm per 1000 ft). Still-air range needs no atmosphere correction — at a fixed IAS schedule, TAS and sink rate scale together, so density cancels. Best-glide IAS scales as √weight below 2440 lb.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "result"]} labels={["cruise-altitude read", "terrain-altitude read", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["range(h) = (h + 85.7) / 530.47                (nm; h in ft)", "glide = range(cruise PA) − range(terrain PA)", "L/D = 6076.115 / 530.47 ≈ 11.45"]} fit="Straight-line fit at 0.165% rms (≈20 ft). The chart's printed example (cruise 5000 ft, terrain 2000 ft → 9.5 − 3.9 = 5.6 nm) reproduces at 9.59 − 3.93 = 5.66 nm (+1.0%)." findings={["The chart is a single dead-straight line (curvature term −0.15 ft/nm² — negligible): ≈1.9 nm per 1000 ft of height.", "Still-air range needs no atmosphere correction at all — flying a fixed IAS schedule, TAS and sink rate scale together, so density cancels; this is the POH's only chart with no atmosphere input.", "L/D 11.45 at 73 KIAS with the prop windmilling bootstraps a drag polar: CL 0.796, CD 0.0695 → CD₀ ≈ 0.032 with e = 0.75 — including ~0.005–0.008 of windmilling-prop drag (subtract before reusing as a clean airframe polar).", "Best-glide IAS scales as √(W/2440) below max gross; the chart's 73 KIAS is the 2440-lb value.", "The fit assumes CAS = IAS at 73 kt; Fig 5-3's ~+1 kt position-error correction is not applied — well inside the line's own scatter."]} />
       </Grid>
     </Grid>
   );

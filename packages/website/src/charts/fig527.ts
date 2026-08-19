@@ -3,7 +3,7 @@
 import type { ReservePolicy } from "../model/rangeEndurance";
 import metaJson from "./fig-5-27.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig527Meta: ChartMeta = metaJson;
 
@@ -37,6 +37,7 @@ export function fig527Trace(pressureAltFt: number, baseReserveNm: number, baseNo
           [Math.max(xRes, xNoRes), y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -44,6 +45,7 @@ export function fig527Trace(pressureAltFt: number, baseReserveNm: number, baseNo
           [xRes, yAxis],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
       {
         points: [
@@ -51,6 +53,7 @@ export function fig527Trace(pressureAltFt: number, baseReserveNm: number, baseNo
           [xNoRes, yAxis],
         ],
         dashed: true,
+        color: SECTION_COLORS.wind,
       },
     ],
     marker: [xSel, yAxis],

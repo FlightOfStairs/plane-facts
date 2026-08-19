@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { fig513Meta, fig513Trace } from "../charts/fig513";
 import { ChartOverlay } from "../components/ChartOverlay";
 import { InputSlider } from "../components/InputSlider";
+import { ModelNotes } from "../components/ModelNotes";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { TraceCaption } from "../components/TraceCaption";
+import { useUrlState } from "../lib/urlState";
 import type { TakeoffOver50Flaps25Inputs } from "../model/takeoffOver50Flaps25";
 import { CHART_EXAMPLE_5_13, takeoffOver50Flaps25 } from "../model/takeoffOver50Flaps25";
 
@@ -14,11 +16,11 @@ export const chartEntry = {
 };
 
 export function TakeoffOver50Flaps25Page() {
-  const [inputs, setInputs] = useState<TakeoffOver50Flaps25Inputs>(CHART_EXAMPLE_5_13);
+  const [inputs, setInputs] = useUrlState<{ [K in keyof TakeoffOver50Flaps25Inputs]: number }>(CHART_EXAMPLE_5_13);
   const result = takeoffOver50Flaps25(inputs);
   const { polylines, marker } = fig513Trace(inputs, result);
 
-  const set = (k: keyof TakeoffOver50Flaps25Inputs) => (v: number) => setInputs((prev) => ({ ...prev, [k]: v }));
+  const set = (k: keyof TakeoffOver50Flaps25Inputs) => (v: number) => setInputs({ [k]: v });
 
   return (
     <Grid container spacing={2}>
@@ -60,14 +62,10 @@ export function TakeoffOver50Flaps25Page() {
               {fig513Meta.title}
             </Typography>
             <ChartOverlay meta={fig513Meta} polylines={polylines} marker={marker} />
-            <Typography variant="caption" color="text.secondary">
-              Red trace is drawn from the model for illustration; the printed numbers above are the model outputs.
-            </Typography>
-            <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
-              Chart quirks: unlike Fig 5-11, the altitude fan here is not a plane in (PA, OAT) — a full quadratic is needed. The lift-off/barrier speed strips are linear in weight (not ∝ √W) and extend past the 1700-lb axis end; the barrier speed is ≈1.10 × lift-off throughout. The tailwind exponent is weakly constrained by the chart's short tailwind guides.
-            </Typography>
+            <TraceCaption sections={["entry", "weight", "wind", "result"]} />
           </CardContent>
         </Card>
+        <ModelNotes form={["S₀ = 1313 + 0.206·PA + 21.5·OAT + 0.00187·PA·OAT + 1.29e−5·PA² + 0.0445·OAT²", "S  = S₀ · (W/2440)^2.02 · f_wind", "f_wind = (1 − 0.5·Vw/52)^1.49 headwind · (1 + 1.5·Vw/52)^1.42 tailwind", "V_LOF, V₅₀ = printed strip anchors, piecewise-linear in W  (V₅₀ ≈ 1.10·V_LOF)"]} fit="Panel-1 quadratic fitted at 1.06% rms; the assembled chain reproduces the chart's printed worked example (1500 ft, 27 °C, 2175 lb, 15 kt HW → 1500 ft, 48/53 KIAS) at −1.9% (≈1470 ft, 47.8/52.6 KIAS), with intermediates matching the printed dashed trace (S₀ ≈ 2345, after-weight ≈ 1873) to <1%." findings={["Unlike Fig 5-11, the altitude fan is not a plane in (PA, OAT): a full quadratic is needed for ~1% rms — a plane alone leaves 3.8%.", "Weight exponent 2.02 sits between its siblings' 1.85 (Fig 5-11) and 2.34 (Fig 5-7) — the POH's weight exponents are per-chart content, not a shared convention.", "Refit in TAS terms, the headwind exponent becomes 1.55 — matching Fig 5-11's wind panel exactly; both encode the 50% headwind / 150% tailwind certification credit against 52 KIAS.", "The lift-off/barrier speed strips are linear in weight (not ∝ √W) and extend past the 1700-lb axis end; the barrier speed is ≈1.10 × lift-off throughout.", "The tailwind exponent (1.42) is weakly constrained — the chart draws only two short usable tailwind guides."]} />
       </Grid>
     </Grid>
   );

@@ -112,7 +112,7 @@ export function enginePerformance(inp: EnginePerformanceInputs): EnginePerforman
   if (pctPower < 55 || pctPower > 75) warnings.push("percent power outside chart lines (55–75%)");
   if (da < 0) warnings.push(`density altitude ${Math.round(da)} ft — below the chart's sea-level bottom border`);
   if (da > 16000) warnings.push(`density altitude ${Math.round(da)} ft — above the chart top (16,000 ft)`);
-  if (limited) warnings.push(`${Math.round(pctPower)}% power is not available at full throttle above ` + `~${Math.round(ceiling / 10) * 10} ft density altitude (the printed curve ends there)`);
+  if (limited) warnings.push(`${Math.round(pctPower)}% power is not available at full throttle above ~${Math.round(ceiling / 10) * 10} ft density altitude (the printed curve ends there)`);
   if (rpm > RPM_REDLINE) warnings.push(`computed ${Math.round(rpm)} RPM exceeds the 2700 RPM redline`);
 
   return {

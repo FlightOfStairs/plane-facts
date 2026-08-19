@@ -2,7 +2,7 @@
 
 import type { CruiseInputs, CruiseResult } from "../model/cruisePerformance";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, v));
@@ -35,6 +35,7 @@ export function cruiseTrace(meta: ChartMeta, inputs: CruiseInputs, result: Cruis
           [xOat, yDa],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       // horizontal transfer at constant DA to the %power curve / FT boundary
       {
@@ -43,6 +44,7 @@ export function cruiseTrace(meta: ChartMeta, inputs: CruiseInputs, result: Cruis
           [xTas, yDa],
         ],
         dashed: true,
+        color: SECTION_COLORS.weight,
       },
       // down to the TAS axis
       {
@@ -51,6 +53,7 @@ export function cruiseTrace(meta: ChartMeta, inputs: CruiseInputs, result: Cruis
           [xTas, yBottom],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [xTas, yBottom],

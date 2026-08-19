@@ -3,7 +3,7 @@
 import type { AirspeedCalResult } from "../model/airspeedCalibration";
 import metaJson from "./fig-5-03.meta.json";
 import type { ChartMeta, Polyline } from "./types";
-import { axisPx } from "./types";
+import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig503Meta: ChartMeta = metaJson;
 
@@ -31,6 +31,7 @@ export function fig503Trace(result: AirspeedCalResult): { polylines: Polyline[];
           [x, y],
         ],
         dashed: true,
+        color: SECTION_COLORS.entry,
       },
       {
         points: [
@@ -38,6 +39,7 @@ export function fig503Trace(result: AirspeedCalResult): { polylines: Polyline[];
           [xLeft, y],
         ],
         dashed: true,
+        color: SECTION_COLORS.result,
       },
     ],
     marker: [x, y],
