@@ -1,0 +1,128 @@
+{
+  "figure": "5-33",
+  "pdfPage": 106,
+  "title": "Glide Performance",
+  "conditions": {
+    "weightLb": 2440,
+    "prop": "windmilling",
+    "flapsDeg": 0,
+    "speedKIAS": 73,
+    "wind": "none"
+  },
+  "calibration": {
+    "glideRangeNm": {
+      "px0": 372.48982951898364,
+      "v0": 0.0,
+      "pxPerUnit": 29.713927523756432
+    },
+    "pressureAltFt": {
+      "px0": 1061.999991204822,
+      "v0": 12000.0,
+      "pxPerUnit": -0.07491127224638766
+    }
+  },
+  "deskewDeg": 0.10000000000000142,
+  "model": {
+    "form": "glide_range_nm(h) = (h_ft - b) / m;  m ft/nm, b ft; usage: range = glide_range(cruise PA) - glide_range(terrain PA); L/D = 6076.115/m",
+    "params": {
+      "m_ft_per_nm": 530.47,
+      "b_ft": -85.7,
+      "glideRatio": 11.454,
+      "xInterceptNm": 0.162,
+      "CL_73KCAS": 0.7955,
+      "CD_73KCAS": 0.06945
+    },
+    "rmsPct": 0.165,
+    "rmsFt": 19.8
+  },
+  "curves": [
+    {
+      "label": "glide",
+      "points": [
+        [0.084, -7.5],
+        [0.455, 146.0],
+        [0.825, 339.5],
+        [1.195, 533.1],
+        [1.565, 740.0],
+        [1.935, 933.6],
+        [2.306, 1126.5],
+        [2.676, 1354.1],
+        [3.046, 1526.5],
+        [3.416, 1727.8],
+        [3.786, 1917.0],
+        [4.157, 2078.7],
+        [4.527, 2301.9],
+        [4.897, 2504.3],
+        [5.267, 2723.3],
+        [5.637, 2944.4],
+        [6.008, 3104.7],
+        [6.378, 3296.4],
+        [6.748, 3476.6],
+        [7.118, 3704.9],
+        [7.488, 3930.5],
+        [7.859, 4101.0],
+        [8.229, 4284.2],
+        [8.599, 4471.1],
+        [8.969, 4675.0],
+        [9.339, 4885.9],
+        [9.71, 5078.5],
+        [10.08, 5288.9],
+        [10.45, 5472.3],
+        [10.82, 5672.5],
+        [11.19, 5866.1],
+        [11.561, 6032.9],
+        [11.931, 6233.2],
+        [12.301, 6420.1],
+        [12.671, 6640.3],
+        [13.041, 6833.9],
+        [13.412, 7034.1],
+        [13.782, 7214.3],
+        [14.152, 7407.9],
+        [14.522, 7588.1],
+        [14.892, 7801.7],
+        [15.263, 8015.3],
+        [15.633, 8202.2],
+        [16.003, 8382.4],
+        [16.373, 8582.6],
+        [16.743, 8789.5],
+        [17.114, 8983.1],
+        [17.484, 9190.0],
+        [17.854, 9390.2],
+        [18.224, 9577.1],
+        [18.594, 9764.0],
+        [18.965, 9991.0],
+        [19.335, 10157.8],
+        [19.705, 10353.1],
+        [20.075, 10585.0],
+        [20.445, 10785.2],
+        [20.815, 10965.4],
+        [21.186, 11144.4],
+        [21.556, 11352.6],
+        [21.926, 11546.1],
+        [22.296, 11746.4],
+        [22.666, 11951.7]
+      ]
+    }
+  ],
+  "workedExample": {
+    "inputs": {
+      "cruisePAft": 5000,
+      "terrainPAft": 2000
+    },
+    "printed": {
+      "rangeCruiseNm": 9.5,
+      "rangeTerrainNm": 3.9,
+      "glideNm": 5.6
+    },
+    "model": {
+      "rangeCruiseNm": 9.59,
+      "rangeTerrainNm": 3.93,
+      "glideNm": 5.66
+    },
+    "errPct": 0.99
+  },
+  "envelope": {
+    "pressureAltFt": [0, 12000]
+  },
+  "notes": ["Single straight line; quadratic curvature term negligible (-0.15 ft/nm^2).", "L/D applies at 73 KIAS, 2440 lb, prop windmilling, flaps 0. Best-glide IAS scales as sqrt(W); still-air ground range is altitude*L/D independent of density (TAS and sink rate scale together).", "CD includes windmilling-prop drag; power-off/feathered polar would be cleaner.", "CAS assumed = IAS at 73 kt (Fig 5-3 correction ~+1 kt not applied)."]
+}

@@ -1,0 +1,129 @@
+{
+  "figure": "5-3",
+  "pdfPage": 91,
+  "title": "Airspeed System Calibration",
+  "deskewDeg": 0.05,
+  "calibration": {
+    "ias": {
+      "px0": 315.1859896148665,
+      "v0": 40.0,
+      "pxPerUnit": 7.478371626411665
+    },
+    "cas": {
+      "px0": 479.06442835076746,
+      "v0": 240.0,
+      "pxPerUnit": -7.50105033330037
+    }
+  },
+  "model": {
+    "form": "KCAS = a0 + a1*KIAS + a2*KIAS^2 per flap setting; flaps-40 line drawn only up to its iasMax (~Vfe 103), beyond which use flapsUp",
+    "params": {
+      "flapsUp": {
+        "a0": 16.577,
+        "a1": 0.7544,
+        "a2": 0.0006344,
+        "iasMin": 56.0,
+        "iasMax": 159.4
+      },
+      "flaps40": {
+        "a0": 23.196,
+        "a1": 0.52737,
+        "a2": 0.0020457,
+        "iasMin": 43.3,
+        "iasMax": 103.2
+      }
+    },
+    "rmsPct": 0.228,
+    "rmsKt": {
+      "flapsUp": 0.228,
+      "flaps40": 0.228
+    },
+    "casEqualsIasKt": {
+      "flapsUp": 87,
+      "flaps40": 71
+    }
+  },
+  "typescript": {
+    "note": "iasToCas(ias, flaps): evaluate polynomial; casToIas: invert (linear: (cas-a0)/a1; quad: positive root). Clamp warnings outside [iasMin, iasMax].",
+    "flapsUp": {
+      "a0": 16.577,
+      "a1": 0.7544,
+      "a2": 0.0006344
+    },
+    "flaps40": {
+      "a0": 23.196,
+      "a1": 0.52737,
+      "a2": 0.0020457
+    },
+    "flaps40IasMax": 103.2
+  },
+  "curves": [
+    {
+      "label": "FLAPS UP (solid)",
+      "points": [
+        [60.0, 64.12],
+        [65.0, 68.29],
+        [70.0, 72.49],
+        [75.0, 76.73],
+        [80.0, 80.99],
+        [85.0, 85.28],
+        [90.0, 89.61],
+        [95.0, 93.97],
+        [100.0, 98.36],
+        [105.0, 102.78],
+        [110.0, 107.24],
+        [115.0, 111.72],
+        [120.0, 116.24],
+        [125.0, 120.79],
+        [130.0, 125.37],
+        [135.0, 129.98],
+        [140.0, 134.63],
+        [145.0, 139.3],
+        [150.0, 144.01],
+        [155.0, 148.75]
+      ]
+    },
+    {
+      "label": "WING FLAPS 40 (dashed)",
+      "points": [
+        [45.0, 51.07],
+        [50.0, 54.68],
+        [55.0, 58.39],
+        [60.0, 62.2],
+        [65.0, 66.12],
+        [70.0, 70.14],
+        [75.0, 74.26],
+        [80.0, 78.48],
+        [85.0, 82.8],
+        [90.0, 87.23],
+        [95.0, 91.76],
+        [100.0, 96.39]
+      ]
+    }
+  ],
+  "workedExample": {
+    "inputs": {
+      "note": "Fig 5-3 prints no example box; validated against the independently digitized Fig 5-5 CAS<->IAS stall anchors at 2440 lb",
+      "kias": 44.1,
+      "flaps": 40
+    },
+    "printed": {
+      "kcasFromFig5_5": 50.2
+    },
+    "model": {
+      "kcas": 50.43,
+      "flapsUpCheck": {
+        "kias": 50.2,
+        "kcasFromFig5_5": 56.1,
+        "kcas": 56.05,
+        "errPct": -0.1
+      }
+    },
+    "errPct": 0.46
+  },
+  "envelope": {
+    "iasKt": [56.021403638458075, 159.38615182374014],
+    "flaps40IasKt": [43.318103408701546, 103.2241929132376]
+  },
+  "notes": ["FLAPS UP is the solid line (upper, higher CAS at a given IAS); WING FLAPS 40 is the dashed line, drawn only ~43-103 KIAS (ends at Vfe 103 where it merges into the flaps-up line).", "CAS=IAS crossing: ~87 KIAS flaps up, ~71 KIAS flaps 40; above that CAS < IAS.", "Below ~43 KIAS the quadratics are extrapolation; Fig 5-5's stall curves imply a near-constant CAS-IAS offset (~6-7 kt) there instead.", "CAS majors: two of ten print at minor stroke width; progression-filled."]
+}
