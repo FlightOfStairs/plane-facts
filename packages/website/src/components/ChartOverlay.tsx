@@ -3,13 +3,18 @@ import { Box } from "@mui/material";
 import type { ChartMeta, Polyline } from "../charts/types";
 import { SECTION_COLORS } from "../charts/types";
 
-/** Stroke width in viewBox units when the scan renders near full size. */
-const BASE_STROKE_UNITS = 5;
+/**
+ * Stroke width in viewBox units when the scan renders near full size — close to
+ * the printed chart lines (2–4 units), so the trace reads as drawn on the chart
+ * rather than pasted over it.
+ */
+const BASE_STROKE_UNITS = 3.2;
 /**
  * Never let the trace render thinner than this many CSS pixels. The SVG scales
  * with the scan, so a viewBox-unit stroke shrinks with it — on a phone, 1050
- * units squeezed into ~370 px turns a 5-unit stroke into ~1.8 px, which
- * disappears into the printed grid.
+ * units squeezed into ~370 px would turn the base stroke into barely 1 px,
+ * which disappears into the printed grid. Small screens therefore get a
+ * proportionally bolder trace than desktop, which is the intent.
  */
 const MIN_STROKE_CSS_PX = 3.5;
 
@@ -35,10 +40,9 @@ function useRenderedWidth() {
  * The lines are for demonstration only — all output numbers come from the
  * mathematical model, never from reading the overlay.
  *
- * Each polyline is drawn with a white casing under a bold colored stroke so
- * the trace stays legible over the dense scanned grid. The printed strokes
- * measure 2–4 viewBox px, so the overlay is deliberately heavier — and it
- * thickens as the chart shrinks, holding a usable width on small screens.
+ * Each polyline is drawn with a white casing under a colored stroke so the
+ * trace stays legible over the dense scanned grid, and it thickens as the
+ * chart shrinks, holding a usable width on small screens.
  */
 export function ChartOverlay(props: {
   meta: ChartMeta;

@@ -32,7 +32,9 @@ export function NumberUnitInput(props: {
 
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
-      <TextField size="small" label={label} value={value} onChange={(e) => onChange(e.target.value, unit)} error={missing || invalid} helperText={missing ? "required" : invalid ? "enter a number" : helperText} placeholder={placeholder} slotProps={{ htmlInput: { inputMode: "decimal", "aria-label": label } }} sx={{ flex: 1, minWidth: 0 }} />
+      {/* An unshrunk label occupies the same space as the placeholder and wins,
+          so float it whenever there is placeholder text to show. */}
+      <TextField size="small" label={label} value={value} onChange={(e) => onChange(e.target.value, unit)} error={missing || invalid} helperText={missing ? "required" : invalid ? "enter a number" : helperText} placeholder={placeholder} slotProps={{ htmlInput: { inputMode: "decimal", "aria-label": label }, inputLabel: placeholder ? { shrink: true } : undefined }} sx={{ flex: 1, minWidth: 0 }} />
       {units.length > 0 && (
         <Select size="small" value={unit} onChange={(e) => changeUnit(e.target.value)} sx={{ minWidth: 78 }} aria-label={`${label} units`}>
           {units.map((u) => (
