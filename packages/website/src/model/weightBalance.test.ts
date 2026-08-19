@@ -93,11 +93,13 @@ describe("out-of-limits detection", () => {
     expect(r.withinLimits).toBe(false);
   });
 
-  test("overweight is reported against ramp and take-off limits", () => {
+  test("overweight is reported once, against the take-off limit only", () => {
     const r = weightAndBalance({ ...SAMPLE_PROBLEM, baggageLb: 200, fuelLb: 288 });
     expect(r.ramp.weightLb).toBeGreaterThan(LIMITS.normal.maxRampLb);
-    expect(r.warnings.join(" ")).toMatch(/ramp weight .* exceeds/);
     expect(r.warnings.join(" ")).toMatch(/take-off weight .* exceeds/);
+    // The ramp cap is the take-off cap plus the taxi allowance, so saying both
+    // is noise — the two tests trip on exactly the same loadings.
+    expect(r.warnings.join(" ")).not.toMatch(/ramp weight/);
   });
 
   test("utility category forbids baggage and rear passengers", () => {

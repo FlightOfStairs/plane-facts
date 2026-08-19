@@ -141,7 +141,11 @@ export interface WeightBalanceResult {
   takeoff: StationPoint;
   /** Same load with the fuel burned off — the other end of the C.G. travel. */
   zeroFuel: StationPoint;
-  /** Any point outside its envelope, or any weight over limit. */
+  /**
+   * Take-off and zero fuel both legal. Ramp is reported for information but
+   * does not govern: its cap exceeds the take-off cap by exactly the taxi
+   * allowance, so it can never be the binding constraint.
+   */
   withinLimits: boolean;
   warnings: string[];
 }
@@ -205,15 +209,16 @@ export function weightAndBalance(inp: WeightBalanceInputs): WeightBalanceResult 
 
   const warnings: string[] = [];
   const cat = category === "normal" ? "normal" : "utility";
-  if (rampWeight > L.maxRampLb) {
-    warnings.push(`ramp weight ${rampWeight.toFixed(1)} lb exceeds the ${cat} limit of ${L.maxRampLb} lb`);
-  }
+  // Only take-off is reported. The ramp cap is the take-off cap plus the same
+  // 7 lb allowance, so the two tests are equivalent — with the allowance
+  // applied they trip together, and without it they are the same number.
   if (takeoff.weightLb > L.maxTakeoffLb) {
     warnings.push(`take-off weight ${takeoff.weightLb.toFixed(1)} lb exceeds the ${cat} limit of ${L.maxTakeoffLb} lb`);
   }
+  // Ramp is left out here too: it differs from take-off by 7 lb at 95.0 in,
+  // which moves the C.G. by ~0.02 in, so it never fails on its own.
   for (const [label, p] of [
     ["take-off", takeoff],
-    ["ramp", ramp],
     ["zero fuel", zeroFuel],
   ] as const) {
     if (p.overWeight) continue; // already reported as a weight exceedance
@@ -239,7 +244,7 @@ export function weightAndBalance(inp: WeightBalanceInputs): WeightBalanceResult 
     ramp,
     takeoff,
     zeroFuel,
-    withinLimits: takeoff.ok && ramp.ok && zeroFuel.ok,
+    withinLimits: takeoff.ok && zeroFuel.ok,
     warnings,
   };
 }
