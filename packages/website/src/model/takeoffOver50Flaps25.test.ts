@@ -71,7 +71,10 @@ describe("Fig 5-13 25° flap takeoff over 50 ft barrier", () => {
   test("envelope warnings fire outside the digitized chart", () => {
     expect(takeoffOver50Flaps25({ pressureAltitudeFt: 8000, oatC: 20, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(takeoffOver50Flaps25({ pressureAltitudeFt: 0, oatC: -45, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
-    expect(takeoffOver50Flaps25({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1650, windKt: 0 }).warnings.length).toBeGreaterThan(0);
+    // 1650 lb is on the chart — the curves run a division past their last
+    // labelled tick — so only below 1600 should warn.
+    expect(takeoffOver50Flaps25({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1650, windKt: 0 }).warnings).toEqual([]);
+    expect(takeoffOver50Flaps25({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1550, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(takeoffOver50Flaps25({ pressureAltitudeFt: 7000, oatC: 40, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0); // beyond the 4000-ft drawn scale
   });
 

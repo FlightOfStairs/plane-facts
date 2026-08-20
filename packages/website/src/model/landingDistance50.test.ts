@@ -44,7 +44,10 @@ describe("Fig 5-35 landing distance over 50 ft barrier", () => {
   test("envelope warnings fire outside the digitized chart", () => {
     expect(landingDistance50({ pressureAltitudeFt: 8000, oatC: 20, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 45, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
-    expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1600, windKt: 0 }).warnings.length).toBeGreaterThan(0);
+    // 1600 lb is on the chart — the curves run a division past their last
+    // labelled tick — so only below that should warn.
+    expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1600, windKt: 0 }).warnings).toEqual([]);
+    expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1550, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 15, weightLb: 2440, windKt: 20 }).warnings.length).toBeGreaterThan(0);
     expect(landingDistance50({ pressureAltitudeFt: 0, oatC: 15, weightLb: 2440, windKt: -6 }).warnings.length).toBeGreaterThan(0);
   });

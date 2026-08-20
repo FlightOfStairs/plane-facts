@@ -17,7 +17,7 @@ export interface TakeoffOver50Flaps0Inputs {
   pressureAltitudeFt: number;
   /** Outside air temperature, °C (chart: −40…+40) */
   oatC: number;
-  /** Takeoff weight, lb (chart: 1700–2440) */
+  /** Takeoff weight, lb (chart: 1600–2440; ticks are labelled only to 1700) */
   weightLb: number;
   /** Wind component, kt. Positive = headwind (0–15), negative = tailwind (0–5). */
   windKt: number;
@@ -47,6 +47,13 @@ export interface TakeoffOver50Flaps0Result {
   /** Non-empty if inputs fall outside the digitized chart envelope */
   warnings: string[];
 }
+
+/**
+ * Lowest weight the guide curves are drawn to. The scale's last *labelled*
+ * tick is 1700, but the curves run one division further, to where the panel
+ * ends on the wind reference line.
+ */
+export const CHART_MIN_WEIGHT_LB = 1600;
 
 export const MTOW_LB = 2440;
 
@@ -118,7 +125,7 @@ export function takeoffOver50Flaps0(inp: TakeoffOver50Flaps0Inputs): TakeoffOver
   const warnings: string[] = [];
   warnRange(warnings, pa, 0, 7000, "pressure altitude", "ft");
   warnRange(warnings, oatC, -40, 40, "OAT", "°C");
-  warnRange(warnings, w, 1700, MTOW_LB, "weight", "lb");
+  warnRange(warnings, w, CHART_MIN_WEIGHT_LB, MTOW_LB, "weight", "lb");
   if (windKt > 15) warnings.push("headwind outside chart (max 15 kt)");
   if (windKt < -5) warnings.push("tailwind outside chart (max 5 kt)");
   const final = s1 * windFactor;

@@ -63,7 +63,10 @@ describe("Fig 5-7 0° flap takeoff ground roll", () => {
   test("envelope warnings fire outside the digitized chart", () => {
     expect(takeoffGroundRoll0({ pressureAltitudeFt: 7000, oatC: 20, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 45, weightLb: 2440, windKt: 0 }).warnings.length).toBeGreaterThan(0);
-    expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1600, windKt: 0 }).warnings.length).toBeGreaterThan(0);
+    // 1600 lb is on the chart — the curves run a division past their last
+    // labelled tick — so only below that should warn.
+    expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1600, windKt: 0 }).warnings).toEqual([]);
+    expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 15, weightLb: 1550, windKt: 0 }).warnings.length).toBeGreaterThan(0);
     expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 15, weightLb: 2440, windKt: 16 }).warnings.length).toBeGreaterThan(0);
     expect(takeoffGroundRoll0({ pressureAltitudeFt: 0, oatC: 15, weightLb: 2440, windKt: -6 }).warnings.length).toBeGreaterThan(0);
   });
