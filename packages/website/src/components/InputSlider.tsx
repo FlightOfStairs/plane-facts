@@ -42,8 +42,13 @@ export function InputSlider(props: ControlSpec & { value: number; onChange: (v: 
         // The visible label is a sibling Typography, so without this the
         // slider reaches assistive tech with no name at all.
         slotProps={{ input: { "aria-label": label } }}
-        sx={
-          deadPct > 0
+        sx={{
+          // MUI eases the thumb over 150 ms and suppresses that only on the
+          // slider being dragged. With linked controls — the chart handles, and
+          // the IAS/CAS pair on Fig 5-3 — that reads as the other one lagging
+          // behind, so the easing goes.
+          "& .MuiSlider-thumb, & .MuiSlider-track": { transition: "none" },
+          ...(deadPct > 0
             ? {
                 // Grey out the span the chart publishes nothing for; it sits
                 // above the filled track so the unusable range stays obvious.
@@ -61,8 +66,8 @@ export function InputSlider(props: ControlSpec & { value: number; onChange: (v: 
                   pointerEvents: "none",
                 },
               }
-            : undefined
-        }
+            : {}),
+        }}
       />
     </Box>
   );

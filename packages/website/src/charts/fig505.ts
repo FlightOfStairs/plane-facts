@@ -17,7 +17,10 @@ const READOUT_X = axisPx(fig505Meta.axes.bankDeg!, 60) + 26;
 export const fig505Anchors: ChartAnchors = {
   weightLb: { axis: "weightLb", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
   bankDeg: { axis: "bankDeg", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
-  stallSpeed: { axis: "speedKt", atPx: READOUT_X, point: "left", color: "result" },
+  // Two line families are drawn against the one speed scale — solid for
+  // indicated, dash-dot for calibrated — so the read-out is two badges.
+  stallIasKt: { axis: "speedKt", atPx: READOUT_X, point: "left", color: "result" },
+  stallCasKt: { axis: "speedKt", atPx: READOUT_X, point: "left", color: "wind", lane: 1 },
 };
 
 /**

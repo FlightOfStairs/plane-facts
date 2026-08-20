@@ -121,7 +121,12 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
   for (const output of wiring.outputs ?? []) {
     const anchor = wiring.anchors[output.anchor];
     const axis = anchor && meta.axes[anchor.axis];
-    if (!anchor || !axis) continue;
+    if (!anchor || !axis) {
+      // Silently dropping this is how a renamed anchor loses a read-out
+      // without anyone noticing, so say so in development.
+      if (import.meta.env.DEV) console.warn(`${meta.id}: no anchor named "${output.anchor}" for read-out "${output.label}"`);
+      continue;
+    }
     badges.push({
       id: output.anchor,
       axis,

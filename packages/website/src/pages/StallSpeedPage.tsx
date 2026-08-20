@@ -49,7 +49,12 @@ export function StallSpeedPage() {
         controls: CONTROLS,
         values: { weightLb: inputs.weightLb, bankDeg: inputs.bankDeg },
         setters: { weightLb: set("weightLb"), bankDeg: set("bankDeg") },
-        outputs: [{ anchor: "stallSpeed", value: result.stallIasKt, text: `${result.stallIasKt.toFixed(0)} kt`, label: "Stall speed read-out" }],
+        // The chart draws two line families against its one speed scale —
+        // solid indicated, dash-dot calibrated — so both are read out.
+        outputs: [
+          { anchor: "stallIasKt", value: result.stallIasKt, text: `${result.stallIasKt.toFixed(0)} KIAS`, label: "Indicated stall speed read-out" },
+          { anchor: "stallCasKt", value: result.stallCasKt, text: `${result.stallCasKt.toFixed(0)} KCAS`, label: "Calibrated stall speed read-out" },
+        ],
       }}
       results={[
         { label: "Wings-level stall", value: `${result.wingsLevelIasKt.toFixed(1)} KIAS / ${result.wingsLevelCasKt.toFixed(1)} KCAS` },
