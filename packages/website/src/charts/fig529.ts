@@ -2,13 +2,24 @@
 
 import type { ReservePolicy } from "../model/rangeEndurance";
 import metaJson from "./fig-5-29.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig529Meta: ChartMeta = metaJson;
 
 /** Left edge of the chart lattice in asset px (start of the entry line). */
 const GRID_LEFT_PX = 90;
+
+/**
+ * Pressure altitude is entered up the left-hand scale — a vertical handle —
+ * and the chart draws both reserve policies, so both read-outs get a badge.
+ * Power selects a curve, so it stays slider-only.
+ */
+export const fig529Anchors: ChartAnchors = {
+  pressureAltFt: { axis: "pressureAltFt", atPx: GRID_LEFT_PX, point: "right", color: "entry" },
+  reserve45: { axis: "enduranceHrReserve45", atPx: axisPx(fig529Meta.axes.pressureAltFt!, 0), point: "up", color: "weight" },
+  noReserve: { axis: "enduranceHrNoReserve", atPx: axisPx(fig529Meta.axes.pressureAltFt!, 0), point: "up", color: "wind", lane: 1 },
+};
 
 /**
  * POH-style trace: horizontal from the pressure-altitude axis across both

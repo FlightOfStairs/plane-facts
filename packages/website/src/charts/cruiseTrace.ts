@@ -1,7 +1,7 @@
 /** Shared worked-example trace for the cruise nomographs (Figs 5-21/5-23). */
 
 import type { CruiseInputs, CruiseResult } from "../model/cruisePerformance";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 function clamp(v: number, lo: number, hi: number): number {
@@ -15,6 +15,19 @@ function clamp(v: number, lo: number, hi: number): number {
  * down to the TAS axis. Every coordinate comes from the model through the
  * calibration; the chart is never read.
  */
+/**
+ * Badge anchors for both cruise charts. Pressure altitude and % power select
+ * curves rather than positions, and `daFt` is the model's *density* altitude
+ * (an output), so OAT is the only draggable input here.
+ */
+export function cruiseAnchors(meta: ChartMeta): ChartAnchors {
+  const bottom = axisPx(meta.axes.daFt!, 0);
+  return {
+    oatC: { axis: "oatC", atPx: bottom, point: "up", color: "entry" },
+    tasKt: { axis: "tasKt", atPx: bottom, point: "up", color: "result" },
+  };
+}
+
 export function cruiseTrace(meta: ChartMeta, inputs: CruiseInputs, result: CruiseResult): { polylines: Polyline[]; marker: [number, number] } {
   const oat = meta.axes.oatC!;
   const tas = meta.axes.tasKt!;

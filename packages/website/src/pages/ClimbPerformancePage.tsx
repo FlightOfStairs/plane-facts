@@ -1,6 +1,7 @@
 import { FormControlLabel, Switch, Typography } from "@mui/material";
-import { fig517Meta, fig517Trace } from "../charts/fig517";
+import { fig517Anchors, fig517Meta, fig517Trace } from "../charts/fig517";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { ClimbPerformanceInputs } from "../model/climbPerformance";
@@ -11,6 +12,12 @@ export const chartEntry = {
   label: "Climb performance (Fig 5-17)",
   Component: ClimbPerformancePage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 16000, step: 100 },
+  oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function ClimbPerformancePage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof ClimbPerformanceInputs]: ClimbPerformanceInputs[K] }>(CHART_EXAMPLE);
@@ -29,8 +36,8 @@ export function ClimbPerformancePage() {
       conditionsNote="2440 lb, full throttle, mixture leaned per Lycoming, 79 KIAS."
       conditions={
         <>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={16000} step={100} onChange={set("pressureAltitudeFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={set("oatC")} />
+          <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={set("pressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={set("oatC")} />
           <FormControlLabel
             control={<Switch checked={inputs.wheelFairingsRemoved} onChange={(_, v) => setInputs({ wheelFairingsRemoved: v })} />}
             label={
@@ -43,6 +50,13 @@ export function ClimbPerformancePage() {
           />
         </>
       }
+      handles={{
+        anchors: fig517Anchors,
+        controls: CONTROLS,
+        values: { pressureAltitudeFt: inputs.pressureAltitudeFt, oatC: inputs.oatC },
+        setters: { oatC: set("oatC") },
+        outputs: [{ anchor: "rocFpm", value: result.rocChartFpm, text: `${Math.round(result.rocChartFpm)} fpm`, label: "Rate of climb read-out" }],
+      }}
       results={[
         { label: "Density altitude", value: `${Math.round(result.densityAltitudeFt)} ft` },
         { label: "ISA deviation", value: `${result.isaDevC >= 0 ? "+" : ""}${result.isaDevC.toFixed(0)} °C` },

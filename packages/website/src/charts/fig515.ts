@@ -2,10 +2,19 @@
 
 import type { EnginePerformanceInputs, EnginePerformanceResult } from "../model/enginePerformance";
 import metaJson from "./fig-5-15.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig515Meta: ChartMeta = metaJson;
+
+/** Bottom of the lattice: the OAT entry and the RPM read-out share it. */
+const AXIS_BOTTOM = axisPx(fig515Meta.axes.uMajor!, 0);
+
+/** Pressure altitude and % power both select curves, so neither gets a handle. */
+export const fig515Anchors: ChartAnchors = {
+  oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  rpm: { axis: "rpm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
+};
 
 /**
  * Build the POH-style worked-example trace from the model: up from the OAT

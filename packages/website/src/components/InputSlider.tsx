@@ -1,13 +1,16 @@
 import { Box, Slider, Typography } from "@mui/material";
 
-export function InputSlider(props: {
+/**
+ * Everything about an input except its current value. Hoisted out of the JSX
+ * so one object can drive both this slider and the matching chart handle —
+ * min/max/step then exist in exactly one place per input.
+ */
+export interface ControlSpec {
   label: string;
   unit: string;
-  value: number;
   min: number;
   max: number;
   step: number;
-  onChange: (v: number) => void;
   /** Tick marks; `true` uses the step, or pass explicit values. */
   marks?: boolean | { value: number; label?: string }[];
   /**
@@ -16,7 +19,9 @@ export function InputSlider(props: {
    * chart simply publishes nothing below a threshold.
    */
   softMin?: number;
-}) {
+}
+
+export function InputSlider(props: ControlSpec & { value: number; onChange: (v: number) => void }) {
   const { label, unit, value, min, max, step, onChange, marks, softMin } = props;
   const deadPct = softMin === undefined ? 0 : ((softMin - min) / (max - min)) * 100;
 
@@ -34,6 +39,9 @@ export function InputSlider(props: {
         marks={marks}
         onChange={(_, v) => onChange(softMin === undefined ? v : Math.max(softMin, v))}
         valueLabelDisplay="auto"
+        // The visible label is a sibling Typography, so without this the
+        // slider reaches assistive tech with no name at all.
+        slotProps={{ input: { "aria-label": label } }}
         sx={
           deadPct > 0
             ? {

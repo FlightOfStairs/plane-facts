@@ -3,13 +3,30 @@
 import type { ClimbLeg, ClimbToInputs, ClimbToResult } from "../model/climbFuelTimeDistance";
 import metaJson from "./fig-5-19.meta.json";
 import { Y_RANGE_PX } from "./fixtures/fig519Fit";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig519Meta: ChartMeta = metaJson;
 
 /** Bottom grid border of the chart, ORIGINAL-page y px. */
 const GRID_BOTTOM_PAGE_Y = 1444;
+
+/** Bottom of the grid: both OAT entries and all three read-outs sit on it. */
+const AXIS_BOTTOM = axisPx(fig519Meta.axes.yPx!, GRID_BOTTOM_PAGE_Y);
+
+/**
+ * Two temperatures share the one OAT axis, and three quantities share the one
+ * `value` axis, so the badges are laned to stop them colliding.
+ */
+export const fig519Anchors: ChartAnchors = {
+  departureOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight", lane: 1 },
+  // Coloured to match their own trace segments, since all three read-outs
+  // land within a few pixels of each other on the shared value axis.
+  fuelGal: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  timeMin: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "wind", lane: 1 },
+  distNm: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "entry", lane: 2 },
+};
 
 /**
  * Build the POH-style worked-example trace from the model, mimicking the

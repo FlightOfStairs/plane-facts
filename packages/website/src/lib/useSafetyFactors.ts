@@ -36,6 +36,28 @@ export function useSafetyFactors(op: Operation): SafetyFactorsState {
 }
 
 /**
+ * The output badge for a factored distance. It sits at the *chart* value —
+ * the factored distance is not a point on the printed scan, so plotting it
+ * there would misrepresent the chart — and notes the factored figure alongside
+ * so the number to plan with is still on the picture.
+ */
+export function factoredBadge(anchor: string, label: string, pohValueFt: number, safety: SafetyFactorsState) {
+  const { total } = safety.result;
+  const poh = `${Math.round(pohValueFt)} ft`;
+  const factored = `${Math.round(pohValueFt * total)} ft`;
+  return {
+    anchor,
+    value: pohValueFt,
+    text: poh,
+    // No caption: the bracketed second number is there to stop the chart
+    // figure being read as the only one that matters. The results panel
+    // beside it spells out which is which.
+    secondaryText: total === 1 ? undefined : `(${factored})`,
+    label: total === 1 ? `${label}, POH chart ${poh}` : `${label}, POH chart ${poh}, CAA factored ${factored}`,
+  };
+}
+
+/**
  * Result rows presenting the factored distance first (the number to plan
  * with) and the raw POH chart value beneath it.
  */

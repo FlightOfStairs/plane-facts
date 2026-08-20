@@ -2,10 +2,21 @@
 
 import type { GlideInputs, GlideResult } from "../model/glidePerformance";
 import metaJson from "./fig-5-33.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig533Meta: ChartMeta = metaJson;
+
+/** Left edge (zero range) and the sea-level baseline. */
+const GRID_LEFT = axisPx(fig533Meta.axes.glideRangeNm!, 0);
+const AXIS_BOTTOM = axisPx(fig533Meta.axes.pressureAltFt!, 0);
+
+/** Both altitudes are read up the same left-hand scale, so they are laned. */
+export const fig533Anchors: ChartAnchors = {
+  cruisePressureAltitudeFt: { axis: "pressureAltFt", atPx: GRID_LEFT, point: "right", color: "entry" },
+  terrainPressureAltitudeFt: { axis: "pressureAltFt", atPx: GRID_LEFT, point: "right", color: "weight", lane: 1 },
+  glideRangeNm: { axis: "glideRangeNm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
+};
 
 /**
  * Build the POH-style worked-example trace from the model: horizontal

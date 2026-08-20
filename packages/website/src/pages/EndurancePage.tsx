@@ -1,6 +1,7 @@
 import { ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { fig529Meta, fig529Trace } from "../charts/fig529";
+import { fig529Anchors, fig529Meta, fig529Trace } from "../charts/fig529";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import { isaTempC } from "../model/atmosphere";
@@ -18,6 +19,11 @@ function formatHours(hr: number): string {
   const m = Math.round((hr - h) * 60);
   return `${hr.toFixed(2)} hr (${h}:${String(m).padStart(2, "0")})`;
 }
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+} satisfies Record<string, ControlSpec>;
 
 export function EndurancePage() {
   const [inputs, setInputs] = useUrlState<{ pressureAltFt: number; power: number; reserve: ReservePolicy }>({
@@ -48,7 +54,7 @@ export function EndurancePage() {
       conditionsNote="Fixed by the chart: best economy mixture leaned per Section 4, 48 gal usable fuel. Includes time to climb and descend; no temperature axis is printed."
       conditions={
         <>
-          <InputSlider label="Cruise pressure altitude" unit="ft" value={pressureAltFt} min={0} max={12000} step={100} onChange={(v) => setInputs({ pressureAltFt: v })} />
+          <InputSlider {...CONTROLS.pressureAltFt} value={pressureAltFt} onChange={(v) => setInputs({ pressureAltFt: v })} />
           <Typography variant="body2" gutterBottom>
             Cruise power (best economy mixture)
           </Typography>
@@ -76,6 +82,16 @@ export function EndurancePage() {
           </ToggleButtonGroup>
         </>
       }
+      handles={{
+        anchors: fig529Anchors,
+        controls: CONTROLS,
+        values: { pressureAltFt },
+        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        outputs: [
+          { anchor: "reserve45", value: reserveRes.enduranceHr, text: `${reserveRes.enduranceHr.toFixed(1)} hr`, label: "Endurance with 45-minute reserve" },
+          { anchor: "noReserve", value: noReserveRes.enduranceHr, text: `${noReserveRes.enduranceHr.toFixed(1)} hr`, label: "Endurance with no reserve" },
+        ],
+      }}
       results={[
         { label: "Endurance — 45-min reserve", value: formatHours(reserveRes.enduranceHr), emphasize: reserve === "reserve45" },
         { label: "Endurance — no reserve", value: formatHours(noReserveRes.enduranceHr), emphasize: reserve === "noReserve" },

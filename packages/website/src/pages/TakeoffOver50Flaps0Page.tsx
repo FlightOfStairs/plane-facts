@@ -1,8 +1,10 @@
-import { fig509Meta, fig509Trace } from "../charts/fig509";
+import { fig509Anchors, fig509Meta, fig509Trace } from "../charts/fig509";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
-import { factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { factoredBadge, factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { windProjection, windToggle } from "../lib/windHandle";
 import type { TakeoffOver50Flaps0Inputs } from "../model/takeoffOver50Flaps0";
 import { CHART_EXAMPLE_5_09, takeoffOver50Flaps0 } from "../model/takeoffOver50Flaps0";
 
@@ -11,6 +13,17 @@ export const chartEntry = {
   label: "Takeoff over 50 ft — flaps 0° (Fig 5-9)",
   Component: TakeoffOver50Flaps0Page,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 7000, step: 100 },
+  oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  // The weight scale is drawn down to 1600 lb even though its last
+  // labelled tick is 1700 — 1600 lands exactly on the wind panel's reference
+  // line, which is where the panel ends.
+  weightLb: { label: "Weight", unit: "lb", min: 1600, max: 2440, step: 5 },
+  windKt: { label: "Wind (+HW / −TW)", unit: "kt", min: -5, max: 15, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function TakeoffOver50Flaps0Page() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof TakeoffOver50Flaps0Inputs]: number }>(CHART_EXAMPLE_5_09);
@@ -29,12 +42,21 @@ export function TakeoffOver50Flaps0Page() {
       conditionsNote="Paved level dry runway, full power before brake release, flaps 0°."
       conditions={
         <>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={7000} step={100} onChange={set("pressureAltitudeFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={set("oatC")} />
-          <InputSlider label="Weight" unit="lb" value={inputs.weightLb} min={1700} max={2440} step={5} onChange={set("weightLb")} />
-          <InputSlider label="Wind (+HW / −TW)" unit="kt" value={inputs.windKt} min={-5} max={15} step={1} onChange={set("windKt")} />
+          <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={set("pressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={set("oatC")} />
+          <InputSlider {...CONTROLS.weightLb} value={inputs.weightLb} onChange={set("weightLb")} />
+          <InputSlider {...CONTROLS.windKt} value={inputs.windKt} onChange={set("windKt")} />
         </>
       }
+      handles={{
+        anchors: fig509Anchors,
+        controls: CONTROLS,
+        values: inputs,
+        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: set("windKt") },
+        projections: { windKt: windProjection(CONTROLS.windKt) },
+        toggles: { windKt: windToggle(inputs.windKt, set("windKt"), CONTROLS.windKt) },
+        outputs: [factoredBadge("distanceOver50Ft", "Distance over 50 ft", result.distanceOver50Ft, safety)],
+      }}
       safety={safety}
       results={[...factoredRows("Distance over 50 ft", result.distanceOver50Ft, safety), { label: "Lift-off", value: `${result.vLofKias.toFixed(0)} KIAS / ${result.vLofKtas.toFixed(0)} KTAS`, emphasize: true }, { label: "Barrier (50 ft)", value: `${result.v50Kias.toFixed(0)} KIAS / ${result.v50Ktas.toFixed(0)} KTAS`, emphasize: true }, { label: "Density altitude", value: `${Math.round(result.densityAltitudeFt)} ft` }, { label: "S₀ @ 2440 lb, calm", value: `${Math.round(result.s0Ft)} ft` }, { label: "× weight", value: `${Math.round(result.s1Ft)} ft` }]}
       warnings={result.warnings}

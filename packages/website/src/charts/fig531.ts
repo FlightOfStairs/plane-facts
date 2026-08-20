@@ -2,10 +2,27 @@
 
 import type { DescentInputs, DescentReading, DescentResult } from "../model/descentFuelTimeDistance";
 import metaJson from "./fig-5-31.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig531Meta: ChartMeta = metaJson;
+
+/** Sea-level baseline, where the OAT entries and the read-outs sit. */
+const AXIS_BOTTOM = axisPx(fig531Meta.axes.isaAltFt!, 0);
+
+/**
+ * Cruise and destination temperatures share the OAT axis, and the three
+ * read-outs share the `value` axis, so both sets are laned apart.
+ */
+export const fig531Anchors: ChartAnchors = {
+  cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  destOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight", lane: 1 },
+  // Coloured to match their own trace segments, since all three read-outs
+  // land within a few pixels of each other on the shared value axis.
+  fuelGal: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  timeMin: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "wind", lane: 1 },
+  distNm: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "entry", lane: 2 },
+};
 
 /**
  * Build the POH-style worked-example trace from the model, once for the

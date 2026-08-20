@@ -2,7 +2,7 @@
 
 import type { ClimbPerformanceInputs, ClimbPerformanceResult } from "../model/climbPerformance";
 import metaJson from "./fig-5-17.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig517Meta: ChartMeta = metaJson;
@@ -55,6 +55,15 @@ const ROC_LINE: [number, number][] = [
 
 /** Bottom grid border of the chart, ORIGINAL-page y px. */
 const GRID_BOTTOM_PAGE_Y = 1450;
+
+/** Bottom of the grid, shared by the OAT entry and the rate-of-climb scale. */
+const AXIS_BOTTOM = axisPx(fig517Meta.axes.yPx!, GRID_BOTTOM_PAGE_Y);
+
+/** Pressure altitude is a curve family here, so only OAT gets a handle. */
+export const fig517Anchors: ChartAnchors = {
+  oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  rocFpm: { axis: "rocFpm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
+};
 
 /** Nomograph height (original-page y px) for a rate of climb, interpolated along the drawn line. */
 function pageYFromRoc(rocFpm: number): number {

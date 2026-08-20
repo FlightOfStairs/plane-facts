@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
-import { fig519Meta, fig519Trace } from "../charts/fig519";
+import { fig519Anchors, fig519Meta, fig519Trace } from "../charts/fig519";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { ClimbToInputs } from "../model/climbFuelTimeDistance";
@@ -13,6 +14,14 @@ export const chartEntry = {
 };
 
 const legValue = (leg: { timeMin: number; distNm: number; fuelGal: number }) => `${leg.timeMin.toFixed(1)} min / ${leg.distNm.toFixed(1)} nm / ${leg.fuelGal.toFixed(1)} gal`;
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  departurePaFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
+  departureOatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  cruisePaFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
+  cruiseOatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function ClimbFuelTimeDistancePage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof ClimbToInputs]: number }>(CHART_EXAMPLE);
@@ -34,15 +43,26 @@ export function ClimbFuelTimeDistancePage() {
           <Typography variant="subtitle2" gutterBottom>
             Departure airport
           </Typography>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.departurePaFt} min={0} max={11000} step={100} onChange={set("departurePaFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.departureOatC} min={-40} max={40} step={1} onChange={set("departureOatC")} />
+          <InputSlider {...CONTROLS.departurePaFt} value={inputs.departurePaFt} onChange={set("departurePaFt")} />
+          <InputSlider {...CONTROLS.departureOatC} value={inputs.departureOatC} onChange={set("departureOatC")} />
           <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
             Cruise
           </Typography>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.cruisePaFt} min={0} max={11000} step={100} onChange={set("cruisePaFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.cruiseOatC} min={-40} max={40} step={1} onChange={set("cruiseOatC")} />
+          <InputSlider {...CONTROLS.cruisePaFt} value={inputs.cruisePaFt} onChange={set("cruisePaFt")} />
+          <InputSlider {...CONTROLS.cruiseOatC} value={inputs.cruiseOatC} onChange={set("cruiseOatC")} />
         </>
       }
+      handles={{
+        anchors: fig519Anchors,
+        controls: { ...CONTROLS, departureOatC: { ...CONTROLS.departureOatC, label: "Departure OAT" }, cruiseOatC: { ...CONTROLS.cruiseOatC, label: "Cruise OAT" } },
+        values: inputs,
+        setters: { departureOatC: set("departureOatC"), cruiseOatC: set("cruiseOatC") },
+        outputs: [
+          { anchor: "fuelGal", value: result.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to climb" },
+          { anchor: "timeMin", value: result.timeMin, text: `${result.timeMin.toFixed(0)} min`, label: "Time to climb" },
+          { anchor: "distNm", value: result.distNm, text: `${result.distNm.toFixed(0)} nm`, label: "Distance to climb" },
+        ],
+      }}
       results={[
         { label: "Chart lookup — departure", value: legValue(result.departure) },
         { label: "Chart lookup — cruise", value: legValue(result.cruise) },

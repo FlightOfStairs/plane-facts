@@ -1,5 +1,6 @@
-import { fig533Meta, fig533Trace } from "../charts/fig533";
+import { fig533Anchors, fig533Meta, fig533Trace } from "../charts/fig533";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { GlideInputs } from "../model/glidePerformance";
@@ -10,6 +11,12 @@ export const chartEntry = {
   label: "Glide range (Fig 5-33)",
   Component: GlidePerformancePage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  cruisePressureAltitudeFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+  terrainPressureAltitudeFt: { label: "Terrain pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+} satisfies Record<string, ControlSpec>;
 
 export function GlidePerformancePage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof GlideInputs]: number }>(CHART_EXAMPLE);
@@ -28,10 +35,17 @@ export function GlidePerformancePage() {
       conditionsNote={`2440 lb, prop windmilling, flaps 0°, ${BEST_GLIDE_KIAS} KIAS, no wind.`}
       conditions={
         <>
-          <InputSlider label="Cruise pressure altitude" unit="ft" value={inputs.cruisePressureAltitudeFt} min={0} max={12000} step={100} onChange={set("cruisePressureAltitudeFt")} />
-          <InputSlider label="Terrain pressure altitude" unit="ft" value={inputs.terrainPressureAltitudeFt} min={0} max={12000} step={100} onChange={set("terrainPressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.cruisePressureAltitudeFt} value={inputs.cruisePressureAltitudeFt} onChange={set("cruisePressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.terrainPressureAltitudeFt} value={inputs.terrainPressureAltitudeFt} onChange={set("terrainPressureAltitudeFt")} />
         </>
       }
+      handles={{
+        anchors: fig533Anchors,
+        controls: CONTROLS,
+        values: inputs,
+        setters: { cruisePressureAltitudeFt: set("cruisePressureAltitudeFt"), terrainPressureAltitudeFt: set("terrainPressureAltitudeFt") },
+        outputs: [{ anchor: "glideRangeNm", value: result.glideNm, text: `${result.glideNm.toFixed(1)} nm`, label: "Glide distance read-out" }],
+      }}
       results={[
         { label: "Range reading at cruise", value: `${result.rangeCruiseNm.toFixed(1)} nm` },
         { label: "Range reading at terrain", value: `${result.rangeTerrainNm.toFixed(1)} nm` },

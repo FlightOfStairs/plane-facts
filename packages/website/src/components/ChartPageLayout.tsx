@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import type { ChartMeta, Polyline, SECTION_COLORS } from "../charts/types";
+import type { HandleWiring } from "../lib/chartHandles";
+import { resolveBadges } from "../lib/chartHandles";
 import type { SafetyFactorsState } from "../lib/useSafetyFactors";
 import { GENERAL_FACTOR } from "../model/caaSafetyFactors";
 import { ChartOverlay } from "./ChartOverlay";
@@ -43,9 +45,16 @@ export function ChartPageLayout(props: {
   resultsNote?: string;
   /** Takeoff/landing pages only: CAA Safety Sense factor controls. */
   safety?: SafetyFactorsState;
+  /**
+   * Value badges on the scan: the page's own control specs joined to the
+   * chart's anchor geometry. `onChange` is the page's `useUrlState` setter, so
+   * a handle and its slider write the very same state.
+   */
+  handles?: HandleWiring;
   warnings: string[];
   notes: { form: string | string[]; fit: string; findings: string[] };
 }) {
+  const badges = props.handles ? resolveBadges(props.meta, props.handles) : undefined;
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -83,7 +92,7 @@ export function ChartPageLayout(props: {
             <Typography variant="h6" gutterBottom>
               {props.meta.title}
             </Typography>
-            <ChartOverlay meta={props.meta} polylines={props.polylines} marker={props.marker} />
+            <ChartOverlay meta={props.meta} polylines={props.polylines} marker={props.marker} badges={badges} />
             <TraceCaption sections={props.sections} labels={props.sectionLabels} />
           </CardContent>
         </Card>

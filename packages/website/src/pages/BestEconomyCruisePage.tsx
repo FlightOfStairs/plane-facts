@@ -1,4 +1,4 @@
-import { fig523Meta, fig523Trace } from "../charts/fig523";
+import { fig523Anchors, fig523Meta, fig523Trace } from "../charts/fig523";
 import { CruisePageBase } from "./CruisePageBase";
 
 export const chartEntry = {
@@ -12,6 +12,7 @@ export function BestEconomyCruisePage() {
     <CruisePageBase
       mixture="bestEconomy"
       meta={fig523Meta}
+      anchors={fig523Anchors}
       trace={fig523Trace}
       notes={{
         form: ["u = DA/2000 = c₀ + c₁·PA + c₂·OAT + c₃·PA·OAT + c₄·PA² + c₅·OAT²", "TAS = q_p(u)                 (quadratic per 55/65/75% curve)", "TAS ≤ TAS_FT(u)              (cubic full-throttle boundary, drawn DA ≈ 9300–12,000 only)", "fuel = 6.6 / 7.5 / 8.5 GPH at 55/65/75%   (printed table)", "−7 kt without wheel fairings"],

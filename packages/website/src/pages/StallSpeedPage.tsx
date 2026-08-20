@@ -1,6 +1,7 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { fig505Meta, fig505Trace } from "../charts/fig505";
+import { fig505Anchors, fig505Meta, fig505Trace } from "../charts/fig505";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { StallFlaps, StallInputs } from "../model/stallSpeed";
@@ -11,6 +12,12 @@ export const chartEntry = {
   label: "Stall speeds (Fig 5-5)",
   Component: StallSpeedPage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  weightLb: { label: "Gross weight", unit: "lb", min: 1600, max: 2440, step: 10 },
+  bankDeg: { label: "Angle of bank", unit: "°", min: 0, max: 60, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function StallSpeedPage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof StallInputs]: StallInputs[K] }>(CHART_EXAMPLE);
@@ -33,10 +40,17 @@ export function StallSpeedPage() {
             <ToggleButton value={0}>Flaps 0°</ToggleButton>
             <ToggleButton value={40}>Flaps 40°</ToggleButton>
           </ToggleButtonGroup>
-          <InputSlider label="Gross weight" unit="lb" value={inputs.weightLb} min={1600} max={2440} step={10} onChange={set("weightLb")} />
-          <InputSlider label="Angle of bank" unit="°" value={inputs.bankDeg} min={0} max={60} step={1} onChange={set("bankDeg")} />
+          <InputSlider {...CONTROLS.weightLb} value={inputs.weightLb} onChange={set("weightLb")} />
+          <InputSlider {...CONTROLS.bankDeg} value={inputs.bankDeg} onChange={set("bankDeg")} />
         </>
       }
+      handles={{
+        anchors: fig505Anchors,
+        controls: CONTROLS,
+        values: { weightLb: inputs.weightLb, bankDeg: inputs.bankDeg },
+        setters: { weightLb: set("weightLb"), bankDeg: set("bankDeg") },
+        outputs: [{ anchor: "stallSpeed", value: result.stallIasKt, text: `${result.stallIasKt.toFixed(0)} kt`, label: "Stall speed read-out" }],
+      }}
       results={[
         { label: "Wings-level stall", value: `${result.wingsLevelIasKt.toFixed(1)} KIAS / ${result.wingsLevelCasKt.toFixed(1)} KCAS` },
         { label: "Load factor n", value: `${result.loadFactor.toFixed(2)} g` },

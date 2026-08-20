@@ -3,10 +3,22 @@
 import type { StallInputs, StallResult } from "../model/stallSpeed";
 import { bankFactor } from "../model/stallSpeed";
 import metaJson from "./fig-5-05.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig505Meta: ChartMeta = metaJson;
+
+/** Bottom of the grid, where the weight and bank panels are entered. */
+const AXIS_BOTTOM = axisPx(fig505Meta.axes.speedKt!, 20);
+/** Out past the bank fan, where the stall-speed scale is read. */
+const READOUT_X = axisPx(fig505Meta.axes.bankDeg!, 60) + 26;
+
+/** Flap setting picks a curve family rather than a position, so it has no handle. */
+export const fig505Anchors: ChartAnchors = {
+  weightLb: { axis: "weightLb", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  bankDeg: { axis: "bankDeg", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  stallSpeed: { axis: "speedKt", atPx: READOUT_X, point: "left", color: "result" },
+};
 
 /**
  * Build the POH-style worked-example trace from the model: up from the

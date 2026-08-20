@@ -1,5 +1,6 @@
-import { fig515Meta, fig515Trace } from "../charts/fig515";
+import { fig515Anchors, fig515Meta, fig515Trace } from "../charts/fig515";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { EnginePerformanceInputs } from "../model/enginePerformance";
@@ -10,6 +11,13 @@ export const chartEntry = {
   label: "Engine performance (Fig 5-15)",
   Component: EnginePerformancePage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: -2000, max: 16000, step: 100 },
+  oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  pctPower: { label: "Rated power", unit: "%", min: 55, max: 75, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function EnginePerformancePage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof EnginePerformanceInputs]: number }>(CHART_EXAMPLE);
@@ -30,11 +38,18 @@ export function EnginePerformancePage() {
       conditionsNote="Best power mixture per Section 4, wheel fairings installed."
       conditions={
         <>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={-2000} max={16000} step={100} onChange={set("pressureAltitudeFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={set("oatC")} />
-          <InputSlider label="Rated power" unit="%" value={inputs.pctPower} min={55} max={75} step={1} onChange={set("pctPower")} />
+          <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={set("pressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={set("oatC")} />
+          <InputSlider {...CONTROLS.pctPower} value={inputs.pctPower} onChange={set("pctPower")} />
         </>
       }
+      handles={{
+        anchors: fig515Anchors,
+        controls: CONTROLS,
+        values: inputs,
+        setters: { oatC: set("oatC") },
+        outputs: [{ anchor: "rpm", value: result.rpm, text: `${Math.round(result.rpm)} RPM`, label: "Engine speed read-out" }],
+      }}
       results={[
         { label: "Density altitude", value: `${Math.round(result.densityAltitudeFt)} ft` },
         { label: "Sea-level intercept a(p)", value: `${Math.round(result.aP)} RPM` },

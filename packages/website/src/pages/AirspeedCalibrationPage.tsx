@@ -1,10 +1,10 @@
-import { Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { fig503Meta, fig503Trace } from "../charts/fig503";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { fig503Anchors, fig503Meta, fig503Trace } from "../charts/fig503";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { FlapSetting } from "../model/airspeed";
-import type { CalDirection } from "../model/airspeedCalibration";
 import { airspeedCalibration } from "../model/airspeedCalibration";
 
 export const chartEntry = {
@@ -13,18 +13,33 @@ export const chartEntry = {
   Component: AirspeedCalibrationPage,
 };
 
-const DEFAULTS: { direction: CalDirection; flaps: FlapSetting; speedKt: number } = {
-  direction: "iasToCas",
-  flaps: "up",
-  speedKt: 100,
-};
+/** IAS is the single stored value; CAS is derived and converted back on edit. */
+const DEFAULTS: { flaps: FlapSetting; iasKt: number } = { flaps: "up", iasKt: 100 };
+
+/** The drawn IAS scale; the CAS slider spans whatever this maps to. */
+const IAS_MIN = 43;
+const IAS_MAX = 160;
 
 export function AirspeedCalibrationPage() {
   const [inputs, setInputs] = useUrlState(DEFAULTS);
-  const { direction, flaps, speedKt } = inputs;
+  const { flaps, iasKt } = inputs;
 
-  const result = airspeedCalibration({ speedKt, direction, flaps });
+  const toCas = (ias: number) => airspeedCalibration({ speedKt: ias, direction: "iasToCas", flaps });
+  const toIas = (cas: number) => airspeedCalibration({ speedKt: cas, direction: "casToIas", flaps }).iasKt;
+
+  const result = toCas(iasKt);
   const { polylines, marker } = fig503Trace(result);
+  const setCas = (cas: number) => setInputs({ iasKt: Number(toIas(cas).toFixed(1)) });
+
+  /**
+   * Two views of one speed, not two independent inputs: moving either slider
+   * (or either chart handle) writes the same stored IAS, so the pair can never
+   * disagree and the trace never jumps.
+   */
+  const CONTROLS = {
+    iasKt: { label: "Indicated airspeed", unit: "kt", min: IAS_MIN, max: IAS_MAX, step: 1 },
+    casKt: { label: "Calibrated airspeed", unit: "kt", min: Math.round(toCas(IAS_MIN).casKt), max: Math.round(toCas(IAS_MAX).casKt), step: 1 },
+  } satisfies Record<string, ControlSpec>;
 
   const err = result.positionErrorKt;
 
@@ -38,22 +53,23 @@ export function AirspeedCalibrationPage() {
       conditionsNote="Pure IAS ↔ CAS geometry — no atmosphere, weight or power enters this chart."
       conditions={
         <>
-          <Stack spacing={2} sx={{ mb: 2 }}>
-            <ToggleButtonGroup exclusive size="small" fullWidth value={direction} onChange={(_, v: CalDirection | null) => v && setInputs({ direction: v })}>
-              <ToggleButton value="iasToCas">IAS → CAS</ToggleButton>
-              <ToggleButton value="casToIas">CAS → IAS</ToggleButton>
-            </ToggleButtonGroup>
-            <ToggleButtonGroup exclusive size="small" fullWidth value={flaps} onChange={(_, v: FlapSetting | null) => v && setInputs({ flaps: v })}>
-              <ToggleButton value="up">Flaps up</ToggleButton>
-              <ToggleButton value="deg40">Flaps 40°</ToggleButton>
-            </ToggleButtonGroup>
-          </Stack>
-          <InputSlider label={direction === "iasToCas" ? "Indicated airspeed" : "Calibrated airspeed"} unit="kt" value={speedKt} min={43} max={160} step={1} onChange={(v) => setInputs({ speedKt: v })} />
+          <ToggleButtonGroup exclusive size="small" fullWidth sx={{ mb: 2 }} value={flaps} onChange={(_, v: FlapSetting | null) => v && setInputs({ flaps: v })}>
+            <ToggleButton value="up">Flaps up</ToggleButton>
+            <ToggleButton value="deg40">Flaps 40°</ToggleButton>
+          </ToggleButtonGroup>
+          <InputSlider {...CONTROLS.iasKt} value={Math.round(iasKt)} onChange={(v) => setInputs({ iasKt: v })} />
+          <InputSlider {...CONTROLS.casKt} value={Math.round(result.casKt)} onChange={setCas} />
         </>
       }
+      handles={{
+        anchors: fig503Anchors,
+        controls: CONTROLS,
+        values: { iasKt: Math.round(iasKt), casKt: Math.round(result.casKt) },
+        setters: { iasKt: (v) => setInputs({ iasKt: v }), casKt: setCas },
+      }}
       results={[
-        { label: "Indicated airspeed", value: `${result.iasKt.toFixed(1)} KIAS`, emphasize: direction === "casToIas" },
-        { label: "Calibrated airspeed", value: `${result.casKt.toFixed(1)} KCAS`, emphasize: direction === "iasToCas" },
+        { label: "Indicated airspeed", value: `${result.iasKt.toFixed(1)} KIAS` },
+        { label: "Calibrated airspeed", value: `${result.casKt.toFixed(1)} KCAS` },
         { label: "Position error (CAS − IAS)", value: `${err >= 0 ? "+" : ""}${err.toFixed(1)} kt` },
       ]}
       warnings={result.warnings}

@@ -1,6 +1,7 @@
 import { FormControlLabel, Switch, Typography } from "@mui/material";
-import type { ChartMeta, Polyline } from "../charts/types";
+import type { ChartAnchors, ChartMeta, Polyline } from "../charts/types";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { CruiseInputs, CruiseResult, Mixture } from "../model/cruisePerformance";
@@ -10,8 +11,14 @@ import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cru
  * Shared page for the two cruise-performance nomographs (Figs 5-21/5-23).
  * The figures differ only in mixture; the model is common.
  */
-export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace: (inputs: CruiseInputs, result: CruiseResult) => { polylines: Polyline[]; marker: [number, number] }; notes: { form: string[]; fit: string; findings: string[] } }) {
-  const { mixture, meta, trace, notes } = props;
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 16000, step: 250 },
+  oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+} satisfies Record<string, ControlSpec>;
+
+export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; anchors: ChartAnchors; trace: (inputs: CruiseInputs, result: CruiseResult) => { polylines: Polyline[]; marker: [number, number] }; notes: { form: string[]; fit: string; findings: string[] } }) {
+  const { mixture, meta, anchors, trace, notes } = props;
   const [urlInputs, setInputs] = useUrlState<{
     pressureAltitudeFt: number;
     oatC: number;
@@ -44,8 +51,8 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
       conditionsNote={`Mid-cruise weight ${CRUISE_WEIGHT_LB} lb, ${mixture === "bestPower" ? "best power" : "best economy"} mixture per Section 4.`}
       conditions={
         <>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={16000} step={250} onChange={(v) => setInputs({ pressureAltitudeFt: v })} />
-          <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={(v) => setInputs({ oatC: v })} />
+          <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={(v) => setInputs({ pressureAltitudeFt: v })} />
+          <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={(v) => setInputs({ oatC: v })} />
           <InputSlider
             label="Cruise power"
             unit="%"
@@ -64,6 +71,13 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; trace
           <FormControlLabel sx={{ mt: 1 }} control={<Switch checked={inputs.wheelFairings} onChange={(_, v) => setInputs({ wheelFairings: v })} />} label={<Typography variant="body2">Wheel fairings installed</Typography>} />
         </>
       }
+      handles={{
+        anchors,
+        controls: CONTROLS,
+        values: { pressureAltitudeFt: inputs.pressureAltitudeFt, oatC: inputs.oatC },
+        setters: { oatC: (v) => setInputs({ oatC: v }) },
+        outputs: [{ anchor: "tasKt", value: result.tasChartKt, text: `${Math.round(result.tasChartKt)} kt`, label: "True airspeed read-out" }],
+      }}
       results={[
         { label: "Density altitude", value: `${Math.round(result.densityAltitudeFt)} ft` },
         { label: `TAS on the ${inputs.powerPct}% curve`, value: `${result.tasPowerCurveKt.toFixed(1)} kt` },

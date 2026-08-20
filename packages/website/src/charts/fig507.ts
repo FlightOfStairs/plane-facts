@@ -3,10 +3,29 @@
 import type { TakeoffRoll0Inputs, TakeoffRoll0Result } from "../model/takeoffGroundRoll0";
 import { MTOW_LB, takeoffGroundRoll0 } from "../model/takeoffGroundRoll0";
 import metaJson from "./fig-5-07.meta.json";
-import type { ChartMeta, Polyline } from "./types";
+import type { ChartAnchors, ChartMeta, Polyline } from "./types";
 import { SECTION_COLORS, axisPx } from "./types";
 
 export const fig507Meta: ChartMeta = metaJson;
+
+/** Bottom edge of the plot: where the three input panels are entered. */
+const AXIS_BOTTOM = axisPx(fig507Meta.axes.distanceFt!, 0);
+/** Right-hand distance scale, where the trace exits. */
+const READOUT_X = axisPx(fig507Meta.axes.windKt!, 15) + 14;
+
+/**
+ * Where the value badges attach. Pressure altitude is deliberately absent: the
+ * chart draws it as a family of curves, not an axis, so there is nothing for a
+ * handle to slide along and it stays slider-only.
+ */
+export const fig507Anchors: ChartAnchors = {
+  oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  weightLb: { axis: "weightLb", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  // The wind panel mirrors tailwind into the headwind band, so the badge sits
+  // at |v| and the sign comes from its toggle rather than from the pixel.
+  windKt: { axis: "windKt", atPx: AXIS_BOTTOM, point: "up", color: "wind", project: (a, v) => axisPx(a, Math.abs(v)) },
+  groundRollFt: { axis: "distanceFt", atPx: READOUT_X, point: "left", color: "result" },
+};
 
 /**
  * Build the POH-style worked-example trace from the model: up from the OAT

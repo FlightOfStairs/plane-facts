@@ -1,8 +1,10 @@
-import { fig537Meta, fig537Trace } from "../charts/fig537";
+import { fig537Anchors, fig537Meta, fig537Trace } from "../charts/fig537";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
-import { factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { factoredBadge, factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { windProjection, windToggle } from "../lib/windHandle";
 import type { LandingGroundRollInputs } from "../model/landingGroundRoll";
 import { CHART_EXAMPLE_5_37, landingGroundRoll } from "../model/landingGroundRoll";
 
@@ -11,6 +13,17 @@ export const chartEntry = {
   label: "Landing ground roll (Fig 5-37)",
   Component: LandingGroundRollPage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 7000, step: 100 },
+  oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  // The weight scale is drawn down to 1600 lb even though its last
+  // labelled tick is 1700 — 1600 lands exactly on the wind panel's reference
+  // line, which is where the panel ends.
+  weightLb: { label: "Weight", unit: "lb", min: 1600, max: 2440, step: 5 },
+  windKt: { label: "Wind (+HW / −TW)", unit: "kt", min: -5, max: 15, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function LandingGroundRollPage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof LandingGroundRollInputs]: number }>(CHART_EXAMPLE_5_37);
@@ -29,12 +42,21 @@ export function LandingGroundRollPage() {
       conditionsNote="Power off, flaps 40°, paved level dry runway, maximum braking."
       conditions={
         <>
-          <InputSlider label="Pressure altitude" unit="ft" value={inputs.pressureAltitudeFt} min={0} max={7000} step={100} onChange={set("pressureAltitudeFt")} />
-          <InputSlider label="OAT" unit="°C" value={inputs.oatC} min={-40} max={40} step={1} onChange={set("oatC")} />
-          <InputSlider label="Weight" unit="lb" value={inputs.weightLb} min={1700} max={2440} step={5} onChange={set("weightLb")} />
-          <InputSlider label="Wind (+HW / −TW)" unit="kt" value={inputs.windKt} min={-5} max={15} step={1} onChange={set("windKt")} />
+          <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={set("pressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={set("oatC")} />
+          <InputSlider {...CONTROLS.weightLb} value={inputs.weightLb} onChange={set("weightLb")} />
+          <InputSlider {...CONTROLS.windKt} value={inputs.windKt} onChange={set("windKt")} />
         </>
       }
+      handles={{
+        anchors: fig537Anchors,
+        controls: CONTROLS,
+        values: inputs,
+        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: set("windKt") },
+        projections: { windKt: windProjection(CONTROLS.windKt) },
+        toggles: { windKt: windToggle(inputs.windKt, set("windKt"), CONTROLS.windKt) },
+        outputs: [factoredBadge("groundRollFt", "Ground roll", result.groundRollFt, safety)],
+      }}
       safety={safety}
       results={[...factoredRows("Ground roll", result.groundRollFt, safety), { label: "Touchdown", value: `${result.touchdownKias.toFixed(0)} KIAS`, emphasize: true }, { label: "Density altitude", value: `${Math.round(result.densityAltitudeFt)} ft` }, { label: "S₀ @ 2440 lb, calm", value: `${Math.round(result.s0Ft)} ft` }, { label: "× weight", value: `${Math.round(result.s1Ft)} ft` }, { label: "× wind", value: `× ${result.windFactor.toFixed(3)}` }]}
       resultsNote="Ground roll only — for a landing over an obstacle use Fig 5-35. The printed touchdown speed is read off the chart's speed strip and is never factored."

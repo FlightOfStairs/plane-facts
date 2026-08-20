@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import type { ChartMeta, Polyline } from "../charts/types";
 import { SECTION_COLORS } from "../charts/types";
+import type { ResolvedBadge } from "../lib/chartHandles";
+import { AxisBadge } from "./AxisBadge";
 
 /**
  * Stroke width in viewBox units when the scan renders near full size — close to
@@ -50,9 +52,13 @@ export function ChartOverlay(props: {
   marker?: [number, number];
   /** Several labelled points, each able to carry its own colour. */
   markers?: { at: [number, number]; color: string; label?: string }[];
+  /** Draggable input handles and read-only result read-outs. */
+  badges?: ResolvedBadge[];
 }) {
-  const { meta, polylines, marker, markers } = props;
+  const { meta, polylines, marker, markers, badges } = props;
   const [boxRef, renderedWidth] = useRenderedWidth();
+  /** Last badge touched, redrawn on top so a dragged handle is never buried. */
+  const [activeBadge, setActiveBadge] = useState<string | null>(null);
 
   const scale = renderedWidth > 0 ? renderedWidth / meta.widthPx : 1;
   const stroke = Math.max(BASE_STROKE_UNITS, MIN_STROKE_CSS_PX / scale);
@@ -62,35 +68,46 @@ export function ChartOverlay(props: {
   return (
     <Box ref={boxRef} sx={{ position: "relative", width: "100%" }}>
       <img src={meta.image} alt={`POH chart scan: ${meta.title}`} style={{ width: "100%", height: "auto", display: "block" }} />
-      <svg viewBox={`0 0 ${meta.widthPx} ${meta.heightPx}`} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} aria-hidden>
-        {polylines.map((line, i) => {
-          const pts = line.points.map(([x, y]) => `${x},${y}`).join(" ");
-          const sw = stroke * (line.widthScale ?? 1);
-          const cw = casing * (line.widthScale ?? 1);
-          return (
-            <g key={i}>
-              <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={cw} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} />
-              <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? dash : undefined} opacity={0.95} />
+      {/* The trace is decorative, but the handles are real controls, so the
+          svg can only be aria-hidden while there are none — focusable content
+          inside an aria-hidden subtree is an accessibility fault. */}
+      <svg viewBox={`0 0 ${meta.widthPx} ${meta.heightPx}`} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: badges?.length ? undefined : "none" }} aria-hidden={badges?.length ? undefined : true} role={badges?.length ? "group" : undefined} aria-label={badges?.length ? `${meta.title} — draggable value handles` : undefined}>
+        <g aria-hidden style={{ pointerEvents: "none" }}>
+          {polylines.map((line, i) => {
+            const pts = line.points.map(([x, y]) => `${x},${y}`).join(" ");
+            const sw = stroke * (line.widthScale ?? 1);
+            const cw = casing * (line.widthScale ?? 1);
+            return (
+              <g key={i}>
+                <polyline points={pts} fill="none" stroke="#ffffff" strokeWidth={cw} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} />
+                <polyline points={pts} fill="none" stroke={line.color ?? SECTION_COLORS.entry} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={line.dashed ? dash : undefined} opacity={0.95} />
+              </g>
+            );
+          })}
+          {marker && (
+            <>
+              <circle cx={marker[0]} cy={marker[1]} r={stroke * 2.2} fill="#ffffff" opacity={0.8} />
+              <circle cx={marker[0]} cy={marker[1]} r={stroke * 1.6} fill={SECTION_COLORS.result} />
+            </>
+          )}
+          {markers?.map((mk) => (
+            <g key={`${mk.label ?? ""}${mk.at[0]},${mk.at[1]}`}>
+              <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 2.2} fill="#ffffff" opacity={0.85} />
+              <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 1.5} fill={mk.color} />
+              {mk.label && (
+                <text x={mk.at[0] + stroke * 2.8} y={mk.at[1] - stroke * 1.4} fontSize={stroke * 3.4} fill={mk.color} stroke="#ffffff" strokeWidth={stroke * 0.7} paintOrder="stroke" fontWeight={600}>
+                  {mk.label}
+                </text>
+              )}
             </g>
-          );
-        })}
-        {marker && (
-          <>
-            <circle cx={marker[0]} cy={marker[1]} r={stroke * 2.2} fill="#ffffff" opacity={0.8} />
-            <circle cx={marker[0]} cy={marker[1]} r={stroke * 1.6} fill={SECTION_COLORS.result} />
-          </>
-        )}
-        {markers?.map((mk) => (
-          <g key={`${mk.label ?? ""}${mk.at[0]},${mk.at[1]}`}>
-            <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 2.2} fill="#ffffff" opacity={0.85} />
-            <circle cx={mk.at[0]} cy={mk.at[1]} r={stroke * 1.5} fill={mk.color} />
-            {mk.label && (
-              <text x={mk.at[0] + stroke * 2.8} y={mk.at[1] - stroke * 1.4} fontSize={stroke * 3.4} fill={mk.color} stroke="#ffffff" strokeWidth={stroke * 0.7} paintOrder="stroke" fontWeight={600}>
-                {mk.label}
-              </text>
-            )}
-          </g>
-        ))}
+          ))}
+        </g>
+        {badges
+          ?.slice()
+          .sort((a, b) => Number(a.id === activeBadge) - Number(b.id === activeBadge))
+          .map((badge) => (
+            <AxisBadge key={badge.id} meta={meta} scale={scale} onActivate={() => setActiveBadge(badge.id)} {...badge} />
+          ))}
       </svg>
     </Box>
   );

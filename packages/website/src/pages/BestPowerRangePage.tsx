@@ -1,6 +1,7 @@
 import { ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { fig525Meta, fig525Trace } from "../charts/fig525";
+import { fig525Anchors, fig525Meta, fig525Trace } from "../charts/fig525";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { ReservePolicy } from "../model/rangeEndurance";
@@ -11,6 +12,11 @@ export const chartEntry = {
   label: "Range — best power mixture (Fig 5-25)",
   Component: BestPowerRangePage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  pressureAltFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+} satisfies Record<string, ControlSpec>;
 
 export function BestPowerRangePage() {
   const [inputs, setInputs] = useUrlState<{ pressureAltFt: number; oatC: number; power: number; reserve: ReservePolicy }>({
@@ -42,7 +48,7 @@ export function BestPowerRangePage() {
       conditionsNote="Fixed by the chart: 2300 lb mid-cruise weight, no wind, 48 gal usable fuel, wheel fairings (up to −7% without). Range includes the distance to climb and descend."
       conditions={
         <>
-          <InputSlider label="Cruise pressure altitude" unit="ft" value={pressureAltFt} min={0} max={12000} step={100} onChange={(v) => setInputs({ pressureAltFt: v })} />
+          <InputSlider {...CONTROLS.pressureAltFt} value={pressureAltFt} onChange={(v) => setInputs({ pressureAltFt: v })} />
           <InputSlider label="Cruise OAT" unit="°C" value={oatC} min={-25} max={40} step={1} onChange={(v) => setInputs({ oatC: v })} />
           <Typography variant="body2" gutterBottom>
             Cruise power (best power mixture)
@@ -71,6 +77,16 @@ export function BestPowerRangePage() {
           </ToggleButtonGroup>
         </>
       }
+      handles={{
+        anchors: fig525Anchors,
+        controls: CONTROLS,
+        values: { pressureAltFt },
+        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        outputs: [
+          { anchor: "reserve45", value: reserveRes.baseRangeNm, text: `${reserveRes.baseRangeNm.toFixed(0)} nm`, label: "Range with 45-minute reserve" },
+          { anchor: "noReserve", value: noReserveRes.baseRangeNm, text: `${noReserveRes.baseRangeNm.toFixed(0)} nm`, label: "Range with no reserve" },
+        ],
+      }}
       results={[
         { label: "Std temp @ altitude", value: `${selected.stdTempC.toFixed(1)} °C` },
         { label: "ISA deviation", value: `${selected.deltaIsaC >= 0 ? "+" : ""}${selected.deltaIsaC.toFixed(1)} °C` },

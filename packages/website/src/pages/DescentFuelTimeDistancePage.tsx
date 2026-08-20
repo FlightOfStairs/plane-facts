@@ -1,5 +1,6 @@
-import { fig531Meta, fig531Trace } from "../charts/fig531";
+import { fig531Anchors, fig531Meta, fig531Trace } from "../charts/fig531";
 import { ChartPageLayout } from "../components/ChartPageLayout";
+import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import type { DescentInputs } from "../model/descentFuelTimeDistance";
@@ -10,6 +11,14 @@ export const chartEntry = {
   label: "Descent fuel/time/distance (Fig 5-31)",
   Component: DescentFuelTimeDistancePage,
 };
+
+/** One spec per input, driving both the slider and its handle on the chart. */
+const CONTROLS = {
+  cruisePressureAltitudeFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+  cruiseOatC: { label: "Cruise OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  destPressureAltitudeFt: { label: "Destination pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+  destOatC: { label: "Destination OAT", unit: "°C", min: -40, max: 40, step: 1 },
+} satisfies Record<string, ControlSpec>;
 
 export function DescentFuelTimeDistancePage() {
   const [inputs, setInputs] = useUrlState<{ [K in keyof DescentInputs]: number }>(CHART_EXAMPLE);
@@ -28,12 +37,23 @@ export function DescentFuelTimeDistancePage() {
       conditionsNote="2500 RPM, 126 KIAS, no wind."
       conditions={
         <>
-          <InputSlider label="Cruise pressure altitude" unit="ft" value={inputs.cruisePressureAltitudeFt} min={0} max={12000} step={100} onChange={set("cruisePressureAltitudeFt")} />
-          <InputSlider label="Cruise OAT" unit="°C" value={inputs.cruiseOatC} min={-40} max={40} step={1} onChange={set("cruiseOatC")} />
-          <InputSlider label="Destination pressure altitude" unit="ft" value={inputs.destPressureAltitudeFt} min={0} max={12000} step={100} onChange={set("destPressureAltitudeFt")} />
-          <InputSlider label="Destination OAT" unit="°C" value={inputs.destOatC} min={-40} max={40} step={1} onChange={set("destOatC")} />
+          <InputSlider {...CONTROLS.cruisePressureAltitudeFt} value={inputs.cruisePressureAltitudeFt} onChange={set("cruisePressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.cruiseOatC} value={inputs.cruiseOatC} onChange={set("cruiseOatC")} />
+          <InputSlider {...CONTROLS.destPressureAltitudeFt} value={inputs.destPressureAltitudeFt} onChange={set("destPressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.destOatC} value={inputs.destOatC} onChange={set("destOatC")} />
         </>
       }
+      handles={{
+        anchors: fig531Anchors,
+        controls: CONTROLS,
+        values: inputs,
+        setters: { cruiseOatC: set("cruiseOatC"), destOatC: set("destOatC") },
+        outputs: [
+          { anchor: "fuelGal", value: result.cruise.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to descend" },
+          { anchor: "timeMin", value: result.cruise.timeMin, text: `${result.timeMin.toFixed(0)} min`, label: "Time to descend" },
+          { anchor: "distNm", value: result.cruise.distNm, text: `${result.distNm.toFixed(0)} nm`, label: "Distance to descend" },
+        ],
+      }}
       results={[
         { label: "Cruise effective altitude", value: `${Math.round(result.cruise.effectiveAltitudeFt)} ft` },
         { label: "Destination effective altitude", value: `${Math.round(result.destination.effectiveAltitudeFt)} ft` },
