@@ -14,7 +14,7 @@ const AXIS_BOTTOM = axisPx(fig533Meta.axes.pressureAltFt!, 0);
 /** Both altitudes are read up the same left-hand scale, so they are laned. */
 export const fig533Anchors: ChartAnchors = {
   cruisePressureAltitudeFt: { axis: "pressureAltFt", atPx: GRID_LEFT, point: "right", color: "entry" },
-  terrainPressureAltitudeFt: { axis: "pressureAltFt", atPx: GRID_LEFT, point: "right", color: "weight", lane: 1 },
+  terrainPressureAltitudeFt: { axis: "pressureAltFt", atPx: GRID_LEFT, point: "right", color: "weight" },
   glideRangeNm: { axis: "glideRangeNm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
 };
 

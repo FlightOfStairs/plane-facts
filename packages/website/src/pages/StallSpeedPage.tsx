@@ -31,8 +31,8 @@ export function StallSpeedPage() {
       meta={fig505Meta}
       polylines={polylines}
       marker={marker}
-      sections={["entry", "wind", "result"]}
-      sectionLabels={["weight entry", "bank fan", "result"]}
+      sections={["entry", "result", "wind"]}
+      sectionLabels={["weight entry", "indicated", "calibrated"]}
       conditionsNote="The chart draws only the 0° and 40° flap families; results are given in both KIAS and KCAS."
       conditions={
         <>

@@ -15,27 +15,36 @@ import type { AxisProjection } from "./chartHandles";
 /** Slider min is the tailwind limit (negative), max the headwind limit. */
 const tailwindMax = (spec: ControlSpec) => Math.abs(spec.min);
 
-export function windProjection(spec: ControlSpec): AxisProjection {
+/**
+ * Which way the wind is set to blow. Held separately from the value because a
+ * sign cannot survive zero: wind the handle down to 0 kt and back up, and
+ * without this the setting would silently revert to headwind.
+ */
+export function isTailwind(windKt: number, remembered: boolean): boolean {
+  return windKt === 0 ? remembered : windKt < 0;
+}
+
+export function windProjection(spec: ControlSpec, tailwind: boolean): AxisProjection {
   return {
     toAxis: Math.abs,
-    fromAxis: (magnitude, current) => (current < 0 ? -Math.min(magnitude, tailwindMax(spec)) : magnitude),
+    fromAxis: (magnitude) => (tailwind ? -Math.min(magnitude, tailwindMax(spec)) : magnitude),
     axisMin: 0,
-    axisMax: spec.max,
+    axisMax: tailwind ? tailwindMax(spec) : spec.max,
     // The toggle beside it already says HW or TW, so the number stands alone.
     text: (v) => `${Math.abs(v)} ${spec.unit}`,
-    valueText: (v) => `${Math.abs(v)} knots ${v < 0 ? "tailwind" : "headwind"}`,
+    valueText: (v) => `${Math.abs(v)} knots ${tailwind ? "tailwind" : "headwind"}`,
   };
 }
 
-export function windToggle(windKt: number, set: (v: number) => void, spec: ControlSpec): BadgeToggle {
+export function windToggle(windKt: number, tailwind: boolean, set: (windKt: number, tailwind: boolean) => void, spec: ControlSpec): BadgeToggle {
   return {
     options: [
       { value: "hw", label: "HW" },
       { value: "tw", label: "TW" },
     ],
-    value: windKt < 0 ? "tw" : "hw",
+    value: tailwind ? "tw" : "hw",
     // Switching to tailwind clamps to the chart's 5 kt tailwind limit.
-    onChange: (v) => set(v === "tw" ? -Math.min(Math.abs(windKt), tailwindMax(spec)) : Math.abs(windKt)),
+    onChange: (v) => (v === "tw" ? set(-Math.min(Math.abs(windKt), tailwindMax(spec)), true) : set(Math.abs(windKt), false)),
     label: "Wind direction",
   };
 }

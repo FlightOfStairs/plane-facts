@@ -23,7 +23,10 @@ export function GlidePerformancePage() {
   const result = glidePerformance(inputs);
   const { polylines, marker } = fig533Trace(inputs, result);
 
-  const set = (k: keyof GlideInputs) => (v: number) => setInputs({ [k]: v });
+  // Gliding *up* to the terrain is not a thing: whichever altitude moves, the
+  // other gives way rather than letting the pair cross over.
+  const setCruise = (v: number) => setInputs({ cruisePressureAltitudeFt: v, terrainPressureAltitudeFt: Math.min(inputs.terrainPressureAltitudeFt, v) });
+  const setTerrain = (v: number) => setInputs({ terrainPressureAltitudeFt: v, cruisePressureAltitudeFt: Math.max(inputs.cruisePressureAltitudeFt, v) });
 
   return (
     <ChartPageLayout
@@ -35,15 +38,18 @@ export function GlidePerformancePage() {
       conditionsNote={`2440 lb, prop windmilling, flaps 0°, ${BEST_GLIDE_KIAS} KIAS, no wind.`}
       conditions={
         <>
-          <InputSlider {...CONTROLS.cruisePressureAltitudeFt} value={inputs.cruisePressureAltitudeFt} onChange={set("cruisePressureAltitudeFt")} />
-          <InputSlider {...CONTROLS.terrainPressureAltitudeFt} value={inputs.terrainPressureAltitudeFt} onChange={set("terrainPressureAltitudeFt")} />
+          <InputSlider {...CONTROLS.cruisePressureAltitudeFt} value={inputs.cruisePressureAltitudeFt} onChange={setCruise} />
+          <InputSlider {...CONTROLS.terrainPressureAltitudeFt} value={inputs.terrainPressureAltitudeFt} onChange={setTerrain} />
         </>
       }
       handles={{
         anchors: fig533Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { cruisePressureAltitudeFt: set("cruisePressureAltitudeFt"), terrainPressureAltitudeFt: set("terrainPressureAltitudeFt") },
+        setters: { cruisePressureAltitudeFt: setCruise, terrainPressureAltitudeFt: setTerrain },
+        // Same axis, same domain: without a word each, the two badges are just
+        // two altitudes.
+        captions: { cruisePressureAltitudeFt: "cruise", terrainPressureAltitudeFt: "terrain" },
         outputs: [{ anchor: "glideRangeNm", value: result.glideNm, text: `${result.glideNm.toFixed(1)} nm`, label: "Glide distance read-out" }],
       }}
       results={[

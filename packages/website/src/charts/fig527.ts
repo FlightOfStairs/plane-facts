@@ -18,7 +18,7 @@ const GRID_LEFT_PX = 35;
 export const fig527Anchors: ChartAnchors = {
   pressureAltFt: { axis: "pressureAltFt", atPx: GRID_LEFT_PX, point: "right", color: "entry" },
   reserve45: { axis: "rangeNmReserve45", atPx: axisPx(fig527Meta.axes.pressureAltFt!, 0), point: "up", color: "weight" },
-  noReserve: { axis: "rangeNmNoReserve", atPx: axisPx(fig527Meta.axes.pressureAltFt!, 0), point: "up", color: "wind", lane: 1 },
+  noReserve: { axis: "rangeNmNoReserve", atPx: axisPx(fig527Meta.axes.pressureAltFt!, 0), point: "up", color: "wind" },
 };
 
 /**

@@ -82,6 +82,7 @@ export function BestEconomyRangePage() {
         controls: CONTROLS,
         values: { pressureAltFt },
         setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        captions: { reserve45: "45-min reserve", noReserve: "no reserve" },
         outputs: [
           { anchor: "reserve45", value: reserveRes.baseRangeNm, text: `${reserveRes.baseRangeNm.toFixed(0)} nm`, label: "Range with 45-minute reserve" },
           { anchor: "noReserve", value: noReserveRes.baseRangeNm, text: `${noReserveRes.baseRangeNm.toFixed(0)} nm`, label: "Range with no reserve" },

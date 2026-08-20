@@ -10,7 +10,11 @@ export const fig515Meta: ChartMeta = metaJson;
 /** Bottom of the lattice: the OAT entry and the RPM read-out share it. */
 const AXIS_BOTTOM = axisPx(fig515Meta.axes.uMajor!, 0);
 
-/** Pressure altitude and % power both select curves, so neither gets a handle. */
+/**
+ * Pressure altitude and % power both select curves rather than positions —
+ * the PA family runs diagonally across the lattice, so there is no line for a
+ * handle to slide along — leaving OAT as the only draggable input.
+ */
 export const fig515Anchors: ChartAnchors = {
   oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
   rpm: { axis: "rpm", atPx: AXIS_BOTTOM, point: "up", color: "result" },

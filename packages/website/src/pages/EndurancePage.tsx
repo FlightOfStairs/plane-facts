@@ -87,6 +87,7 @@ export function EndurancePage() {
         controls: CONTROLS,
         values: { pressureAltFt },
         setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        captions: { reserve45: "45-min reserve", noReserve: "no reserve" },
         outputs: [
           { anchor: "reserve45", value: reserveRes.enduranceHr, text: `${reserveRes.enduranceHr.toFixed(1)} hr`, label: "Endurance with 45-minute reserve" },
           { anchor: "noReserve", value: noReserveRes.enduranceHr, text: `${noReserveRes.enduranceHr.toFixed(1)} hr`, label: "Endurance with no reserve" },

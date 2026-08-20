@@ -16,9 +16,9 @@ function clamp(v: number, lo: number, hi: number): number {
  * calibration; the chart is never read.
  */
 /**
- * Badge anchors for both cruise charts. Pressure altitude and % power select
- * curves rather than positions, and `daFt` is the model's *density* altitude
- * (an output), so OAT is the only draggable input here.
+ * Badge anchors for both cruise charts. Pressure altitude is drawn as a family
+ * of diagonals and % power as a curve family, so neither has a line to slide
+ * along; OAT is the only draggable input.
  */
 export function cruiseAnchors(meta: ChartMeta): ChartAnchors {
   const bottom = axisPx(meta.axes.daFt!, 0);

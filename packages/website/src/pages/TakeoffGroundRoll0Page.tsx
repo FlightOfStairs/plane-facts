@@ -4,7 +4,7 @@ import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import { factoredBadge, factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
-import { windProjection, windToggle } from "../lib/windHandle";
+import { isTailwind, windProjection, windToggle } from "../lib/windHandle";
 import type { TakeoffRoll0Inputs } from "../model/takeoffGroundRoll0";
 import { CHART_EXAMPLE_5_07, takeoffGroundRoll0 } from "../model/takeoffGroundRoll0";
 
@@ -33,6 +33,16 @@ export function TakeoffGroundRoll0Page() {
 
   const set = (k: keyof TakeoffRoll0Inputs) => (v: number) => setInputs({ [k]: v });
 
+  // Sign alone cannot carry the wind direction through zero, so the choice is
+  // remembered separately: wind the handle down to 0 kt and back up and it
+  // still blows the way you set it.
+  const [{ windTail }, setWindTail] = useUrlState({ windTail: false });
+  const tailwind = isTailwind(inputs.windKt, windTail);
+  const setWind = (windKt: number, tail = tailwind) => {
+    setInputs({ windKt: tail ? -Math.abs(windKt) : Math.abs(windKt) });
+    setWindTail({ windTail: tail });
+  };
+
   return (
     <ChartPageLayout
       meta={fig507Meta}
@@ -45,16 +55,16 @@ export function TakeoffGroundRoll0Page() {
           <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={set("pressureAltitudeFt")} />
           <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={set("oatC")} />
           <InputSlider {...CONTROLS.weightLb} value={inputs.weightLb} onChange={set("weightLb")} />
-          <InputSlider {...CONTROLS.windKt} value={inputs.windKt} onChange={set("windKt")} />
+          <InputSlider {...CONTROLS.windKt} value={inputs.windKt} onChange={(v) => setWind(v, v === 0 ? tailwind : v < 0)} />
         </>
       }
       handles={{
         anchors: fig507Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: set("windKt") },
-        projections: { windKt: windProjection(CONTROLS.windKt) },
-        toggles: { windKt: windToggle(inputs.windKt, set("windKt"), CONTROLS.windKt) },
+        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: (v) => setWind(v) },
+        projections: { windKt: windProjection(CONTROLS.windKt, tailwind) },
+        toggles: { windKt: windToggle(inputs.windKt, tailwind, setWind, CONTROLS.windKt) },
         outputs: [factoredBadge("groundRollFt", "Ground roll", result.groundRollFt, safety)],
       }}
       safety={safety}

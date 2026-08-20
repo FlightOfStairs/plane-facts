@@ -1,7 +1,8 @@
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useRef, useState } from "react";
 import type { AxisMeta, ChartMeta } from "../charts/types";
-import { badgePx, clientToViewBox, dragToValue, snapToStep } from "../lib/chartGeometry";
+import { axisPx } from "../charts/types";
+import { clientToViewBox, dragToValue, snapToStep } from "../lib/chartGeometry";
 
 /**
  * Badge text size in viewBox units at full scan size. Deliberately small: a
@@ -39,8 +40,6 @@ export interface BadgeDrag {
   onChange: (axisValue: number) => void;
   /** Spoken value, where the number alone is ambiguous ("15 kt headwind"). */
   valueText?: string;
-  project?: (axis: AxisMeta, value: number) => number;
-  unproject?: (axis: AxisMeta, px: number) => number;
 }
 
 /**
@@ -51,8 +50,8 @@ export interface BadgeDrag {
  *
  * Without `drag` it is a read-only read-out of a model result.
  */
-export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered width ÷ asset width, for the CSS-pixel floors. */ scale: number; atPx: number; point: "up" | "down" | "left" | "right"; lane?: number; value: number; text: string; /** A second number to weigh, e.g. "(1300 ft)" factored. */ secondaryText?: string; label: string; color: string; drag?: BadgeDrag; toggle?: BadgeToggle; onActivate?: () => void }) {
-  const { meta, axis, scale, atPx, point, lane = 0, value, text, secondaryText, label, color, drag, toggle } = props;
+export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered width ÷ asset width, for the CSS-pixel floors. */ scale: number; atPx: number; point: "up" | "down" | "left" | "right"; /** Position along the axis, in axis units — not always the value itself. */ axisValue: number; text: string; /** A second number to weigh, e.g. "(1300 ft)" factored. */ secondaryText?: string; label: string; color: string; drag?: BadgeDrag; toggle?: BadgeToggle; onActivate?: () => void }) {
+  const { meta, axis, scale, atPx, point, axisValue, text, secondaryText, label, color, drag, toggle } = props;
   const [focused, setFocused] = useState(false);
   const grabOffsetPx = useRef(0);
   const activePointerId = useRef<number | null>(null);
@@ -73,28 +72,21 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
   const width = Math.max(font * 3, Math.max(textWidth + toggleWidth, secondaryWidth) + padX * 2);
   const arrow = font * 0.5;
   const halfBase = font * 0.5;
-  const laneGap = lane * (height + font * 0.35);
 
-  const along = badgePx(axis, value, drag?.project);
+  const along = axisPx(axis, axisValue);
   const vertical = point === "up" || point === "down";
   // The arrow points from the badge at the axis, so an up-pointing arrow puts
-  // the badge *below* the line it points at.
-  const preferred = point === "down" || point === "right" ? -1 : 1;
-  const offset = arrow + laneGap + (vertical ? height : width) / 2;
-  const centre = (s: number) => atPx + s * offset;
-  const span = (vertical ? height : width) / 2;
-  const limit = vertical ? meta.heightPx : meta.widthPx;
-  // A phone enlarges the badge (the CSS-px floor) until it no longer fits in
-  // the margin outside the plot; rather than run off the sheet, flip it to the
-  // other side of the axis — the arrow still lands on the value either way.
-  const fits = (s: number) => centre(s) - span >= 0 && centre(s) + span <= limit;
-  const side = fits(preferred) || !fits(-preferred) ? preferred : -preferred;
+  // the badge *below* the line it points at, with its tip on that line.
+  const side = point === "down" || point === "right" ? -1 : 1;
 
-  // Keep the pill on the sheet along the axis too. The arrow tip stays at the
-  // true value, so a clamped badge reads as a callout rather than a wrong one.
-  const clampAlong = (v: number, half: number, max: number) => Math.min(Math.max(v, half), max - half);
-  const cx = vertical ? clampAlong(along, width / 2, meta.widthPx) : centre(side);
-  const cy = vertical ? centre(side) : clampAlong(along, height / 2, meta.heightPx);
+  // Clamp onto the sheet in both directions rather than flipping to the other
+  // side: a badge that hops inside the plot when the margin is tight reads as
+  // a different thing entirely. The arrow tip always stays on the axis, so a
+  // clamped pill reads as a callout rather than as a wrong value.
+  const clamp = (v: number, half: number, max: number) => Math.min(Math.max(v, half), max - half);
+  const perpendicular = atPx + side * (arrow + (vertical ? height : width) / 2);
+  const cx = vertical ? clamp(along, width / 2, meta.widthPx) : clamp(perpendicular, width / 2, meta.widthPx);
+  const cy = vertical ? clamp(perpendicular, height / 2, meta.heightPx) : clamp(along, height / 2, meta.heightPx);
 
   const tipX = vertical ? along : atPx;
   const tipY = vertical ? atPx : along;
@@ -105,7 +97,7 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
   // Floor the hit target along the drag axis; a 21 CSS px pill is fine to look
   // at on a phone but not to catch with a thumb.
   const hitWidth = vertical ? Math.max(width, units(MIN_TARGET_CSS_PX)) : width + arrow;
-  const hitHeight = vertical ? height + arrow + laneGap : Math.max(height, units(MIN_TARGET_CSS_PX));
+  const hitHeight = vertical ? height + arrow : Math.max(height, units(MIN_TARGET_CSS_PX));
 
   const svgRect = (e: ReactPointerEvent<SVGGElement>) => e.currentTarget.ownerSVGElement?.getBoundingClientRect();
 
@@ -127,7 +119,7 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
     const rect = svgRect(e);
     if (!rect) return;
     e.preventDefault();
-    const next = dragToValue({ rect, meta, axis, clientX: e.clientX, clientY: e.clientY, grabOffsetPx: grabOffsetPx.current, min: drag.min, max: drag.max, step: drag.step, unproject: drag.unproject });
+    const next = dragToValue({ rect, meta, axis, clientX: e.clientX, clientY: e.clientY, grabOffsetPx: grabOffsetPx.current, min: drag.min, max: drag.max, step: drag.step });
     // Re-rendering the trace re-runs the model ~40 times: skip no-op moves.
     if (next !== drag.current) drag.onChange(next);
   }

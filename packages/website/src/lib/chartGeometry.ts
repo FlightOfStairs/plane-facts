@@ -8,7 +8,7 @@
  */
 
 import type { AxisMeta, ChartMeta } from "../charts/types";
-import { axisPx, axisValue } from "../charts/types";
+import { axisValue } from "../charts/types";
 
 /** The part of DOMRect this needs, so a test can pass an object literal. */
 export interface Rect {
@@ -52,14 +52,8 @@ export function snapToStep(value: number, min: number, max: number, step: number
  * weight axes (which run right to left), so nothing here may assume that a
  * larger pixel means a larger value — `axisValue` carries the sign through.
  */
-export function dragToValue(args: { rect: Rect; meta: ChartMeta; axis: AxisMeta; clientX: number; clientY: number; grabOffsetPx: number; min: number; max: number; step: number; unproject?: (axis: AxisMeta, px: number) => number }): number {
+export function dragToValue(args: { rect: Rect; meta: ChartMeta; axis: AxisMeta; clientX: number; clientY: number; grabOffsetPx: number; min: number; max: number; step: number }): number {
   const point = clientToViewBox(args.rect, args.meta, args.clientX, args.clientY);
   const px = (args.axis.orient === "y" ? point.y : point.x) - args.grabOffsetPx;
-  const raw = (args.unproject ?? axisValue)(args.axis, px);
-  return snapToStep(raw, args.min, args.max, args.step);
-}
-
-/** Pixel a badge sits at, honouring any per-chart projection (e.g. |wind|). */
-export function badgePx(axis: AxisMeta, value: number, project?: (axis: AxisMeta, value: number) => number): number {
-  return (project ?? axisPx)(axis, value);
+  return snapToStep(axisValue(args.axis, px), args.min, args.max, args.step);
 }

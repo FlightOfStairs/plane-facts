@@ -11,7 +11,7 @@ export const fig509Meta: ChartMeta = metaJson;
 /** Bottom edge of the plot: where the three input panels are entered. */
 const AXIS_BOTTOM = axisPx(fig509Meta.axes.distanceFt!, 0);
 /** Right-hand distance scale, where the trace exits. */
-const READOUT_X = axisPx(fig509Meta.axes.windKt!, 15) + 14;
+const READOUT_X = axisPx(fig509Meta.axes.windKt!, 15);
 
 /**
  * Where the value badges attach. Pressure altitude is deliberately absent: the
@@ -23,7 +23,7 @@ export const fig509Anchors: ChartAnchors = {
   weightLb: { axis: "weightLb", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
   // The wind panel mirrors tailwind into the headwind band, so the badge sits
   // at |v| and the sign comes from its toggle rather than from the pixel.
-  windKt: { axis: "windKt", atPx: AXIS_BOTTOM, point: "up", color: "wind", project: (a, v) => axisPx(a, Math.abs(v)) },
+  windKt: { axis: "windKt", atPx: AXIS_BOTTOM, point: "up", color: "wind" },
   distanceOver50Ft: { axis: "distanceFt", atPx: READOUT_X, point: "left", color: "result" },
 };
 

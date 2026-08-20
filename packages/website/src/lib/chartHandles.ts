@@ -15,8 +15,12 @@ export interface ResolvedBadge {
   axis: AxisMeta;
   atPx: number;
   point: "up" | "down" | "left" | "right";
-  lane?: number;
   value: number;
+  /**
+   * Where the badge sits, in the axis's own units. Not always the value: a
+   * pressure altitude rides a density-altitude scale, and a wind rides |v|.
+   */
+  axisValue: number;
   text: string;
   secondaryText?: string;
   label: string;
@@ -71,6 +75,13 @@ export interface HandleWiring {
    */
   setters: Record<string, (value: number) => void>;
   outputs?: OutputBadge[];
+  /**
+   * A word under the value, for badges that would otherwise be
+   * indistinguishable: two OATs, or two pressure altitudes, sharing one axis
+   * *and* one domain. Where the quantities differ — fuel against time, KIAS
+   * against KCAS — the number and its unit already say which is which.
+   */
+  captions?: Record<string, string>;
   /** Branch pickers for inputs the chart draws as more than one line. */
   toggles?: Record<string, BadgeToggle>;
   projections?: Record<string, AxisProjection>;
@@ -97,9 +108,10 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
       axis,
       atPx: anchor.atPx,
       point: anchor.point,
-      lane: anchor.lane,
       value,
+      axisValue: projection ? projection.toAxis(value) : value,
       text: projection?.text?.(value) ?? format(value, spec),
+      secondaryText: wiring.captions?.[key],
       label: `${spec.label} — drag along the chart axis`,
       color: SECTION_COLORS[anchor.color ?? "entry"],
       drag: setter && {
@@ -111,8 +123,6 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
         current: projection ? projection.toAxis(value) : value,
         valueText: projection?.valueText?.(value),
         onChange: (axisValue) => setter(projection ? projection.fromAxis(axisValue, value) : axisValue),
-        project: anchor.project,
-        unproject: anchor.unproject,
       },
       toggle: wiring.toggles?.[key],
     });
@@ -132,10 +142,10 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
       axis,
       atPx: anchor.atPx,
       point: anchor.point,
-      lane: anchor.lane,
       value: output.value,
+      axisValue: output.value,
       text: output.text,
-      secondaryText: output.secondaryText,
+      secondaryText: output.secondaryText ?? wiring.captions?.[output.anchor],
       label: output.label,
       color: SECTION_COLORS[anchor.color ?? "result"],
     });

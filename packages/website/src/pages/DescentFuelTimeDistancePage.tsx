@@ -48,6 +48,7 @@ export function DescentFuelTimeDistancePage() {
         controls: CONTROLS,
         values: inputs,
         setters: { cruiseOatC: set("cruiseOatC"), destOatC: set("destOatC") },
+        captions: { cruiseOatC: "cruise", destOatC: "destination" },
         outputs: [
           { anchor: "fuelGal", value: result.cruise.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to descend" },
           { anchor: "timeMin", value: result.cruise.timeMin, text: `${result.timeMin.toFixed(0)} min`, label: "Time to descend" },

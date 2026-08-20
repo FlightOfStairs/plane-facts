@@ -56,17 +56,8 @@ export interface AxisAnchor {
   atPx: number;
   /** Which way the arrow points, i.e. which side of atPx the badge sits. */
   point: "up" | "down" | "left" | "right";
-  /** Stacks this badge clear of another sharing the same axis. */
-  lane?: number;
   /** Trace section to colour-match, so a badge reads as part of its segment. */
   color?: keyof typeof SECTION_COLORS;
-  /**
-   * Charts that plot a value somewhere other than axisPx(axis, value). The six
-   * wind panels mirror tailwind into the headwind band as |v|, so they need
-   * both directions overridden together to stay inverses of each other.
-   */
-  project?: (axis: AxisMeta, value: number) => number;
-  unproject?: (axis: AxisMeta, px: number) => number;
 }
 
 export type ChartAnchors = Record<string, AxisAnchor>;

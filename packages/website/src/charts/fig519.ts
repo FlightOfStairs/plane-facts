@@ -20,12 +20,12 @@ const AXIS_BOTTOM = axisPx(fig519Meta.axes.yPx!, GRID_BOTTOM_PAGE_Y);
  */
 export const fig519Anchors: ChartAnchors = {
   departureOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
-  cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight", lane: 1 },
+  cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
   // Coloured to match their own trace segments, since all three read-outs
   // land within a few pixels of each other on the shared value axis.
   fuelGal: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
-  timeMin: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "wind", lane: 1 },
-  distNm: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "entry", lane: 2 },
+  timeMin: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "wind" },
+  distNm: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
 };
 
 /**

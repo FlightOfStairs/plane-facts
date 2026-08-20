@@ -57,6 +57,7 @@ export function ClimbFuelTimeDistancePage() {
         controls: { ...CONTROLS, departureOatC: { ...CONTROLS.departureOatC, label: "Departure OAT" }, cruiseOatC: { ...CONTROLS.cruiseOatC, label: "Cruise OAT" } },
         values: inputs,
         setters: { departureOatC: set("departureOatC"), cruiseOatC: set("cruiseOatC") },
+        captions: { departureOatC: "departure", cruiseOatC: "cruise" },
         outputs: [
           { anchor: "fuelGal", value: result.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to climb" },
           { anchor: "timeMin", value: result.timeMin, text: `${result.timeMin.toFixed(0)} min`, label: "Time to climb" },
