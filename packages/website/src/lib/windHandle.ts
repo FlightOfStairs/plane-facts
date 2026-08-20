@@ -27,7 +27,12 @@ export function isTailwind(windKt: number, remembered: boolean): boolean {
 export function windProjection(spec: ControlSpec, tailwind: boolean): AxisProjection {
   return {
     toAxis: Math.abs,
-    fromAxis: (magnitude) => (tailwind ? -Math.min(magnitude, tailwindMax(spec)) : magnitude),
+    // The drag runs continuously along the axis, so the rounding to whole
+    // knots has to happen here: nobody plans against 3.63 kt of headwind.
+    fromAxis: (magnitude) => {
+      const knots = Math.round(magnitude / spec.step) * spec.step;
+      return tailwind ? -Math.min(knots, tailwindMax(spec)) : Math.min(knots, spec.max);
+    },
     axisMin: 0,
     axisMax: tailwind ? tailwindMax(spec) : spec.max,
     // The toggle beside it already says HW or TW, so the number stands alone.

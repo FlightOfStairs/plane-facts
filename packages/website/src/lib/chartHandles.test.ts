@@ -85,6 +85,17 @@ describe("resolveBadges", () => {
     expect(out?.drag).toBeUndefined();
   });
 
+  test("the wind projection rounds to whole knots", async () => {
+    const { windProjection } = await import("./windHandle");
+    const spec = { label: "Wind", unit: "kt", min: -5, max: 15, step: 1 };
+    // A continuous drag lands anywhere; what reaches the input must not.
+    expect(windProjection(spec, false).fromAxis(3.6332072129931774, 0)).toBe(4);
+    expect(windProjection(spec, true).fromAxis(3.2, 0)).toBe(-3);
+    // …and neither end of the slider's range can be overshot.
+    expect(windProjection(spec, false).fromAxis(99, 0)).toBe(15);
+    expect(windProjection(spec, true).fromAxis(99, 0)).toBe(-5);
+  });
+
   test("a projection drags in axis space and maps back to the input", () => {
     const seen: number[] = [];
     const badges = resolveBadges(fig511Meta, {
