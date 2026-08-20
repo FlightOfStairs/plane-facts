@@ -1,5 +1,5 @@
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AxisMeta, ChartMeta } from "../charts/types";
 import { axisPx } from "../charts/types";
 import { clientToViewBox, dragToValue } from "../lib/chartGeometry";
@@ -69,6 +69,28 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
   const [focused, setFocused] = useState(false);
   const grabOffsetPx = useRef(0);
   const activePointerId = useRef<number | null>(null);
+  const groupRef = useRef<SVGGElement>(null);
+  const draggable = Boolean(drag);
+
+  /**
+   * Stop the browser claiming the gesture as a scroll. `touch-action: none` is
+   * set below and is honoured on ordinary boxes, but Chrome ignores it on SVG
+   * child elements: a touch drag on a badge gets four pointermoves and then a
+   * pointercancel, which is why it used to move a little and stop. React makes
+   * its own touch listeners passive, so preventDefault has to come from a
+   * listener registered by hand.
+   */
+  useEffect(() => {
+    const el = groupRef.current;
+    if (!el || !draggable) return undefined;
+    const stopScrolling = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchstart", stopScrolling, { passive: false });
+    el.addEventListener("touchmove", stopScrolling, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", stopScrolling);
+      el.removeEventListener("touchmove", stopScrolling);
+    };
+  }, [draggable]);
 
   /** CSS pixels → viewBox units. */
   const units = (css: number) => css / (scale || 1);
@@ -187,6 +209,7 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
   return (
     <g>
       <g
+        ref={groupRef}
         {...a11y}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
