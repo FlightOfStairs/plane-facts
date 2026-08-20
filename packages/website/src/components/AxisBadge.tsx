@@ -2,7 +2,7 @@ import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useRef, useState } from "react";
 import type { AxisMeta, ChartMeta } from "../charts/types";
 import { axisPx } from "../charts/types";
-import { clientToViewBox, dragToValue, snapToStep } from "../lib/chartGeometry";
+import { clientToViewBox, dragToValue } from "../lib/chartGeometry";
 
 /**
  * Badge text size in viewBox units at full scan size. Deliberately small: a
@@ -34,10 +34,24 @@ export interface BadgeDrag {
   max: number;
   step: number;
   unit: string;
-  /** Where the handle currently sits, in axis space. */
+  /** Where the handle currently sits, in axis space — what a drag moves. */
   current: number;
+  /**
+   * The same handle in *input* space, for assistive tech. On a pressure-altitude
+   * handle the axis carries a distance, and announcing that would be nonsense:
+   * what the user is setting is an altitude.
+   */
+  ariaValue: number;
+  ariaMin: number;
+  ariaMax: number;
   /** Receives an axis-space value; the wiring maps it back to the input. */
   onChange: (axisValue: number) => void;
+  /**
+   * Keyboard nudge, in whole steps of the *input*. Arrow keys cannot work in
+   * axis space: one step of power is not one step of the endurance the axis
+   * carries.
+   */
+  onStep: (steps: number) => void;
   /** Spoken value, where the number alone is ambiguous ("15 kt headwind"). */
   valueText?: string;
 }
@@ -132,31 +146,30 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
 
   function onKeyDown(e: KeyboardEvent<SVGGElement>) {
     if (!drag) return;
-    const coarse = Math.max(drag.step, (drag.max - drag.min) / 10);
-    const bump = e.shiftKey ? coarse : drag.step;
-    let next: number;
+    const bump = e.shiftKey ? 10 : 1;
+    let steps: number;
     switch (e.key) {
       // Value semantics, not pixel semantics: Up/Right always increase, which
       // stays right on the y axes and the right-to-left weight axes alike.
       case "ArrowRight":
       case "ArrowUp":
-        next = drag.current + bump;
+        steps = bump;
         break;
       case "ArrowLeft":
       case "ArrowDown":
-        next = drag.current - bump;
+        steps = -bump;
         break;
       case "Home":
-        next = drag.min;
+        steps = -Infinity;
         break;
       case "End":
-        next = drag.max;
+        steps = Infinity;
         break;
       default:
         return;
     }
     e.preventDefault();
-    drag.onChange(snapToStep(next, drag.min, drag.max, drag.step));
+    drag.onStep(steps);
   }
 
   const cycleToggle = () => {
@@ -166,7 +179,7 @@ export function AxisBadge(props: { meta: ChartMeta; axis: AxisMeta; /** Rendered
     if (next) toggle.onChange(next.value);
   };
 
-  const a11y = drag ? ({ role: "slider", tabIndex: 0, "aria-label": label, "aria-valuenow": drag.current, "aria-valuemin": drag.min, "aria-valuemax": drag.max, "aria-valuetext": drag.valueText ?? `${drag.current} ${drag.unit}`, "aria-orientation": axis.orient === "y" ? ("vertical" as const) : ("horizontal" as const) } as const) : ({ role: "img", "aria-label": `${label}: ${text}` } as const);
+  const a11y = drag ? ({ role: "slider", tabIndex: 0, "aria-label": label, "aria-valuenow": drag.ariaValue, "aria-valuemin": drag.ariaMin, "aria-valuemax": drag.ariaMax, "aria-valuetext": drag.valueText ?? `${drag.ariaValue} ${drag.unit}`, "aria-orientation": axis.orient === "y" ? ("vertical" as const) : ("horizontal" as const) } as const) : ({ role: "img", "aria-label": `${label}: ${text}` } as const);
 
   const toggleLabel = toggle?.options.find((o) => o.value === toggle.value)?.label ?? "";
   const toggleX = cx + width / 2 - padX - toggleWidth / 2;

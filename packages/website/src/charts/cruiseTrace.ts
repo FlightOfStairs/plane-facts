@@ -20,10 +20,25 @@ function clamp(v: number, lo: number, hi: number): number {
  * of diagonals and % power as a curve family, so neither has a line to slide
  * along; OAT is the only draggable input.
  */
+/** Left end of the DA transfer line, which moves with the OAT. */
+export function cruisePaAnchorPx(meta: ChartMeta, oatC: number): number {
+  return axisPx(meta.axes.oatC!, Math.min(Math.max(oatC, -40), 40));
+}
+
+/** Height of the constant-DA transfer, where the %power corner sits. */
+export function cruisePowerAnchorPx(meta: ChartMeta, densityAltitudeFt: number): number {
+  return axisPx(meta.axes.daFt!, Math.min(Math.max(densityAltitudeFt, 0), 16000));
+}
+
 export function cruiseAnchors(meta: ChartMeta): ChartAnchors {
   const bottom = axisPx(meta.axes.daFt!, 0);
   return {
     oatC: { axis: "oatC", atPx: bottom, point: "up", color: "entry" },
+    // Pressure altitude picks a diagonal, but it sets the height of the
+    // constant-DA transfer, so its badge rides just left of that line.
+    pressureAltitudeFt: { axis: "daFt", atPx: 0, point: "right", color: "entry" },
+    // %power selects a curve; what it moves is where the DA transfer meets it.
+    powerPct: { axis: "tasKt", atPx: 0, point: "down", color: "weight" },
     tasKt: { axis: "tasKt", atPx: bottom, point: "up", color: "result" },
   };
 }

@@ -18,8 +18,18 @@ const READOUT_X = axisPx(fig509Meta.axes.windKt!, 15);
  * chart draws it as a family of curves, not an axis, so there is nothing for a
  * handle to slide along and it stays slider-only.
  */
+/** Left end of the transfer line: where the OAT entry turns the corner. */
+export function fig509PaAnchorPx(oatC: number): number {
+  return axisPx(fig509Meta.axes.oatC!, oatC);
+}
+
 export const fig509Anchors: ChartAnchors = {
   oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  // Pressure altitude has no scale of its own — it picks a curve — but it does
+  // set the height of the transfer line out of the OAT entry, so the badge
+  // rides just left of that line's start. `atPx` moves with the OAT, so the
+  // page overrides it each render (see paAnchorPx below).
+  pressureAltitudeFt: { axis: "distanceFt", atPx: 0, point: "right", color: "entry" },
   weightLb: { axis: "weightLb", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
   // The wind panel mirrors tailwind into the headwind band, so the badge sits
   // at |v| and the sign comes from its toggle rather than from the pixel.

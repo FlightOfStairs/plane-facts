@@ -85,6 +85,12 @@ export interface HandleWiring {
   /** Branch pickers for inputs the chart draws as more than one line. */
   toggles?: Record<string, BadgeToggle>;
   projections?: Record<string, AxisProjection>;
+  /**
+   * Overrides an anchor's `atPx` for this render. A badge that rides a
+   * transfer line moves with the inputs, so its position cannot live in the
+   * chart file's static anchors.
+   */
+  anchorPx?: Record<string, number>;
 }
 
 function format(value: number, spec: ControlSpec): string {
@@ -106,23 +112,34 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
     badges.push({
       id: key,
       axis,
-      atPx: anchor.atPx,
+      atPx: wiring.anchorPx?.[key] ?? anchor.atPx,
       point: anchor.point,
       value,
       axisValue: projection ? projection.toAxis(value) : value,
       text: projection?.text?.(value) ?? format(value, spec),
       secondaryText: wiring.captions?.[key],
-      label: `${spec.label} — drag along the chart axis`,
+      label: `${spec.ariaLabel ?? spec.label} — drag along the chart axis`,
       color: SECTION_COLORS[anchor.color ?? "entry"],
       drag: setter && {
         // Honour the slider's shaded dead band as the real floor.
         min: projection?.axisMin ?? spec.softMin ?? spec.min,
         max: projection?.axisMax ?? spec.max,
-        step: spec.step,
+        // A projected handle drags continuously and snaps on the way back, in
+        // the input's own units — snapping in axis units would quantise, say,
+        // endurance to whole hours because power steps by 1%.
+        step: projection ? 0 : spec.step,
         unit: spec.unit,
         current: projection ? projection.toAxis(value) : value,
+        ariaValue: value,
+        ariaMin: spec.softMin ?? spec.min,
+        ariaMax: spec.max,
         valueText: projection?.valueText?.(value),
         onChange: (axisValue) => setter(projection ? projection.fromAxis(axisValue, value) : axisValue),
+        onStep: (steps) => {
+          const low = spec.softMin ?? spec.min;
+          const next = steps === Infinity ? spec.max : steps === -Infinity ? low : value + steps * spec.step;
+          setter(Math.min(spec.max, Math.max(low, Number(next.toFixed(6)))));
+        },
       },
       toggle: wiring.toggles?.[key],
     });
@@ -140,7 +157,7 @@ export function resolveBadges(meta: ChartMeta, wiring: HandleWiring): ResolvedBa
     badges.push({
       id: output.anchor,
       axis,
-      atPx: anchor.atPx,
+      atPx: wiring.anchorPx?.[output.anchor] ?? anchor.atPx,
       point: anchor.point,
       value: output.value,
       axisValue: output.value,

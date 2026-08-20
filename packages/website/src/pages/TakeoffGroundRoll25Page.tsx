@@ -1,9 +1,10 @@
-import { fig511Anchors, fig511Meta, fig511Trace } from "../charts/fig511";
+import { fig511Anchors, fig511Meta, fig511PaAnchorPx, fig511Trace } from "../charts/fig511";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import { factoredBadge, factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { modelProjection } from "../lib/modelProjection";
 import { isTailwind, windProjection, windToggle } from "../lib/windHandle";
 import type { TakeoffInputs } from "../model/takeoffGroundRoll25";
 import { CHART_EXAMPLE, takeoffGroundRoll25 } from "../model/takeoffGroundRoll25";
@@ -62,8 +63,14 @@ export function TakeoffGroundRoll25Page() {
         anchors: fig511Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: (v) => setWind(v) },
-        projections: { windKt: windProjection(CONTROLS.windKt, tailwind) },
+        setters: { pressureAltitudeFt: set("pressureAltitudeFt"), oatC: set("oatC"), weightLb: set("weightLb"), windKt: (v) => setWind(v) },
+        anchorPx: { pressureAltitudeFt: fig511PaAnchorPx(inputs.oatC) },
+        projections: {
+          windKt: windProjection(CONTROLS.windKt, tailwind),
+          // No PA scale exists, so the handle rides the transfer line whose
+          // height the PA sets, and the model maps between the two.
+          pressureAltitudeFt: modelProjection({ toAxis: (pa) => takeoffGroundRoll25({ ...inputs, pressureAltitudeFt: pa }).s0Ft, bounds: CONTROLS.pressureAltitudeFt }),
+        },
         toggles: { windKt: windToggle(inputs.windKt, tailwind, setWind, CONTROLS.windKt) },
         outputs: [factoredBadge("groundRollFt", "Ground roll", result.groundRollFt, safety)],
       }}

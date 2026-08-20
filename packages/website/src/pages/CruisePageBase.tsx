@@ -1,8 +1,10 @@
 import { FormControlLabel, Switch, Typography } from "@mui/material";
+import { cruisePaAnchorPx, cruisePowerAnchorPx } from "../charts/cruiseTrace";
 import type { ChartAnchors, ChartMeta, Polyline } from "../charts/types";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { CruiseInputs, CruiseResult, Mixture } from "../model/cruisePerformance";
 import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cruisePerformance";
@@ -15,6 +17,20 @@ import { CHART_EXAMPLE, CRUISE_WEIGHT_LB, cruisePerformance } from "../model/cru
 const CONTROLS = {
   pressureAltitudeFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 16000, step: 250 },
   oatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  powerPct: {
+    label: "Cruise power",
+    unit: "%",
+    min: 0,
+    max: 100,
+    step: 1,
+    // The chart publishes nothing below 55%, so the handle stops there too.
+    softMin: 55,
+    marks: [
+      { value: 55, label: "55" },
+      { value: 65, label: "65" },
+      { value: 75, label: "75" },
+    ],
+  },
 } satisfies Record<string, ControlSpec>;
 
 export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; anchors: ChartAnchors; trace: (inputs: CruiseInputs, result: CruiseResult) => { polylines: Polyline[]; marker: [number, number] }; notes: { form: string[]; fit: string; findings: string[] } }) {
@@ -34,6 +50,8 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; ancho
   const powerPct = Math.min(100, Math.max(55, urlInputs.powerPct));
   const inputs: CruiseInputs = { ...urlInputs, powerPct, mixture };
   const result = cruisePerformance(inputs);
+  const paAnchorPx = cruisePaAnchorPx(meta, inputs.oatC);
+  const powerAnchorPx = cruisePowerAnchorPx(meta, result.densityAltitudeFt);
   const { polylines, marker } = trace(inputs, result);
 
   const warnings = [...result.warnings];
@@ -53,29 +71,25 @@ export function CruisePageBase(props: { mixture: Mixture; meta: ChartMeta; ancho
         <>
           <InputSlider {...CONTROLS.pressureAltitudeFt} value={inputs.pressureAltitudeFt} onChange={(v) => setInputs({ pressureAltitudeFt: v })} />
           <InputSlider {...CONTROLS.oatC} value={inputs.oatC} onChange={(v) => setInputs({ oatC: v })} />
-          <InputSlider
-            label="Cruise power"
-            unit="%"
-            value={inputs.powerPct}
-            min={0}
-            max={100}
-            step={1}
-            softMin={55}
-            marks={[
-              { value: 55, label: "55" },
-              { value: 65, label: "65" },
-              { value: 75, label: "75" },
-            ]}
-            onChange={(v) => setInputs({ powerPct: v })}
-          />
+          <InputSlider {...CONTROLS.powerPct} value={inputs.powerPct} onChange={(v) => setInputs({ powerPct: v })} />
           <FormControlLabel sx={{ mt: 1 }} control={<Switch checked={inputs.wheelFairings} onChange={(_, v) => setInputs({ wheelFairings: v })} />} label={<Typography variant="body2">Wheel fairings installed</Typography>} />
         </>
       }
       handles={{
         anchors,
         controls: CONTROLS,
-        values: { pressureAltitudeFt: inputs.pressureAltitudeFt, oatC: inputs.oatC },
-        setters: { oatC: (v) => setInputs({ oatC: v }) },
+        values: { pressureAltitudeFt: inputs.pressureAltitudeFt, oatC: inputs.oatC, powerPct: inputs.powerPct },
+        setters: { oatC: (v) => setInputs({ oatC: v }), pressureAltitudeFt: (v) => setInputs({ pressureAltitudeFt: v }), powerPct: (v) => setInputs({ powerPct: v }) },
+        anchorPx: { pressureAltitudeFt: paAnchorPx, powerPct: powerAnchorPx },
+        // The constant-DA transfer is what the PA sets, so the handle maps
+        // through the cruise model at the current temperature.
+        projections: {
+          pressureAltitudeFt: modelProjection({ toAxis: (pa) => cruisePerformance({ ...inputs, pressureAltitudeFt: pa }).densityAltitudeFt, bounds: CONTROLS.pressureAltitudeFt }),
+          // Sliding along the TAS axis picks the %power curve that meets it.
+          // Above the full-throttle boundary TAS stops responding, so the
+          // handle simply stops there — which is what the chart shows too.
+          powerPct: modelProjection({ toAxis: (p) => cruisePerformance({ ...inputs, powerPct: p }).tasChartKt, bounds: CONTROLS.powerPct }),
+        },
         outputs: [{ anchor: "tasKt", value: result.tasChartKt, text: `${Math.round(result.tasChartKt)} kt`, label: "True airspeed read-out" }],
       }}
       results={[

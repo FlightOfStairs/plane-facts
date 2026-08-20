@@ -15,8 +15,24 @@ const AXIS_BOTTOM = axisPx(fig515Meta.axes.uMajor!, 0);
  * the PA family runs diagonally across the lattice, so there is no line for a
  * handle to slide along — leaving OAT as the only draggable input.
  */
+/** Left end of the transfer line, which moves with the OAT. */
+export function fig515PaAnchorPx(oatC: number): number {
+  return axisPx(fig515Meta.axes.oatC!, Math.min(Math.max(oatC, -40), 40));
+}
+
+/** Height of the constant-DA transfer, where the %power corner sits. */
+export function fig515PowerAnchorPx(u: number): number {
+  return axisPx(fig515Meta.axes.uMajor!, Math.min(Math.max(u, 0), 8));
+}
+
 export const fig515Anchors: ChartAnchors = {
   oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  // No PA scale — the family runs diagonally — but the PA does set the height
+  // of the transfer line, so the badge rides just left of where it starts.
+  pressureAltitudeFt: { axis: "uMajor", atPx: 0, point: "right", color: "entry" },
+  // %power picks one of the drawn lines; what it moves is where the transfer
+  // meets it, so its badge rides above that corner.
+  pctPower: { axis: "rpm", atPx: 0, point: "down", color: "weight" },
   rpm: { axis: "rpm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
 };
 

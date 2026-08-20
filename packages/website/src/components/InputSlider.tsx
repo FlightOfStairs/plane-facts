@@ -7,6 +7,12 @@ import { Box, Slider, Typography } from "@mui/material";
  */
 export interface ControlSpec {
   label: string;
+  /**
+   * Name for assistive tech where the visible label is ambiguous on its own —
+   * Fig 5-19 has two sliders both captioned "OAT", told apart only by the
+   * subheading above them.
+   */
+  ariaLabel?: string;
   unit: string;
   min: number;
   max: number;
@@ -22,7 +28,7 @@ export interface ControlSpec {
 }
 
 export function InputSlider(props: ControlSpec & { value: number; onChange: (v: number) => void }) {
-  const { label, unit, value, min, max, step, onChange, marks, softMin } = props;
+  const { label, ariaLabel, unit, value, min, max, step, onChange, marks, softMin } = props;
   const deadPct = softMin === undefined ? 0 : ((softMin - min) / (max - min)) * 100;
 
   return (
@@ -41,7 +47,7 @@ export function InputSlider(props: ControlSpec & { value: number; onChange: (v: 
         valueLabelDisplay="auto"
         // The visible label is a sibling Typography, so without this the
         // slider reaches assistive tech with no name at all.
-        slotProps={{ input: { "aria-label": label } }}
+        slotProps={{ input: { "aria-label": ariaLabel ?? label } }}
         sx={{
           // MUI eases the thumb over 150 ms and suppresses that only on the
           // slider being dragged. With linked controls — the chart handles, and

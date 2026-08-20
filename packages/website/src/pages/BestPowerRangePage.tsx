@@ -1,8 +1,9 @@
 import { ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { fig525Anchors, fig525Meta, fig525Trace } from "../charts/fig525";
+import { fig525Anchors, fig525Meta, fig525PowerAnchorPx, fig525Trace } from "../charts/fig525";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { ReservePolicy } from "../model/rangeEndurance";
 import { CHART_EXAMPLE_5_25, enduranceHr, impliedBlockTasKt, rangeNm } from "../model/rangeEndurance";
@@ -16,6 +17,20 @@ export const chartEntry = {
 /** One spec per input, driving both the slider and its handle on the chart. */
 const CONTROLS = {
   pressureAltFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+  power: {
+    label: "Cruise power",
+    unit: "%",
+    min: 0,
+    max: 100,
+    step: 1,
+    // The chart publishes nothing below 55%, so the handle stops there too.
+    softMin: 55,
+    marks: [
+      { value: 55, label: "55" },
+      { value: 65, label: "65" },
+      { value: 75, label: "75" },
+    ],
+  },
 } satisfies Record<string, ControlSpec>;
 
 export function BestPowerRangePage() {
@@ -53,21 +68,7 @@ export function BestPowerRangePage() {
           <Typography variant="body2" gutterBottom>
             Cruise power (best power mixture)
           </Typography>
-          <InputSlider
-            label="Cruise power"
-            unit="%"
-            value={power}
-            min={0}
-            max={100}
-            step={1}
-            softMin={55}
-            marks={[
-              { value: 55, label: "55" },
-              { value: 65, label: "65" },
-              { value: 75, label: "75" },
-            ]}
-            onChange={(v) => setInputs({ power: v })}
-          />
+          <InputSlider {...CONTROLS.power} value={power} onChange={(v) => setInputs({ power: v })} />
           <Typography variant="body2" gutterBottom>
             Reserve policy
           </Typography>
@@ -80,8 +81,12 @@ export function BestPowerRangePage() {
       handles={{
         anchors: fig525Anchors,
         controls: CONTROLS,
-        values: { pressureAltFt },
-        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        values: { pressureAltFt, power },
+        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }), power: (v) => setInputs({ power: v }) },
+        anchorPx: { power: fig525PowerAnchorPx(pressureAltFt) },
+        // Sliding along the read-out axis picks the %power curve that meets
+        // the altitude transfer there.
+        projections: { power: modelProjection({ toAxis: (p) => rangeNm({ ...common, power: p, reserve: "reserve45" }).baseRangeNm, bounds: CONTROLS.power }) },
         captions: { reserve45: "45-min reserve", noReserve: "no reserve" },
         outputs: [
           { anchor: "reserve45", value: reserveRes.baseRangeNm, text: `${reserveRes.baseRangeNm.toFixed(0)} nm`, label: "Range with 45-minute reserve" },

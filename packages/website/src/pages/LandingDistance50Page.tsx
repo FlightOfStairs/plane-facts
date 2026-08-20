@@ -1,9 +1,10 @@
-import { fig535Anchors, fig535Meta, fig535Trace } from "../charts/fig535";
+import { fig535Anchors, fig535Meta, fig535PaAnchorPx, fig535Trace } from "../charts/fig535";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
 import { useUrlState } from "../lib/urlState";
 import { factoredBadge, factoredRows, useSafetyFactors } from "../lib/useSafetyFactors";
+import { modelProjection } from "../lib/modelProjection";
 import { isTailwind, windProjection, windToggle } from "../lib/windHandle";
 import type { LandingDistance50Inputs } from "../model/landingDistance50";
 import { CHART_EXAMPLE_5_35, landingDistance50 } from "../model/landingDistance50";
@@ -62,8 +63,14 @@ export function LandingDistance50Page() {
         anchors: fig535Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { oatC: set("oatC"), weightLb: set("weightLb"), windKt: (v) => setWind(v) },
-        projections: { windKt: windProjection(CONTROLS.windKt, tailwind) },
+        setters: { pressureAltitudeFt: set("pressureAltitudeFt"), oatC: set("oatC"), weightLb: set("weightLb"), windKt: (v) => setWind(v) },
+        anchorPx: { pressureAltitudeFt: fig535PaAnchorPx(inputs.oatC) },
+        projections: {
+          windKt: windProjection(CONTROLS.windKt, tailwind),
+          // No PA scale exists, so the handle rides the transfer line whose
+          // height the PA sets, and the model maps between the two.
+          pressureAltitudeFt: modelProjection({ toAxis: (pa) => landingDistance50({ ...inputs, pressureAltitudeFt: pa }).s0Ft, bounds: CONTROLS.pressureAltitudeFt }),
+        },
         toggles: { windKt: windToggle(inputs.windKt, tailwind, setWind, CONTROLS.windKt) },
         outputs: [factoredBadge("distanceOver50FtFt", "Distance over 50 ft", result.distanceOver50FtFt, safety)],
       }}

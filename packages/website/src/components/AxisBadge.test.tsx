@@ -26,13 +26,17 @@ afterEach(cleanup);
 const handle = (name: RegExp) => screen.getByRole("slider", { name });
 
 describe("chart handles on a page", () => {
-  test("renders one handle per axis-mapped input, and none for the curve-family input", () => {
+  test("renders a handle for every input, including the one with no axis", () => {
     render(<TakeoffGroundRoll25Page />);
     expect(handle(/OAT — drag/)).toBeDefined();
     expect(handle(/Weight — drag/)).toBeDefined();
     expect(handle(/Wind .* drag/)).toBeDefined();
-    // Pressure altitude is drawn as a family of curves: no axis, no handle.
-    expect(screen.queryByRole("slider", { name: /Pressure altitude — drag/ })).toBeNull();
+    // Pressure altitude has no scale of its own — it picks a curve — so its
+    // handle rides the transfer line whose height it sets, dragged vertically.
+    const pa = handle(/Pressure altitude — drag/);
+    expect(pa.getAttribute("aria-orientation")).toBe("vertical");
+    // …and it announces an altitude, not the distance its axis carries.
+    expect(pa.getAttribute("aria-valuenow")).toBe("1500");
   });
 
   test("arrow keys move the handle and the page's slider together", () => {
@@ -60,8 +64,8 @@ describe("chart handles on a page", () => {
   test("the wind handle drags magnitude and its toggle flips the sign", () => {
     render(<TakeoffGroundRoll25Page />);
     const wind = handle(/Wind .* drag/);
-    // The chart plots |wind|, so the handle's value is a magnitude…
-    expect(wind.getAttribute("aria-valuemin")).toBe("0");
+    // The drag works in magnitude, but what it announces is the input itself.
+    expect(wind.getAttribute("aria-valuemin")).toBe("-5");
     expect(wind.getAttribute("aria-valuetext")).toMatch(/headwind/);
 
     fireEvent.pointerDown(screen.getByRole("button", { name: /Wind direction/ }));

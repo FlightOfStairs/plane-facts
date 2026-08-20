@@ -1,7 +1,8 @@
-import { fig531Anchors, fig531Meta, fig531Trace } from "../charts/fig531";
+import { fig531Anchors, fig531Meta, fig531PaAnchorPx, fig531Trace } from "../charts/fig531";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { DescentInputs } from "../model/descentFuelTimeDistance";
 import { CHART_EXAMPLE, FUEL_TOLERANCE_GAL, descentFuelTimeDistance } from "../model/descentFuelTimeDistance";
@@ -47,7 +48,13 @@ export function DescentFuelTimeDistancePage() {
         anchors: fig531Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { cruiseOatC: set("cruiseOatC"), destOatC: set("destOatC") },
+        setters: { cruiseOatC: set("cruiseOatC"), destOatC: set("destOatC"), cruisePressureAltitudeFt: set("cruisePressureAltitudeFt"), destPressureAltitudeFt: set("destPressureAltitudeFt") },
+        anchorPx: { cruisePressureAltitudeFt: fig531PaAnchorPx(inputs.cruiseOatC), destPressureAltitudeFt: fig531PaAnchorPx(inputs.destOatC) },
+        // Each leg's altitude sets the effective altitude its transfer runs at.
+        projections: {
+          cruisePressureAltitudeFt: modelProjection({ toAxis: (pa) => descentFuelTimeDistance({ ...inputs, cruisePressureAltitudeFt: pa }).cruise.effectiveAltitudeFt, bounds: CONTROLS.cruisePressureAltitudeFt }),
+          destPressureAltitudeFt: modelProjection({ toAxis: (pa) => descentFuelTimeDistance({ ...inputs, destPressureAltitudeFt: pa }).destination.effectiveAltitudeFt, bounds: CONTROLS.destPressureAltitudeFt }),
+        },
         captions: { cruiseOatC: "cruise", destOatC: "destination" },
         outputs: [
           { anchor: "fuelGal", value: result.cruise.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to descend" },

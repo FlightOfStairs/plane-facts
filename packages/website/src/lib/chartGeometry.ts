@@ -37,9 +37,16 @@ export function decimalsFor(step: number): number {
   return dot < 0 ? 0 : String(step).length - dot - 1;
 }
 
-/** Snap to the step's grid measured from `min`, then clamp into range. */
+/**
+ * Snap to the step's grid measured from `min`, then clamp into range. A step
+ * of zero means no snapping: handles that map through the model snap in the
+ * input's own units instead, since a step of "1%" of power is not a step of
+ * "1 hour" of endurance.
+ */
 export function snapToStep(value: number, min: number, max: number, step: number): number {
-  const snapped = min + Math.round((value - min) / step) * step;
+  const clamped = Math.min(max, Math.max(min, value));
+  if (!(step > 0)) return clamped;
+  const snapped = min + Math.round((clamped - min) / step) * step;
   return Number(Math.min(max, Math.max(min, snapped)).toFixed(decimalsFor(step)));
 }
 

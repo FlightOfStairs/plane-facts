@@ -60,8 +60,21 @@ const GRID_BOTTOM_PAGE_Y = 1450;
 const AXIS_BOTTOM = axisPx(fig517Meta.axes.yPx!, GRID_BOTTOM_PAGE_Y);
 
 /** Pressure altitude is a curve family here, so only OAT gets a handle. */
+/** Left end of the transfer line, which moves with the OAT. */
+export function fig517PaAnchorPx(oatC: number): number {
+  return axisPx(fig517Meta.axes.oatC!, oatC);
+}
+
+/** The `yPx` value the transfer line sits at for a given chart ROC. */
+export function fig517RocAxisValue(rocChartFpm: number): number {
+  return pageYFromRoc(rocChartFpm);
+}
+
 export const fig517Anchors: ChartAnchors = {
   oatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
+  // The PA curve's height is what the transfer line reads, so the badge rides
+  // just left of that line rather than on a scale of its own.
+  pressureAltitudeFt: { axis: "yPx", atPx: 0, point: "right", color: "entry" },
   rocFpm: { axis: "rocFpm", atPx: AXIS_BOTTOM, point: "up", color: "result" },
 };
 

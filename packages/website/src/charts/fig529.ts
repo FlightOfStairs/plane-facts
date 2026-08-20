@@ -15,8 +15,17 @@ const GRID_LEFT_PX = 90;
  * and the chart draws both reserve policies, so both read-outs get a badge.
  * Power selects a curve, so it stays slider-only.
  */
+/** Height of the altitude transfer, where the %power corner sits. */
+export function fig529PowerAnchorPx(pressureAltFt: number): number {
+  return axisPx(fig529Meta.axes.pressureAltFt!, pressureAltFt);
+}
+
 export const fig529Anchors: ChartAnchors = {
   pressureAltFt: { axis: "pressureAltFt", atPx: GRID_LEFT_PX, point: "right", color: "entry" },
+  // %power selects one of the drawn curves; what it moves is where the
+  // altitude transfer meets it, so its badge rides above that corner. It is
+  // shown against the reserve read-out, which is the one the chart leads with.
+  power: { axis: "enduranceHrReserve45", atPx: 0, point: "down", color: "weight" },
   reserve45: { axis: "enduranceHrReserve45", atPx: axisPx(fig529Meta.axes.pressureAltFt!, 0), point: "up", color: "weight" },
   noReserve: { axis: "enduranceHrNoReserve", atPx: axisPx(fig529Meta.axes.pressureAltFt!, 0), point: "up", color: "wind" },
 };

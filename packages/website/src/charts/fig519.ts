@@ -18,9 +18,23 @@ const AXIS_BOTTOM = axisPx(fig519Meta.axes.yPx!, GRID_BOTTOM_PAGE_Y);
  * Two temperatures share the one OAT axis, and three quantities share the one
  * `value` axis, so the badges are laned to stop them colliding.
  */
+/** Left end of a leg's transfer line, which moves with that leg's OAT. */
+export function fig519PaAnchorPx(oatC: number): number {
+  return axisPx(fig519Meta.axes.oatC!, oatC);
+}
+
+/** The `yPx` value a leg's transfer line sits at, clamped to the drawn grid. */
+export function fig519LegAxisValue(yPx: number): number {
+  return Math.min(Math.max(yPx, Y_RANGE_PX[0]), GRID_BOTTOM_PAGE_Y);
+}
+
 export const fig519Anchors: ChartAnchors = {
   departureOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
   cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  // Each leg's pressure altitude picks a curve, and what it moves is the
+  // height of that leg's transfer line, so its badge rides left of it.
+  departurePaFt: { axis: "yPx", atPx: 0, point: "right", color: "entry" },
+  cruisePaFt: { axis: "yPx", atPx: 0, point: "right", color: "weight" },
   // Coloured to match their own trace segments, since all three read-outs
   // land within a few pixels of each other on the shared value axis.
   fuelGal: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "weight" },

@@ -14,9 +14,18 @@ const AXIS_BOTTOM = axisPx(fig531Meta.axes.isaAltFt!, 0);
  * Cruise and destination temperatures share the OAT axis, and the three
  * read-outs share the `value` axis, so both sets are laned apart.
  */
+/** Left end of a leg's transfer line, which moves with that leg's OAT. */
+export function fig531PaAnchorPx(oatC: number): number {
+  return axisPx(fig531Meta.axes.oatC!, oatC);
+}
+
 export const fig531Anchors: ChartAnchors = {
   cruiseOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "entry" },
   destOatC: { axis: "oatC", atPx: AXIS_BOTTOM, point: "up", color: "weight" },
+  // Each leg's pressure altitude sets the height its transfer line runs at —
+  // the model's effective altitude — so its badge rides left of that line.
+  cruisePressureAltitudeFt: { axis: "isaAltFt", atPx: 0, point: "right", color: "entry" },
+  destPressureAltitudeFt: { axis: "isaAltFt", atPx: 0, point: "right", color: "weight" },
   // Coloured to match their own trace segments, since all three read-outs
   // land within a few pixels of each other on the shared value axis.
   fuelGal: { axis: "value", atPx: AXIS_BOTTOM, point: "up", color: "weight" },

@@ -1,8 +1,9 @@
 import { Typography } from "@mui/material";
-import { fig519Anchors, fig519Meta, fig519Trace } from "../charts/fig519";
+import { fig519Anchors, fig519LegAxisValue, fig519Meta, fig519PaAnchorPx, fig519Trace } from "../charts/fig519";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { ClimbToInputs } from "../model/climbFuelTimeDistance";
 import { CHART_EXAMPLE, climbFuelTimeDistance } from "../model/climbFuelTimeDistance";
@@ -17,10 +18,10 @@ const legValue = (leg: { timeMin: number; distNm: number; fuelGal: number }) => 
 
 /** One spec per input, driving both the slider and its handle on the chart. */
 const CONTROLS = {
-  departurePaFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
-  departureOatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
-  cruisePaFt: { label: "Pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
-  cruiseOatC: { label: "OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  departurePaFt: { label: "Pressure altitude", ariaLabel: "Departure pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
+  departureOatC: { label: "OAT", ariaLabel: "Departure OAT", unit: "°C", min: -40, max: 40, step: 1 },
+  cruisePaFt: { label: "Pressure altitude", ariaLabel: "Cruise pressure altitude", unit: "ft", min: 0, max: 11000, step: 100 },
+  cruiseOatC: { label: "OAT", ariaLabel: "Cruise OAT", unit: "°C", min: -40, max: 40, step: 1 },
 } satisfies Record<string, ControlSpec>;
 
 export function ClimbFuelTimeDistancePage() {
@@ -54,9 +55,15 @@ export function ClimbFuelTimeDistancePage() {
       }
       handles={{
         anchors: fig519Anchors,
-        controls: { ...CONTROLS, departureOatC: { ...CONTROLS.departureOatC, label: "Departure OAT" }, cruiseOatC: { ...CONTROLS.cruiseOatC, label: "Cruise OAT" } },
+        controls: CONTROLS,
         values: inputs,
-        setters: { departureOatC: set("departureOatC"), cruiseOatC: set("cruiseOatC") },
+        setters: { departureOatC: set("departureOatC"), cruiseOatC: set("cruiseOatC"), departurePaFt: set("departurePaFt"), cruisePaFt: set("cruisePaFt") },
+        anchorPx: { departurePaFt: fig519PaAnchorPx(inputs.departureOatC), cruisePaFt: fig519PaAnchorPx(inputs.cruiseOatC) },
+        // Each leg's altitude sets the height of its own transfer line.
+        projections: {
+          departurePaFt: modelProjection({ toAxis: (pa) => fig519LegAxisValue(climbFuelTimeDistance({ ...inputs, departurePaFt: pa }).departure.yPx), bounds: CONTROLS.departurePaFt }),
+          cruisePaFt: modelProjection({ toAxis: (pa) => fig519LegAxisValue(climbFuelTimeDistance({ ...inputs, cruisePaFt: pa }).cruise.yPx), bounds: CONTROLS.cruisePaFt }),
+        },
         captions: { departureOatC: "departure", cruiseOatC: "cruise" },
         outputs: [
           { anchor: "fuelGal", value: result.fuelGal, text: `${result.fuelGal.toFixed(1)} gal`, label: "Fuel to climb" },

@@ -1,8 +1,9 @@
 import { ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { fig529Anchors, fig529Meta, fig529Trace } from "../charts/fig529";
+import { fig529Anchors, fig529Meta, fig529PowerAnchorPx, fig529Trace } from "../charts/fig529";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import { isaTempC } from "../model/atmosphere";
 import type { ReservePolicy } from "../model/rangeEndurance";
@@ -23,6 +24,20 @@ function formatHours(hr: number): string {
 /** One spec per input, driving both the slider and its handle on the chart. */
 const CONTROLS = {
   pressureAltFt: { label: "Cruise pressure altitude", unit: "ft", min: 0, max: 12000, step: 100 },
+  power: {
+    label: "Cruise power",
+    unit: "%",
+    min: 0,
+    max: 100,
+    step: 1,
+    // The chart publishes nothing below 55%, so the handle stops there too.
+    softMin: 55,
+    marks: [
+      { value: 55, label: "55" },
+      { value: 65, label: "65" },
+      { value: 75, label: "75" },
+    ],
+  },
 } satisfies Record<string, ControlSpec>;
 
 export function EndurancePage() {
@@ -58,21 +73,7 @@ export function EndurancePage() {
           <Typography variant="body2" gutterBottom>
             Cruise power (best economy mixture)
           </Typography>
-          <InputSlider
-            label="Cruise power"
-            unit="%"
-            value={power}
-            min={0}
-            max={100}
-            step={1}
-            softMin={55}
-            marks={[
-              { value: 55, label: "55" },
-              { value: 65, label: "65" },
-              { value: 75, label: "75" },
-            ]}
-            onChange={(v) => setInputs({ power: v })}
-          />
+          <InputSlider {...CONTROLS.power} value={power} onChange={(v) => setInputs({ power: v })} />
           <Typography variant="body2" gutterBottom>
             Reserve policy
           </Typography>
@@ -85,8 +86,12 @@ export function EndurancePage() {
       handles={{
         anchors: fig529Anchors,
         controls: CONTROLS,
-        values: { pressureAltFt },
-        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }) },
+        values: { pressureAltFt, power },
+        setters: { pressureAltFt: (v) => setInputs({ pressureAltFt: v }), power: (v) => setInputs({ power: v }) },
+        anchorPx: { power: fig529PowerAnchorPx(pressureAltFt) },
+        // Sliding along the read-out axis picks the %power curve that meets
+        // the altitude transfer there.
+        projections: { power: modelProjection({ toAxis: (p) => enduranceHr({ power: p, reserve: "reserve45", pressureAltFt }).enduranceHr, bounds: CONTROLS.power }) },
         captions: { reserve45: "45-min reserve", noReserve: "no reserve" },
         outputs: [
           { anchor: "reserve45", value: reserveRes.enduranceHr, text: `${reserveRes.enduranceHr.toFixed(1)} hr`, label: "Endurance with 45-minute reserve" },

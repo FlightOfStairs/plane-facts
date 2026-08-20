@@ -1,7 +1,8 @@
-import { fig515Anchors, fig515Meta, fig515Trace } from "../charts/fig515";
+import { fig515Anchors, fig515Meta, fig515PaAnchorPx, fig515PowerAnchorPx, fig515Trace } from "../charts/fig515";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { EnginePerformanceInputs } from "../model/enginePerformance";
 import { CHART_EXAMPLE, enginePerformance } from "../model/enginePerformance";
@@ -47,7 +48,15 @@ export function EnginePerformancePage() {
         anchors: fig515Anchors,
         controls: CONTROLS,
         values: inputs,
-        setters: { oatC: set("oatC") },
+        setters: { oatC: set("oatC"), pressureAltitudeFt: set("pressureAltitudeFt"), pctPower: set("pctPower") },
+        anchorPx: { pressureAltitudeFt: fig515PaAnchorPx(inputs.oatC), pctPower: fig515PowerAnchorPx(result.u) },
+        // The lattice is a density-altitude scale, so the PA handle maps
+        // through the model at the current temperature.
+        projections: {
+          pressureAltitudeFt: modelProjection({ toAxis: (pa) => enginePerformance({ ...inputs, pressureAltitudeFt: pa }).u, bounds: CONTROLS.pressureAltitudeFt }),
+          // Sliding along the RPM axis picks the %power line that meets it.
+          pctPower: modelProjection({ toAxis: (p) => enginePerformance({ ...inputs, pctPower: p }).rpm, bounds: CONTROLS.pctPower }),
+        },
         outputs: [{ anchor: "rpm", value: result.rpm, text: `${Math.round(result.rpm)} RPM`, label: "Engine speed read-out" }],
       }}
       results={[

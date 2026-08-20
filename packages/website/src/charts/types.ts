@@ -52,7 +52,11 @@ export interface Polyline {
 export interface AxisAnchor {
   /** Key into ChartMeta.axes; supplies px0/pxPerUnit/orient. */
   axis: string;
-  /** Perpendicular pixel the arrow tip touches — usually the axis line. */
+  /**
+   * Perpendicular pixel the arrow tip touches — usually the axis line, or for
+   * a "none" badge the point on the line it sits at. Pages whose line moves
+   * with the inputs override this per render via HandleWiring.anchorPx.
+   */
   atPx: number;
   /** Which way the arrow points, i.e. which side of atPx the badge sits. */
   point: "up" | "down" | "left" | "right";

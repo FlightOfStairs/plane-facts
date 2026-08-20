@@ -1,8 +1,9 @@
 import { FormControlLabel, Switch, Typography } from "@mui/material";
-import { fig517Anchors, fig517Meta, fig517Trace } from "../charts/fig517";
+import { fig517Anchors, fig517Meta, fig517PaAnchorPx, fig517RocAxisValue, fig517Trace } from "../charts/fig517";
 import { ChartPageLayout } from "../components/ChartPageLayout";
 import type { ControlSpec } from "../components/InputSlider";
 import { InputSlider } from "../components/InputSlider";
+import { modelProjection } from "../lib/modelProjection";
 import { useUrlState } from "../lib/urlState";
 import type { ClimbPerformanceInputs } from "../model/climbPerformance";
 import { ABSOLUTE_CEILING_DA_FT, CHART_EXAMPLE, climbPerformance } from "../model/climbPerformance";
@@ -54,7 +55,11 @@ export function ClimbPerformancePage() {
         anchors: fig517Anchors,
         controls: CONTROLS,
         values: { pressureAltitudeFt: inputs.pressureAltitudeFt, oatC: inputs.oatC },
-        setters: { oatC: set("oatC") },
+        setters: { oatC: set("oatC"), pressureAltitudeFt: set("pressureAltitudeFt") },
+        anchorPx: { pressureAltitudeFt: fig517PaAnchorPx(inputs.oatC) },
+        // The transfer line's height is the ROC the PA curve gives, so the
+        // handle maps through the climb model.
+        projections: { pressureAltitudeFt: modelProjection({ toAxis: (pa) => fig517RocAxisValue(climbPerformance({ ...inputs, pressureAltitudeFt: pa }).rocChartFpm), bounds: CONTROLS.pressureAltitudeFt }) },
         outputs: [{ anchor: "rocFpm", value: result.rocChartFpm, text: `${Math.round(result.rocChartFpm)} fpm`, label: "Rate of climb read-out" }],
       }}
       results={[
