@@ -44,10 +44,23 @@ numbers and draws the model-derived trace over the original scan.
   `components/ChartPageLayout.tsx`; registry in `index.ts`. `AboutModelsPage`
   holds the cross-chart documentation, so per-chart `ModelNotes` carry only
   what is unique to that chart.
+- `packages/website/src/practise/` — the Practise section (app-bar tab,
+  `?section=practise`), with its own registry in `index.ts`. The off-track
+  correction drill puts random 25–50 nm legs over Scotland on OSM tiles
+  (Leaflet / react-leaflet). Each leg tests one technique, chosen at random:
+  fraction-of-leg shortcut (aircraft abeam a quarter mark), double track
+  error (regain heading, minutes, heading once on track) or 1-in-60.
+  Scenarios are regenerated until the technique's rule lands within 1.5° /
+  0.5 min of the exact answer, so applying the rule properly always scores.
+  Its geometry, scenario generation and marking (`offTrack.ts`) are pure and
+  tested. Endpoints are confined to land by
+  `scotlandLand.json`, the Natural Earth 1:50m "Scotland" map unit (public
+  domain). All bearings are true.
 - Page state (chart selection + all inputs) is URL-persisted via
   `lib/urlState.ts`, so a refresh or a shared link restores the scenario.
+  Drill scenarios are random and deliberately not persisted.
 - `tools/screenshot.mjs` — serves the built `dist` and screenshots every
-  registered page to `tools/digitize/out/qa/ui-*.png` (playwright).
+  performance chart page to `tools/digitize/out/qa/ui-*.png` (playwright).
 
 ## Method (for any future chart/POH work)
 

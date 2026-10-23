@@ -2,7 +2,7 @@
 
 Plane facts website.
 
-This NPM workspace consists of two packages: `website` produces a static React application (Vite + MUI); `infrastructure` defines a CDK stack for AWS hosting (S3 + CloudFront + Route53). CDK deployment also uploads the built static site.
+This NPM workspace consists of two packages: `website` produces a static React application (Vite + MUI) with PA-28-161 performance charts and a Practise section of navigation drills (Leaflet over OpenStreetMap tiles); `infrastructure` defines a CDK stack for AWS hosting (S3 + CloudFront + Route53). CDK deployment also uploads the built static site.
 
 ## Development
 

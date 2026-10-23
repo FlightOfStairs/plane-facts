@@ -18,3 +18,5 @@ npm-debug.log*
 # digitization intermediates
 tools/digitize/out/raw
 tools/digitize/out/qa
+
+.idea
